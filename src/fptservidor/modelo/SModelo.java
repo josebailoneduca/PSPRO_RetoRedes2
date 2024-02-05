@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -42,10 +43,23 @@ public class SModelo extends Thread{
 					Sesion sesion=new Sesion(s);
 					sesiones.add(sesion);
 					sesion.start();
+					limpiarSesiones();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
+	}
+
+	/**
+	 * 
+	 */
+	private void limpiarSesiones() {
+		List<Sesion> borrar=new ArrayList<Sesion>();
+		for (Sesion sesion : sesiones) {
+			if (sesion.getSocket().isClosed())
+				borrar.add(sesion);
+		}
+		sesiones.removeAll(borrar);
 	}
 
 	/**

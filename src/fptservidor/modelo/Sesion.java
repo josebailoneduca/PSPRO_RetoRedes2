@@ -7,12 +7,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-import fptservidor.Config;
+import fptservidor.modelo.comandos.ComLs;
+import fptservidor.modelo.comandos.Comandos;
 
 /**
  * 
@@ -25,11 +24,10 @@ public class Sesion extends Thread {
 	OutputStream os;
 	DataInputStream dis;
 	DataOutputStream dos;
-	private InputStreamReader isr;
-	private OutputStreamWriter osw;
 
 	private int tipoSesion = 0;
 	private Usuario usuario;
+	private String cwd="/";
 
 	/**
 	 * @param s
@@ -45,8 +43,8 @@ public class Sesion extends Thread {
 			os = socket.getOutputStream();
 			dis = new DataInputStream(is);
 			dos = new DataOutputStream(os);
-			isr = new InputStreamReader(is, Config.COD_TEXTO);
-			osw = new OutputStreamWriter(os, Config.COD_TEXTO);
+//			isr = new InputStreamReader(is, Config.COD_TEXTO);
+//			osw = new OutputStreamWriter(os, Config.COD_TEXTO);
 			boolean permitido = gestionaLogin();
 			if (!permitido) {
 				dos.writeInt(Codigos.LOGIN_MAL);
@@ -67,6 +65,21 @@ public class Sesion extends Thread {
 		System.out.println("bucle peticiones");
 		System.out.println(usuario.getNombreUsuario());
 		while (estaConectado()) {
+			try {
+				String codigoPeticion = dis.readUTF();
+				switch (codigoPeticion) {
+				case Comandos.EXIT: 
+					dos.writeInt(Codigos.OK);
+					socket.close();
+					break;
+				case Comandos.LS:
+					new ComLs(this).iniciar();
+					break;
+				}
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 	}
@@ -99,7 +112,6 @@ public class Sesion extends Thread {
 			e.printStackTrace();
 			return false;
 		}
-
 	}
 
 	/**
@@ -112,4 +124,42 @@ public class Sesion extends Thread {
 			return true;
 		return false;
 	}
+
+	public Socket getSocket() {
+		return socket;
+	}
+
+	public void setSocket(Socket socket) {
+		this.socket = socket;
+	}
+
+	public InputStream getIs() {
+		return is;
+	}
+
+	public OutputStream getOs() {
+		return os;
+	}
+
+	public DataInputStream getDis() {
+		return dis;
+	}
+
+	public DataOutputStream getDos() {
+		return dos;
+	}
+
+	public int getTipoSesion() {
+		return tipoSesion;
+	}
+
+	public Usuario getUsuario() {
+		return usuario;
+	}
+
+	public String getCwd() {
+		return cwd;
+	}
+	
+	
 }
