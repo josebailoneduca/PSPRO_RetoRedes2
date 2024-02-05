@@ -1,7 +1,7 @@
 /**
  * 
  */
-package fptservidor.modelo.comandos;
+package ftpcliente.modelo.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

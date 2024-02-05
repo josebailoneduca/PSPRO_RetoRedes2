@@ -15,7 +15,9 @@ public class Controlador {
 	
 	public Controlador() {
 		modelo=new Modelo();
-		System.out.println(modelo.conectar(1, Config.USUARIO, Config.CONTRASENA, Config.HOST, Config.PUERTO));
+		modelo.conectar(1, Config.USUARIO, Config.CONTRASENA, Config.HOST, Config.PUERTO);
+		modelo.procesarOperaciones();
+		
 	}
 	
 

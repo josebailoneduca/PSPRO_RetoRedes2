@@ -28,10 +28,9 @@ public class Modelo {
     private OutputStream os;
     private DataInputStream dis;
     private DataOutputStream dos;
-    private InputStreamReader isr;
-    private OutputStreamWriter osw;
-    
-    
+ 
+    private LinkedBlockingDeque<String> operaciones = new LinkedBlockingDeque<String>();
+    ProcesadorOperaciones procOperaciones;
     
 	public boolean conectar (int tipo,String usuario, String contrasena, String host, int puerto) {
 		if (estaConectado())
@@ -42,8 +41,8 @@ public class Modelo {
 			os = socket.getOutputStream();
 			dis = new DataInputStream(is);
 			dos = new DataOutputStream(os);
-			isr = new InputStreamReader(is,Config.COD_TEXTO);
-			osw = new OutputStreamWriter(os,Config.COD_TEXTO);
+//			isr = new InputStreamReader(is,Config.COD_TEXTO);
+//			osw = new OutputStreamWriter(os,Config.COD_TEXTO);
 			
 			
 			dos.writeInt(tipo);
@@ -52,12 +51,25 @@ public class Modelo {
 				dos.writeUTF(contrasena);
 				}
 			int res = dis.readInt();
-			System.out.println("responde:"+res);
-			return true;
+			if (res==Codigos.LOGIN_OK)
+				return true;
+			else
+				return false;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+
+
+
+	/**
+	 * 
+	 */
+	public void procesarOperaciones() {
+		procOperaciones = new ProcesadorOperaciones()
+		
 	}
 
 
