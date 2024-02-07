@@ -7,7 +7,7 @@ package fptservidor.modelo.comandos;
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class Comandos {
+public class TiposComando {
 	public static final String EXIT="EXIT";
 	public static final String LS="LS";
 	public static final String GET="GET";

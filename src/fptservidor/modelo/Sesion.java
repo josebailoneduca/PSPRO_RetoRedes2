@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import fptservidor.modelo.comandos.ComLs;
-import fptservidor.modelo.comandos.Comandos;
+import fptservidor.modelo.comandos.TiposComando;
 
 /**
  * 
@@ -27,7 +27,7 @@ public class Sesion extends Thread {
 
 	private int tipoSesion = 0;
 	private Usuario usuario;
-	private String cwd="/";
+	private String cwd = "/";
 
 	/**
 	 * @param s
@@ -46,10 +46,7 @@ public class Sesion extends Thread {
 //			isr = new InputStreamReader(is, Config.COD_TEXTO);
 //			osw = new OutputStreamWriter(os, Config.COD_TEXTO);
 			boolean permitido = gestionaLogin();
-			if (!permitido) {
-				dos.writeInt(Codigos.LOGIN_MAL);
-			} else {
-				dos.writeInt(Codigos.LOGIN_OK);
+			if (permitido) {
 				buclePeticiones();
 			}
 
@@ -68,20 +65,26 @@ public class Sesion extends Thread {
 			try {
 				String codigoPeticion = dis.readUTF();
 				switch (codigoPeticion) {
-				case Comandos.EXIT: 
+				case TiposComando.EXIT -> {
 					dos.writeInt(Codigos.OK);
 					socket.close();
-					break;
-				case Comandos.LS:
-					new ComLs(this).iniciar();
-					break;
 				}
+				case TiposComando.LS -> new ComLs(this).iniciar();
 				
+				}
+
 			} catch (IOException e) {
+				try {
+					socket.close();
+					System.exit(0);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				e.printStackTrace();
 			}
 		}
-
+		 
 	}
 
 	/**
@@ -160,6 +163,5 @@ public class Sesion extends Thread {
 	public String getCwd() {
 		return cwd;
 	}
-	
-	
+
 }

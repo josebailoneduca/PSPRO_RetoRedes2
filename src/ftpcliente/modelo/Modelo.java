@@ -11,9 +11,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import ftpcliente.Config;
+import ftpcliente.controlador.Controlador;
+import ftpcliente.modelo.dto.DtoArchivo;
 
 
 /**
@@ -21,7 +25,7 @@ import ftpcliente.Config;
  * @author Jose Javier Bailon Ortiz
  */
 public class Modelo {
-
+	Controlador controlador;
 	private Socket socket;
 
     private InputStream is;
@@ -29,9 +33,21 @@ public class Modelo {
     private DataInputStream dis;
     private DataOutputStream dos;
  
-    private LinkedBlockingDeque<String> operaciones = new LinkedBlockingDeque<String>();
+    private LinkedBlockingQueue<String> operacionesPendientes;
     ProcesadorOperaciones procOperaciones;
     
+    
+    
+	public Modelo(Controlador controlador) {
+		this.controlador=controlador;
+		 operacionesPendientes= new LinkedBlockingQueue<String>();
+	}
+
+
+	public void addOperacion(String operacion) {
+		operacionesPendientes.add(operacion);
+	}
+
 	public boolean conectar (int tipo,String usuario, String contrasena, String host, int puerto) {
 		if (estaConectado())
 			return false;
@@ -51,26 +67,21 @@ public class Modelo {
 				dos.writeUTF(contrasena);
 				}
 			int res = dis.readInt();
-			if (res==Codigos.LOGIN_OK)
+			if (res==Codigos.LOGIN_OK) {
+				 procOperaciones=new ProcesadorOperaciones(operacionesPendientes, dis, dos,this);
+				 procOperaciones.start();
 				return true;
+			}
 			else
 				return false;
 		} catch (IOException e) {
-			e.printStackTrace();
 			return false;
 		}
 	}
 
 
 
-
-	/**
-	 * 
-	 */
-	public void procesarOperaciones() {
-		procOperaciones = new ProcesadorOperaciones()
-		
-	}
+ 
 
 
 
@@ -84,6 +95,16 @@ public class Modelo {
 		if (socket!=null&&(socket.isConnected()&&!socket.isClosed()))
 			return true;
 		return false;
+	}
+
+
+	/**
+	 * @param rutaActual
+	 * @param archivos
+	 */
+	public void actualizaLista(String rutaActual, ArrayList<DtoArchivo> archivos) {
+		controlador.actualizaLista(rutaActual,archivos);
+		
 	}
 	
 	

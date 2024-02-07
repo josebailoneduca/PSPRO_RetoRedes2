@@ -21,7 +21,7 @@ public class Usuario {
 	private boolean anonimo=false;
 
 	public Usuario(String usuario) {
-		this.carpeta = Config.RUTA_ALMACENAMIENTO+usuario;
+		this.carpeta = Config.RUTA_ALMACENAMIENTO+"/"+usuario;
 		this.nombreUsuario = usuario;
 	}
 	public Usuario() {

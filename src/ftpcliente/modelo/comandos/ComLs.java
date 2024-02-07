@@ -7,55 +7,50 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import fptservidor.modelo.Codigos;
 import fptservidor.modelo.Sesion;
 import fptservidor.modelo.Usuario;
+import ftpcliente.modelo.Modelo;
+import ftpcliente.modelo.dto.DtoArchivo;
 
 /**
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class ComLs {
-	Usuario usuario;
-	DataInputStream dis;
-	DataOutputStream dos;
-	Sesion sesion;
-	String cwd;
-	public ComLs(Sesion sesion) {
-		super();
-		this.sesion = sesion;
-		this.usuario = sesion.getUsuario();
-		this.dis = sesion.getDis();
-		this.dos = sesion.getDos();
-		this.cwd = sesion.getCwd();
+public class ComLs extends Comando{
+
+	public ComLs(String[] comando,DataInputStream dis, DataOutputStream dos,Modelo modelo) {
+		super(comando,dis,dos,modelo);
+
 	}
 	
  
 	public void iniciar() {
-		String ruta = usuario.getCarpeta()+sesion.getCwd();
-		File[] archivos = new File(ruta).listFiles();
+		
 		try {
-			if (archivos==null) {
-				dos.writeInt(Codigos.MAL);
-				return;
+			dos.writeUTF(TiposComando.LS);
+			int res = dis.readInt();
+			if (res==Codigos.OK) {
+				String rutaActual=dis.readUTF();
+				ArrayList<DtoArchivo> archivos=new ArrayList<DtoArchivo>();
+				int nArch = dis.readInt();
+				for (int i=0;i<nArch;i++) {
+					String nombre= dis.readUTF();
+					int codTipo=dis.readInt();
+					archivos.add(new DtoArchivo(nombre, codTipo));
+					
+				}
+				modelo.actualizaLista(rutaActual,archivos);
+			}else {
+				System.out.println("No se pudo hacer ls");
 			}
-			dos.writeInt(Codigos.OK);
-			dos.writeUTF(sesion.getCwd());
-			dos.writeInt(archivos.length);
-			
-			for (File file : archivos) {
-				dos.writeUTF(file.getName());
-				dos.writeInt((file.isDirectory()?Codigos.DIRECTORIO:Codigos.ARCHIVO));
-			}
-			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
 	}
 	
 }
