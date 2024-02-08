@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import javax.swing.SwingUtilities;
 
+import fptservidor.modelo.Codigos;
 import ftpcliente.Config;
 import ftpcliente.modelo.Modelo;
 import ftpcliente.modelo.dto.DtoArchivo;
@@ -26,7 +27,7 @@ public class Controlador {
 
 		
 		
-		while(true) {}
+		//conectar("","");
 		
 	}
 
@@ -36,15 +37,26 @@ public class Controlador {
 	 */
 	public void actualizaLista(String rutaActual, ArrayList<DtoArchivo> archivos) {
 		SwingUtilities.invokeLater(() -> 
-			vista.actualizaLista(rutaActual,archivos));
+			vista.actualizaListaRemota(rutaActual,archivos));
 	}
 	
 	
-	public boolean conectar(String usuario, String contrasena) {
-		boolean res = modelo.conectar(1, Config.USUARIO, Config.CONTRASENA, Config.HOST, Config.PUERTO);
+	public boolean login(String host, int puerto, String usuario, String contrasena) {
+		modelo.iniciarConexion(host, puerto);
+		modelo.addOperacion("LOGIN "+Codigos.LOGIN_ANONIMO);
+		modelo.addOperacion("LS");
+		return true;
+//		boolean res = modelo.conectar(1, usuario, contrasena, host, puerto);
+//		if (res)
+//			modelo.addOperacion("LS");
+//		return res;
+	}
+
+	public boolean registrar(String host, int puerto, String usuario, String contrasena) {
+		boolean res = modelo.registrar(1, usuario, contrasena, host, puerto);
 		if (res)
 			modelo.addOperacion("LS");
 		return res;
 	}
-
+	
 }

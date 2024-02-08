@@ -1,168 +1,427 @@
-/**
- * 
+/*
+LICENCIA JOSE JAVIER BO
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+Lista de paquetes:
  */
 package ftpcliente.vista.gui;
 
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ArrayList;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreeModel;
 
+import ftpcliente.Config;
 import ftpcliente.controlador.Controlador;
 import ftpcliente.modelo.dto.DtoArchivo;
-
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-
-import java.awt.BorderLayout;
-import javax.swing.JList;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.ScrollPaneLayout;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.ListSelectionModel;
-import java.awt.Color;
-import javax.swing.border.LineBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import ftpcliente.vista.modelos.ArbolArchivosModel;
+import ftpcliente.vista.modelos.ArchArbol;
+import ftpcliente.vista.modelos.ArchivoTableModel;
 
 /**
- * 
+ *
  * @author Jose Javier Bailon Ortiz
  */
-public class Ventana extends JFrame implements ActionListener {
+public class Ventana extends javax.swing.JFrame implements TreeSelectionListener, ActionListener {
+	
+	Controlador controlador;
 
-	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	private Controlador controlador;
-	JTextField campoRuta;
-	private JTable tabla;
-	ArchivoTableModel tableModel;
- 
+    public Ventana(Controlador controlador) {
+    	this.controlador=controlador;
+        initComponents();
+        initPropio();
+        seleccionarUnidad();
 
-	/**
-	 * Create the frame.
-	 * @param controlador 
-	 */
-	public Ventana(Controlador controlador) {
-		this.controlador=controlador;
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 621, 495);
-		
-		//PADRE
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(new BorderLayout(0, 0));
-		
-		//LISTADO
-		JPanel panelListado = new JPanel();
-		panelListado.setLayout(new BorderLayout());
-		contentPane.add(panelListado, BorderLayout.CENTER);
-		//ruta
-		JPanel panelRuta = new JPanel();
-		panelRuta.setLayout(new BorderLayout());
-		panelListado.add(panelRuta,BorderLayout.NORTH);
-		
-		JLabel lbRutaActual = new JLabel("Ruta actual:");
-		panelRuta.add(lbRutaActual,BorderLayout.WEST);
-		
-		campoRuta = new JTextField();
-		panelRuta.add(campoRuta,BorderLayout.CENTER);
-		
-		//tabla
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setLayout(new ScrollPaneLayout());
-		panelListado.add(scrollPane, BorderLayout.CENTER);
-		
-		tabla = new JTable();
-		tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tabla.setFillsViewportHeight(true);
-		ArrayList<DtoArchivo> l = new ArrayList<DtoArchivo>();
-		tableModel=new ArchivoTableModel(new ArrayList<DtoArchivo>());
-		tabla.setModel(tableModel);
-		tabla.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-		tabla.getColumnModel().getColumn(0).setMaxWidth(50);
-		scrollPane.add(tabla);
-		scrollPane.setViewportView(tabla);
-		tabla.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) { // Verificar si fue un doble clic
-                    JTable target = (JTable)e.getSource();
-                    int row = target.getSelectedRow();
-                    // Obtener el contenido de la fila doble clickeada
-                    String id = target.getValueAt(row, 0).toString();
-                    String firstName = target.getValueAt(row, 1).toString();
-                    // Imprimir los datos de la fila
-                    System.out.println("Doble clic en la fila: " + id + ", " + firstName);
-                }
-            }
-        });
-		
-		
-		
-		
-		//BOTONERA
-		JPanel panelBotonera = new JPanel();
-		contentPane.add(panelBotonera, BorderLayout.NORTH);
-		panelBotonera.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		ArrayList <JButton> botones = new ArrayList<JButton>();
-		
-		String[] btnEtiquetas= {"CONECTAR","DESCONECTAR","LS","GET","PUT","CD","DEL","MKDIR","RMDIR"};
-		
-		for(String st :btnEtiquetas) {
-			JButton btn = new JButton(st);
-			btn.setActionCommand(st);
-			btn.addActionListener(this);
-			panelBotonera.add(btn);
-		}
-		
-		JPanel panelEstado = new JPanel();
-		contentPane.add(panelEstado, BorderLayout.SOUTH);
+    }
 
-	}
+    private void initPropio() {
+    	inputHost.setText(Config.HOST);
+    	inputPuerto.setText(""+Config.PUERTO);
+    	inputUsuario.setText(Config.USUARIO);
+    	inputContrasena.setText(Config.CONTRASENA);
+    	
+    	
+    	
+        getUnidades();
+        iniEventos();
+    }
+
+    private void iniEventos() {
+        localArbol.addTreeSelectionListener(this);
+        localSelectorUnidad.addActionListener(this);
+        btnConectar.addActionListener(this);
+    }
+
 
 	/**
 	 * @param rutaActual
 	 * @param archivos
 	 */
-	public void actualizaLista(String rutaActual, ArrayList<DtoArchivo> archivos) {
-		 campoRuta.setText(rutaActual);
-		 tabla.setModel(new ArchivoTableModel(archivos));
-		 tabla.getColumnModel().getColumn(0).setMaxWidth(50);
+	public void actualizaListaRemota(String rutaActual, ArrayList<DtoArchivo> archivos) {
+		 remotoRuta.setText(rutaActual);
+		 remotoTabla.setModel(new ArchivoTableModel(archivos));
+		 remotoTabla.getColumnModel().getColumn(0).setMaxWidth(50);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		String ac = e.getActionCommand();
-		
-		switch (ac) {
-		case "CONECTAR"-> controlador.conectar("","");
-		case "DESCONECTAR"-> controlador.conectar("","");
-		case "LS"-> controlador.conectar("","");
-		case "GET"-> controlador.conectar("","");
-		case "PUT"-> controlador.conectar("","");
-		case "CD"-> controlador.conectar("","");
-		case "DEL"-> controlador.conectar("","");
-		case "MKDIR"-> controlador.conectar("","");
-		case "RMDIR"-> controlador.conectar("","");
-		};
-		
-		
-		
-		}
-	 
+	
+    private void getUnidades() {
+        File[] unidades;
+        unidades = File.listRoots();
+        String[] nombres = new String[unidades.length];
+        for (int i = 0; i < unidades.length; i++) {
+            nombres[i] = unidades[i].getAbsolutePath();
+        }
+        localSelectorUnidad.setModel(new DefaultComboBoxModel<String>(nombres));
+    }
 
-}
+
+
+    @Override
+    public void valueChanged(TreeSelectionEvent e) {
+
+        ArchArbol node = (ArchArbol) ((JTree) e.getSource()).getLastSelectedPathComponent();
+        if (node == null) {
+            //since Nothing is selected.     
+            return;
+        }
+        localRuta.setText(node.getAbsolutePath());
+        actualizarArchivosLocales();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String ac = e.getActionCommand();
+        switch (ac) {
+            case "SELEC_UNIDAD" -> seleccionarUnidad();
+            case "CONECTAR" -> conectar();
+        }
+
+    }
+
+    /**
+	 * @return
+	 */
+	private void conectar() {
+		String host=inputHost.getText();
+		int puerto=0;
+		try {
+		puerto=Integer.parseInt(inputPuerto.getText());
+		}catch(NumberFormatException ex) {
+			//TODO AVISAR
+			return;
+		}
+		String usuario=inputUsuario.getText();
+		String contrasena=inputContrasena.getText();
+		controlador.login(host, puerto, usuario, contrasena);
+	}
+
+	/**
+     * Lleva a cabo la seleccion de una nueva unidad de disco
+     */
+    private void seleccionarUnidad() {
+        TreeModel model = new ArbolArchivosModel(new ArchArbol((String) localSelectorUnidad.getSelectedItem()));
+        localRuta.setText((String) localSelectorUnidad.getSelectedItem());
+        localArbol.setModel(model);
+        actualizarArchivosLocales();
+    }
+
+    private void actualizarArchivosLocales() {
+        System.out.println("Actualizar con "+localRuta.getText());
+    }
+    
+    //EDITOR INTERFACES
+    
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        panelCentral = new javax.swing.JPanel();
+        panelDivisor = new javax.swing.JSplitPane();
+        panelLocalDivisor = new javax.swing.JSplitPane();
+        panelArbol = new javax.swing.JPanel();
+        localSelectorUnidad = new javax.swing.JComboBox<>();
+        scrollLocalArbol = new javax.swing.JScrollPane();
+        localArbol = new javax.swing.JTree();
+        panelLocalArchivos = new javax.swing.JPanel();
+        scrollLocalArchivos = new javax.swing.JScrollPane();
+        localTabla = new javax.swing.JTable();
+        localRuta = new javax.swing.JTextField();
+        panelRemoto = new javax.swing.JPanel();
+        scrollRemotoArchivos = new javax.swing.JScrollPane();
+        remotoTabla = new javax.swing.JTable();
+        remotoRuta = new javax.swing.JLabel();
+        panelInferior = new javax.swing.JPanel();
+        panelComandos = new javax.swing.JPanel();
+        inputComando = new javax.swing.JTextField();
+        btnEnviar = new javax.swing.JButton();
+        scrollHistorial = new javax.swing.JScrollPane();
+        historial = new javax.swing.JTextArea();
+        jLabel5 = new javax.swing.JLabel();
+        panelEstado = new javax.swing.JPanel();
+        lbConectado = new javax.swing.JLabel();
+        datosConexion = new javax.swing.JLabel();
+        panelSuperior = new javax.swing.JPanel();
+        panelConexion = new javax.swing.JPanel();
+        lbHost = new javax.swing.JLabel();
+        inputHost = new javax.swing.JTextField();
+        lbPuerto = new javax.swing.JLabel();
+        inputPuerto = new javax.swing.JTextField();
+        lbUsuario = new javax.swing.JLabel();
+        inputUsuario = new javax.swing.JTextField();
+        lbContrasena = new javax.swing.JLabel();
+        inputContrasena = new javax.swing.JTextField();
+        btnConectar = new javax.swing.JButton();
+        btnRegistrar = new javax.swing.JButton();
+        panelBotonera = new javax.swing.JPanel();
+        btnCmdLS = new javax.swing.JButton();
+        btnCmdGET = new javax.swing.JButton();
+        btnCmdPUT = new javax.swing.JButton();
+        btnCmdCD = new javax.swing.JButton();
+        btnCmdDEL = new javax.swing.JButton();
+        btnCmdMKDIR = new javax.swing.JButton();
+        btnCmdRMDIR = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        panelDivisor.setDividerLocation(451);
+
+        panelLocalDivisor.setBorder(javax.swing.BorderFactory.createTitledBorder("Archivos locales"));
+        panelLocalDivisor.setDividerLocation(150);
+
+        panelArbol.setLayout(new java.awt.BorderLayout(0, 5));
+
+        localSelectorUnidad.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "C:\\" }));
+            localSelectorUnidad.setActionCommand("SELEC_UNIDAD");
+            panelArbol.add(localSelectorUnidad, java.awt.BorderLayout.NORTH);
+
+            scrollLocalArbol.setViewportView(localArbol);
+
+            panelArbol.add(scrollLocalArbol, java.awt.BorderLayout.CENTER);
+
+            panelLocalDivisor.setLeftComponent(panelArbol);
+
+            panelLocalArchivos.setLayout(new java.awt.BorderLayout(0, 10));
+
+            localTabla.setModel(new javax.swing.table.DefaultTableModel(
+                new Object [][] {
+
+                },
+                new String [] {
+
+                }
+            ));
+            scrollLocalArchivos.setViewportView(localTabla);
+
+            panelLocalArchivos.add(scrollLocalArchivos, java.awt.BorderLayout.CENTER);
+
+            localRuta.setEditable(false);
+            localRuta.setText("C:\\");
+                panelLocalArchivos.add(localRuta, java.awt.BorderLayout.NORTH);
+
+                panelLocalDivisor.setRightComponent(panelLocalArchivos);
+
+                panelDivisor.setLeftComponent(panelLocalDivisor);
+
+                panelRemoto.setBorder(javax.swing.BorderFactory.createTitledBorder("Archivos remotos"));
+                panelRemoto.setLayout(new java.awt.BorderLayout(0, 10));
+
+                remotoTabla.setModel(new javax.swing.table.DefaultTableModel(
+                    new Object [][] {
+
+                    },
+                    new String [] {
+
+                    }
+                ));
+                scrollRemotoArchivos.setViewportView(remotoTabla);
+
+                panelRemoto.add(scrollRemotoArchivos, java.awt.BorderLayout.CENTER);
+
+                remotoRuta.setText("/");
+                panelRemoto.add(remotoRuta, java.awt.BorderLayout.NORTH);
+
+                panelDivisor.setRightComponent(panelRemoto);
+
+                javax.swing.GroupLayout panelCentralLayout = new javax.swing.GroupLayout(panelCentral);
+                panelCentral.setLayout(panelCentralLayout);
+                panelCentralLayout.setHorizontalGroup(
+                    panelCentralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelCentralLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(panelDivisor, javax.swing.GroupLayout.DEFAULT_SIZE, 929, Short.MAX_VALUE)
+                        .addContainerGap())
+                );
+                panelCentralLayout.setVerticalGroup(
+                    panelCentralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelCentralLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(panelDivisor, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
+                        .addContainerGap())
+                );
+
+                getContentPane().add(panelCentral, java.awt.BorderLayout.CENTER);
+
+                panelInferior.setLayout(new java.awt.BorderLayout());
+
+                panelComandos.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
+                panelComandos.setLayout(new java.awt.BorderLayout(5, 5));
+                panelComandos.add(inputComando, java.awt.BorderLayout.CENTER);
+
+                btnEnviar.setText("Enviar");
+                panelComandos.add(btnEnviar, java.awt.BorderLayout.LINE_END);
+
+                historial.setColumns(20);
+                historial.setRows(5);
+                scrollHistorial.setViewportView(historial);
+
+                panelComandos.add(scrollHistorial, java.awt.BorderLayout.PAGE_START);
+
+                jLabel5.setText("Comando:");
+                panelComandos.add(jLabel5, java.awt.BorderLayout.LINE_START);
+
+                panelInferior.add(panelComandos, java.awt.BorderLayout.CENTER);
+
+                panelEstado.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5), javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204))));
+                panelEstado.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+                lbConectado.setText("Desconectado");
+                panelEstado.add(lbConectado);
+                panelEstado.add(datosConexion);
+
+                panelInferior.add(panelEstado, java.awt.BorderLayout.SOUTH);
+
+                getContentPane().add(panelInferior, java.awt.BorderLayout.SOUTH);
+
+                panelSuperior.setLayout(new java.awt.BorderLayout());
+
+                panelConexion.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+                lbHost.setText("Host:");
+                panelConexion.add(lbHost);
+
+                inputHost.setMinimumSize(new java.awt.Dimension(100, 22));
+                inputHost.setPreferredSize(new java.awt.Dimension(100, 22));
+                panelConexion.add(inputHost);
+
+                lbPuerto.setText("Puerto:");
+                panelConexion.add(lbPuerto);
+
+                inputPuerto.setPreferredSize(new java.awt.Dimension(40, 22));
+                panelConexion.add(inputPuerto);
+
+                lbUsuario.setText("Usuario:");
+                panelConexion.add(lbUsuario);
+
+                inputUsuario.setPreferredSize(new java.awt.Dimension(100, 22));
+                panelConexion.add(inputUsuario);
+
+                lbContrasena.setText("Contraseña:");
+                panelConexion.add(lbContrasena);
+
+                inputContrasena.setPreferredSize(new java.awt.Dimension(100, 22));
+                panelConexion.add(inputContrasena);
+
+                btnConectar.setText("Conectar");
+                panelConexion.add(btnConectar);
+                btnConectar.setActionCommand("CONECTAR");
+
+                btnRegistrar.setText("Registrarse");
+                btnRegistrar.setActionCommand("REGISTRAR");
+                btnRegistrar.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+                btnRegistrar.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+                panelConexion.add(btnRegistrar);
+
+                panelSuperior.add(panelConexion, java.awt.BorderLayout.NORTH);
+
+                btnCmdLS.setText("LS");
+                panelBotonera.add(btnCmdLS);
+
+                btnCmdGET.setText("<-GET");
+                btnCmdGET.setActionCommand("GET");
+                panelBotonera.add(btnCmdGET);
+
+                btnCmdPUT.setText("PUT->");
+                btnCmdPUT.setActionCommand("PUT");
+                panelBotonera.add(btnCmdPUT);
+
+                btnCmdCD.setText("CD");
+                panelBotonera.add(btnCmdCD);
+
+                btnCmdDEL.setText("DEL");
+                panelBotonera.add(btnCmdDEL);
+
+                btnCmdMKDIR.setText("MKDIR");
+                panelBotonera.add(btnCmdMKDIR);
+
+                btnCmdRMDIR.setText("RMDIR");
+                panelBotonera.add(btnCmdRMDIR);
+
+                panelSuperior.add(panelBotonera, java.awt.BorderLayout.CENTER);
+
+                getContentPane().add(panelSuperior, java.awt.BorderLayout.NORTH);
+
+                pack();
+            }// </editor-fold>//GEN-END:initComponents
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCmdCD;
+    private javax.swing.JButton btnCmdDEL;
+    private javax.swing.JButton btnCmdGET;
+    private javax.swing.JButton btnCmdLS;
+    private javax.swing.JButton btnCmdMKDIR;
+    private javax.swing.JButton btnCmdPUT;
+    private javax.swing.JButton btnCmdRMDIR;
+    private javax.swing.JButton btnConectar;
+    private javax.swing.JButton btnEnviar;
+    private javax.swing.JButton btnRegistrar;
+    private javax.swing.JLabel datosConexion;
+    private javax.swing.JTextArea historial;
+    private javax.swing.JTextField inputComando;
+    private javax.swing.JTextField inputContrasena;
+    private javax.swing.JTextField inputHost;
+    private javax.swing.JTextField inputPuerto;
+    private javax.swing.JTextField inputUsuario;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel lbConectado;
+    private javax.swing.JLabel lbContrasena;
+    private javax.swing.JLabel lbHost;
+    private javax.swing.JLabel lbPuerto;
+    private javax.swing.JLabel lbUsuario;
+    private javax.swing.JTree localArbol;
+    private javax.swing.JTextField localRuta;
+    private javax.swing.JComboBox<String> localSelectorUnidad;
+    private javax.swing.JTable localTabla;
+    private javax.swing.JPanel panelArbol;
+    private javax.swing.JPanel panelBotonera;
+    private javax.swing.JPanel panelCentral;
+    private javax.swing.JPanel panelComandos;
+    private javax.swing.JPanel panelConexion;
+    private javax.swing.JSplitPane panelDivisor;
+    private javax.swing.JPanel panelEstado;
+    private javax.swing.JPanel panelInferior;
+    private javax.swing.JPanel panelLocalArchivos;
+    private javax.swing.JSplitPane panelLocalDivisor;
+    private javax.swing.JPanel panelRemoto;
+    private javax.swing.JPanel panelSuperior;
+    private javax.swing.JLabel remotoRuta;
+    private javax.swing.JTable remotoTabla;
+    private javax.swing.JScrollPane scrollHistorial;
+    private javax.swing.JScrollPane scrollLocalArbol;
+    private javax.swing.JScrollPane scrollLocalArchivos;
+    private javax.swing.JScrollPane scrollRemotoArchivos;
+    // End of variables declaration//GEN-END:variables
+    
+
+}//fin Ftp

@@ -33,13 +33,13 @@ public class ComLs {
 	}
 	
  
-	public void iniciar() {
+	public Object iniciar() {
 		String ruta = usuario.getCarpeta()+sesion.getCwd();
 		File[] archivos = new File(ruta).listFiles();
 		try {
 			if (archivos==null) {
 				dos.writeInt(Codigos.MAL);
-				return;
+				return null;
 			}
 			dos.writeInt(Codigos.OK);
 			dos.writeUTF(sesion.getCwd());
@@ -54,6 +54,7 @@ public class ComLs {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 		
 		
 	}

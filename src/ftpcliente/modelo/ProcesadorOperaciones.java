@@ -13,6 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ftpcliente.modelo.comandos.ComLogin;
 import ftpcliente.modelo.comandos.ComLs;
 
 /**
@@ -46,7 +47,8 @@ public class ProcesadorOperaciones extends Thread {
 				if (partes.length > 0) {
 					String comando = partes[0];
 					switch (comando.toUpperCase()) {
-						case "LS" -> new ComLs(partes, dis, dos,modelo).iniciar();
+						case "LOGIN" -> new ComLogin(partes, dis, dos, modelo).iniciar();
+						case "LS" -> new ComLs(partes, dis, dos, modelo).iniciar();
 					}
 				}
 			} catch (InterruptedException e) {

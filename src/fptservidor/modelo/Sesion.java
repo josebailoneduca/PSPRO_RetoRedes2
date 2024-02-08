@@ -8,10 +8,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 import fptservidor.modelo.comandos.ComLs;
 import fptservidor.modelo.comandos.TiposComando;
+import ftpcliente.modelo.ProcesadorOperaciones;
 
 /**
  * 
@@ -19,40 +21,59 @@ import fptservidor.modelo.comandos.TiposComando;
  */
 public class Sesion extends Thread {
 
+	Socket socketInicial;
+	ServerSocket serverSocket;
 	Socket socket;
 	InputStream is;
 	OutputStream os;
 	DataInputStream dis;
 	DataOutputStream dos;
-
 	private int tipoSesion = 0;
-	private Usuario usuario;
+	private Usuario usuario = new Usuario("jose");
 	private String cwd = "/";
+
+	boolean conectado = false;
 
 	/**
 	 * @param s
 	 */
-	public Sesion(Socket s) {
-		this.socket = s;
+	public Sesion(ServerSocket serverSocket, Socket socketInicial) {
+		this.serverSocket = serverSocket;
+		this.socketInicial = socketInicial;
+
 	}
 
 	@Override
 	public void run() {
 		try {
+			// coger nuevo socket
+			serverSocket.setSoTimeout(100000);
+			socket = serverSocket.accept();
+			// cerrar socket inicial
+			this.socketInicial.close();
+			// cerrar server socket
+			serverSocket.close();
+			conectado = true;
 			is = socket.getInputStream();
 			os = socket.getOutputStream();
 			dis = new DataInputStream(is);
 			dos = new DataOutputStream(os);
-//			isr = new InputStreamReader(is, Config.COD_TEXTO);
-//			osw = new OutputStreamWriter(os, Config.COD_TEXTO);
-			boolean permitido = gestionaLogin();
+
+			// gestionar login y registro
+			String operacion = dis.readUTF();
+			boolean permitido = false;
+			if (operacion.toUpperCase().equals("LOGIN")) 
+				permitido = gestionaLogin();
+			
+			// bucle de operaciones
 			if (permitido) {
 				buclePeticiones();
 			}
-
 			socket.close();
 		} catch (IOException e) {
 		}
+		System.out.println(
+				"Conexion terminada con " + usuario.getNombreUsuario() + " en " + socket.getRemoteSocketAddress());
 	}
 
 	/**
@@ -70,21 +91,19 @@ public class Sesion extends Thread {
 					socket.close();
 				}
 				case TiposComando.LS -> new ComLs(this).iniciar();
-				
+
 				}
 
 			} catch (IOException e) {
 				try {
 					socket.close();
-					System.exit(0);
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+
 				}
-				e.printStackTrace();
+
 			}
 		}
-		 
+
 	}
 
 	/**
@@ -99,9 +118,11 @@ public class Sesion extends Thread {
 				String contrasena = dis.readUTF();
 				usuario = new Usuario(nombreUsuario);
 				loginOk = usuario.login(contrasena);
-			} else {
+			} else if (tipoSesion==Codigos.LOGIN_ANONIMO) {
 				usuario = new Usuario();
 				loginOk = true;
+			} else if (tipoSesion==Codigos.LOGIN_REGISTRO) {
+				loginOk=gestionarRegistro();
 			}
 			if (loginOk) {
 				dos.writeInt(Codigos.LOGIN_OK);
@@ -115,6 +136,14 @@ public class Sesion extends Thread {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	private boolean gestionarRegistro() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	/**

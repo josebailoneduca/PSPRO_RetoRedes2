@@ -3,7 +3,9 @@
  */
 package fptservidor.modelo;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -39,10 +41,15 @@ public class SModelo extends Thread{
 			iniciar();
 			while(escuchando()) {
 				try {
-					Socket s = serverSocket.accept();
-					Sesion sesion=new Sesion(s);
+					Socket socketInicial = serverSocket.accept();
+					
+					DataOutputStream dos = new DataOutputStream(socketInicial.getOutputStream());
+					ServerSocket servSocketOperar = new ServerSocket(0);
+					Sesion sesion=new Sesion(servSocketOperar,socketInicial);
 					sesiones.add(sesion);
 					sesion.start();
+					dos.writeInt(Codigos.OK);
+					dos.writeInt(servSocketOperar.getLocalPort());
 					limpiarSesiones();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -56,7 +63,7 @@ public class SModelo extends Thread{
 	private void limpiarSesiones() {
 		List<Sesion> borrar=new ArrayList<Sesion>();
 		for (Sesion sesion : sesiones) {
-			if (sesion.getSocket().isClosed())
+			if (!sesion.isAlive())
 				borrar.add(sesion);
 		}
 		sesiones.removeAll(borrar);

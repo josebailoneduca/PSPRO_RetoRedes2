@@ -26,76 +26,69 @@ import ftpcliente.modelo.dto.DtoArchivo;
  */
 public class Modelo {
 	Controlador controlador;
-	private Socket socket;
-
-    private InputStream is;
-    private OutputStream os;
-    private DataInputStream dis;
-    private DataOutputStream dos;
- 
-    private LinkedBlockingQueue<String> operacionesPendientes;
-    ProcesadorOperaciones procOperaciones;
+    private Conexion conexion;
+    boolean logged=false;
+    String usuario="";
+    
     
     
     
 	public Modelo(Controlador controlador) {
 		this.controlador=controlador;
-		 operacionesPendientes= new LinkedBlockingQueue<String>();
+		 
 	}
 
-
-	public void addOperacion(String operacion) {
-		operacionesPendientes.add(operacion);
-	}
-
-	public boolean conectar (int tipo,String usuario, String contrasena, String host, int puerto) {
-		if (estaConectado())
-			return false;
+	public boolean iniciarConexion(String host, int puerto) {
+		Socket socketConexion=null;
+		Socket socketOperaciones=null;
 		try {
-			socket = new Socket(host,puerto);
-			is = socket.getInputStream();
-			os = socket.getOutputStream();
-			dis = new DataInputStream(is);
-			dos = new DataOutputStream(os);
-//			isr = new InputStreamReader(is,Config.COD_TEXTO);
-//			osw = new OutputStreamWriter(os,Config.COD_TEXTO);
-			
-			
-			dos.writeInt(tipo);
-			if (tipo==Codigos.LOGIN_NORMAL) {
-				dos.writeUTF(usuario);
-				dos.writeUTF(contrasena);
-				}
+			//conexion inicial
+			socketConexion= new Socket(host,puerto);
+			InputStream is = socketConexion.getInputStream();
+			OutputStream os = socketConexion.getOutputStream();
+			DataInputStream dis = new DataInputStream(is);
+			DataOutputStream dos = new DataOutputStream(os);
 			int res = dis.readInt();
-			if (res==Codigos.LOGIN_OK) {
-				 procOperaciones=new ProcesadorOperaciones(operacionesPendientes, dis, dos,this);
-				 procOperaciones.start();
+			//si respuesta afirmativa
+			if (res==Codigos.OK) {
+				//recoger puerto para operaciones y crear la nueva conexion al puerefimero del server
+				int puertoOperaciones = dis.readInt();
+				socketOperaciones = new Socket(host,puertoOperaciones);
+				conexion=new Conexion(socketOperaciones,this);
 				return true;
-			}
-			else
+			//si respuesta negativa
+			}else {
+				socketConexion.close();
 				return false;
+			}
+			
 		} catch (IOException e) {
+			e.printStackTrace();
+			try {
+				if (socketConexion!=null)socketConexion.close();
+				if (socketOperaciones!=null)socketOperaciones.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			return false;
 		}
 	}
+	
+	
+	
+	
+	
+	
+	public void addOperacion(String operacion) {
+		conexion.addOperacion(operacion);
+	}
+ 
 
 
 
  
 
-
-
-
-	/**
-	 * Devuelve si se esta conectado
-	 * 
-	 * @return True si se esta conectado, false en otro caso
-	 */
-	private boolean estaConectado() {
-		if (socket!=null&&(socket.isConnected()&&!socket.isClosed()))
-			return true;
-		return false;
-	}
+ 
 
 
 	/**
@@ -105,6 +98,34 @@ public class Modelo {
 	public void actualizaLista(String rutaActual, ArrayList<DtoArchivo> archivos) {
 		controlador.actualizaLista(rutaActual,archivos);
 		
+	}
+
+
+	/**
+	 * @param i
+	 * @param usuario
+	 * @param contrasena
+	 * @param host
+	 * @param puerto
+	 * @return
+	 */
+	public boolean registrar(int i, String usuario, String contrasena, String host, int puerto) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/**
+	 * @param ok
+	 * @param usuario
+	 */
+	public void setEstadoLogin(boolean ok, String usuario) {
+		if(ok){
+			logged=true;
+		    this.usuario=usuario;
+		}else {
+		    logged=false;
+		    usuario="";
+		}
 	}
 	
 	

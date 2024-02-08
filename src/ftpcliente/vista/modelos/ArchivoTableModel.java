@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpcliente.vista.gui;
+package ftpcliente.vista.modelos;
 
 import java.util.ArrayList;
 import java.util.List;
