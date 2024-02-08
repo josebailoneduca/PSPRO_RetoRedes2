@@ -3,14 +3,19 @@
  */
 package fptservidor.modelo;
 
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import fptservidor.Config;
 import fptservidor.modelo.comandos.ComLs;
 import fptservidor.modelo.comandos.TiposComando;
 import ftpcliente.modelo.ProcesadorOperaciones;
@@ -62,9 +67,10 @@ public class Sesion extends Thread {
 			// gestionar login y registro
 			String operacion = dis.readUTF();
 			boolean permitido = false;
-			if (operacion.toUpperCase().equals("LOGIN")) 
+			if (operacion.toUpperCase().equals(TiposComando.LOGIN)) 
 				permitido = gestionaLogin();
-			
+			else if (operacion.toUpperCase().equals(TiposComando.REGISTRO))
+				permitido = gestionarRegistro();
 			// bucle de operaciones
 			if (permitido) {
 				buclePeticiones();
@@ -121,9 +127,7 @@ public class Sesion extends Thread {
 			} else if (tipoSesion==Codigos.LOGIN_ANONIMO) {
 				usuario = new Usuario();
 				loginOk = true;
-			} else if (tipoSesion==Codigos.LOGIN_REGISTRO) {
-				loginOk=gestionarRegistro();
-			}
+			} 
 			if (loginOk) {
 				dos.writeInt(Codigos.LOGIN_OK);
 				return true;
@@ -142,8 +146,46 @@ public class Sesion extends Thread {
 	 * @return
 	 */
 	private boolean gestionarRegistro() {
-		// TODO Auto-generated method stub
-		return false;
+		try {
+			String nombreUsuario = dis.readUTF();
+			String contrasena = dis.readUTF();
+			
+			File carpetaUsuario = new File(Config.RUTA_ALMACENAMIENTO+"/"+nombreUsuario);
+			if (carpetaUsuario.exists())
+				return false;
+			else {
+				carpetaUsuario.mkdir();
+				crearPasswordFile(nombreUsuario,contrasena);
+				
+			}
+			
+			return true;
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	/**
+	 * @param nombreUsuario
+	 */
+	private void crearPasswordFile(String nombreUsuario, String contrasena) {
+		File arch = new File(Config.RUTA_ALMACENAMIENTO+"/"+nombreUsuario+".pass");
+		try {
+			FileWriter fw = new FileWriter(arch);
+			fw.write(contrasena);
+			fw.flush();
+			fw.close();
+			
+			
+		} catch (IOException e) {
+		
+			e.printStackTrace();
+		}
+		
+		
 	}
 
 	/**

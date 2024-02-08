@@ -127,6 +127,15 @@ public class Modelo {
 		    usuario="";
 		}
 	}
+
+	/**
+	 * 
+	 */
+	public void malRegistro() {
+		// TODO Auto-generated method stub
+		System.out.println("Mal registro");
+		
+	}
 	
 	
 }

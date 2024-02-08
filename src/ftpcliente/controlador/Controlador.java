@@ -43,7 +43,7 @@ public class Controlador {
 	
 	public boolean login(String host, int puerto, String usuario, String contrasena) {
 		modelo.iniciarConexion(host, puerto);
-		modelo.addOperacion("LOGIN "+Codigos.LOGIN_ANONIMO);
+		modelo.addOperacion("REGISTRO "+usuario+" "+contrasena);
 		modelo.addOperacion("LS");
 		return true;
 //		boolean res = modelo.conectar(1, usuario, contrasena, host, puerto);

@@ -9,6 +9,7 @@ package ftpcliente.modelo.comandos;
  */
 public class TiposComando {
 	public static String LOGIN="LOGIN";
+	public static String REGISTRO="REGISTRO";
 	public static String EXIT="EXIT";
 	public static String LS="LS";
 	public static String GET="GET";

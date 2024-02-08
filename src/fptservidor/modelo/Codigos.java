@@ -10,7 +10,6 @@ package fptservidor.modelo;
 public class Codigos {
 	public static final int LOGIN_ANONIMO=0;
 	public static final int LOGIN_NORMAL=1;
-	public static final int LOGIN_REGISTRO=5;
 	public static final int LOGIN_OK =20;
 	public static final int LOGIN_MAL = 1_000;
 	public static final int OK = 10;

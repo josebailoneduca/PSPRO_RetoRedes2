@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import ftpcliente.modelo.comandos.ComLogin;
 import ftpcliente.modelo.comandos.ComLs;
+import ftpcliente.modelo.comandos.ComRegistro;
 
 /**
  * 
@@ -47,6 +48,7 @@ public class ProcesadorOperaciones extends Thread {
 				if (partes.length > 0) {
 					String comando = partes[0];
 					switch (comando.toUpperCase()) {
+						case "REGISTRO" -> new ComRegistro(partes, dis, dos, modelo).iniciar();
 						case "LOGIN" -> new ComLogin(partes, dis, dos, modelo).iniciar();
 						case "LS" -> new ComLs(partes, dis, dos, modelo).iniciar();
 					}
