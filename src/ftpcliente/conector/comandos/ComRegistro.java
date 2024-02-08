@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpcliente.modelo.comandos;
+package ftpcliente.conector.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import fptservidor.modelo.Codigos;
 import fptservidor.modelo.Sesion;
 import fptservidor.modelo.Usuario;
-import ftpcliente.modelo.Modelo;
-import ftpcliente.modelo.dto.DtoArchivo;
+import ftpcliente.conector.Modelo;
+import ftpcliente.controlador.dto.DtoArchivo;
 
 /**
  * 
@@ -35,9 +35,8 @@ public class ComRegistro extends Comando{
 			dos.writeUTF(TiposComando.REGISTRO);
 			String usuario=comando[1];
 			String contrasena = comando[2];
-				dos.writeUTF(usuario);
-				dos.writeUTF(contrasena);
-				
+			dos.writeUTF(usuario);
+			dos.writeUTF(contrasena);
 			int res = dis.readInt();
 			if (res==Codigos.OK) {
 				modelo.setEstadoLogin(true,usuario);
@@ -45,7 +44,7 @@ public class ComRegistro extends Comando{
 			else
 			modelo.malRegistro();
 		} catch (IOException e) {
-			 modelo.setEstadoLogin(false,null);
+			 modelo.malRegistro();
 		}
 	
 	}

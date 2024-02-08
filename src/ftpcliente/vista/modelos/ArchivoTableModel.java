@@ -3,13 +3,14 @@
  */
 package ftpcliente.vista.modelos;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import ftpcliente.modelo.Codigos;
-import ftpcliente.modelo.dto.DtoArchivo;
+import ftpcliente.controlador.Codigos;
+import ftpcliente.controlador.dto.DtoArchivo;
 /**
  * 
  * @author Bailon
@@ -27,6 +28,7 @@ public class ArchivoTableModel extends AbstractTableModel{
 		System.out.println(items.size());
 		
 	}
+ 
 
 	@Override
 	public int getRowCount() {

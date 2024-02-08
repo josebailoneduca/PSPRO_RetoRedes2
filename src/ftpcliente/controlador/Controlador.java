@@ -3,14 +3,17 @@
  */
 package ftpcliente.controlador;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import fptservidor.modelo.Codigos;
 import ftpcliente.Config;
-import ftpcliente.modelo.Modelo;
-import ftpcliente.modelo.dto.DtoArchivo;
+import ftpcliente.conector.Modelo;
+import ftpcliente.conector.comandos.TiposComando;
+import ftpcliente.controlador.dto.DtoArchivo;
 import ftpcliente.vista.gui.Ventana;
 
 /**
@@ -42,21 +45,82 @@ public class Controlador {
 	
 	
 	public boolean login(String host, int puerto, String usuario, String contrasena) {
-		modelo.iniciarConexion(host, puerto);
-		modelo.addOperacion("REGISTRO "+usuario+" "+contrasena);
-		modelo.addOperacion("LS");
-		return true;
-//		boolean res = modelo.conectar(1, usuario, contrasena, host, puerto);
-//		if (res)
-//			modelo.addOperacion("LS");
-//		return res;
+		if (modelo.iniciarConexion(host, puerto)) {
+			int tipo = Codigos.LOGIN_NORMAL;
+			if (usuario.length()==0){
+				tipo=Codigos.LOGIN_ANONIMO;
+			}
+			modelo.addOperacion(TiposComando.LOGIN+" "+tipo+" "+usuario+" "+contrasena);
+			modelo.addOperacion("LS");
+			return true;
+		}else {
+			return false;
+		}
 	}
 
 	public boolean registrar(String host, int puerto, String usuario, String contrasena) {
-		boolean res = modelo.registrar(1, usuario, contrasena, host, puerto);
-		if (res)
+		if (modelo.iniciarConexion(host, puerto)) {
+			modelo.addOperacion(TiposComando.REGISTRO+" "+usuario+" "+contrasena);
 			modelo.addOperacion("LS");
-		return res;
+			return true;
+		}else {
+			return false;
+		}
+
+	}
+
+	/**
+	 * 
+	 */
+	public void actualizaLogin() {
+		if (modelo.isLogged()) {
+		String usuario = modelo.getUsuario();
+		String host = modelo.getHost();
+		vista.actualizaLogin(true,host,usuario);
+		}else {
+			vista.actualizaLogin(false,"","");
+		}
+		
+	}
+
+	/**
+	 * @param string
+	 */
+	public void mensajeError(String string) {
+		SwingUtilities.invokeLater(() -> 
+		vista.msgError(string));
+		
+	}
+
+	/**
+	 * 
+	 */
+	public void logout() {
+		modelo.logout();
+		
+	}
+
+	/**
+	 * @return
+	 */
+	public void comLs() {
+		if (modelo.isLogged())
+			modelo.addOperacion(TiposComando.LS);
+	}
+
+	/**
+	 * @param ruta
+	 * @return
+	 */
+	public List<DtoArchivo> getArchivosLocales(File ruta) {
+
+		List<DtoArchivo> archivos=new ArrayList<DtoArchivo>();
+		FilenameFilter filtroArchivos= (File current, String name) -> !(new File(current, name).isDirectory());
+		File[] lista = ruta.listFiles(filtroArchivos);
+		for (File arch : lista) {
+			archivos.add(new DtoArchivo(arch.getName(), (arch.isDirectory())?Codigos.DIRECTORIO:Codigos.ARCHIVO));
+		}
+		return archivos;	
 	}
 	
 }

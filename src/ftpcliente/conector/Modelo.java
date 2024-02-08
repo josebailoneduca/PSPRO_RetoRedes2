@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpcliente.modelo;
+package ftpcliente.conector;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -16,8 +16,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import ftpcliente.Config;
+import ftpcliente.controlador.Codigos;
 import ftpcliente.controlador.Controlador;
-import ftpcliente.modelo.dto.DtoArchivo;
+import ftpcliente.controlador.dto.DtoArchivo;
 
 
 /**
@@ -63,7 +64,7 @@ public class Modelo {
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			try {
 				if (socketConexion!=null)socketConexion.close();
 				if (socketOperaciones!=null)socketOperaciones.close();
@@ -83,15 +84,7 @@ public class Modelo {
 		conexion.addOperacion(operacion);
 	}
  
-
-
-
- 
-
- 
-
-
-	/**
+	/*
 	 * @param rutaActual
 	 * @param archivos
 	 */
@@ -101,18 +94,7 @@ public class Modelo {
 	}
 
 
-	/**
-	 * @param i
-	 * @param usuario
-	 * @param contrasena
-	 * @param host
-	 * @param puerto
-	 * @return
-	 */
-	public boolean registrar(int i, String usuario, String contrasena, String host, int puerto) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+ 
 
 	/**
 	 * @param ok
@@ -126,14 +108,52 @@ public class Modelo {
 		    logged=false;
 		    usuario="";
 		}
+		controlador.actualizaLogin();
 	}
 
 	/**
 	 * 
 	 */
 	public void malRegistro() {
-		// TODO Auto-generated method stub
-		System.out.println("Mal registro");
+		controlador.mensajeError("Registro erroneo");
+		setEstadoLogin(false,null);
+
+		
+	}
+
+	
+	public boolean isLogged() {
+		return logged;
+	}
+	
+	/**
+	 * @return
+	 */
+	public String getUsuario() {
+		return usuario;
+	}
+	
+	public int getPuerto() {
+		if (conexion!=null)
+			return conexion.getPuerto();
+		else
+			return 0;
+	}
+
+	public String getHost() {
+		if (conexion!=null)
+			return ""+conexion.getHost();
+		else
+			return "";
+	}
+
+	/**
+	 * 
+	 */
+	public void logout() {
+		conexion.logout();
+	    boolean logged=false;
+	    setEstadoLogin(false, "");
 		
 	}
 	

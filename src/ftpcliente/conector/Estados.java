@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpcliente.modelo;
+package ftpcliente.conector;
 
 /**
  * 

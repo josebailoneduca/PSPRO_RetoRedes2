@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpcliente.modelo;
+package ftpcliente.conector;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -51,6 +51,41 @@ public class Conexion {
 	public void addOperacion(String operacion) {
 		operacionesPendientes.add(operacion);
 		
+	}
+
+	/**
+	 * @return
+	 */
+	public int getPuerto() {
+		if (socket!=null)
+		return socket.getPort();
+		else 
+			return -1;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getHost() {
+		if (socket!=null)
+		return socket.getRemoteSocketAddress().toString();
+		else 
+			return "";
+	}
+
+	/**
+	 * 
+	 */
+	public void logout() {
+		try {
+			socket.close();
+		} catch (IOException e) {		
+			e.printStackTrace();
+		}
+		
+		operacionesPendientes.clear();
+		procOperaciones.parar();
+		procOperaciones.interrupt();
 	}
 	
 }

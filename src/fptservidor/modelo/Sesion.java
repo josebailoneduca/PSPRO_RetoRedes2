@@ -18,7 +18,7 @@ import java.net.Socket;
 import fptservidor.Config;
 import fptservidor.modelo.comandos.ComLs;
 import fptservidor.modelo.comandos.TiposComando;
-import ftpcliente.modelo.ProcesadorOperaciones;
+import ftpcliente.conector.ProcesadorOperaciones;
 
 /**
  * 

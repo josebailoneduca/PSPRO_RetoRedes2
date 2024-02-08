@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpcliente.modelo.comandos;
+package ftpcliente.conector.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import fptservidor.modelo.Codigos;
 import fptservidor.modelo.Sesion;
 import fptservidor.modelo.Usuario;
-import ftpcliente.modelo.Modelo;
-import ftpcliente.modelo.dto.DtoArchivo;
+import ftpcliente.conector.Modelo;
+import ftpcliente.controlador.dto.DtoArchivo;
 
 /**
  * 

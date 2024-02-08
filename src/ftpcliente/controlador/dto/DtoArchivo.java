@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpcliente.modelo.dto;
+package ftpcliente.controlador.dto;
 
 /**
  * 

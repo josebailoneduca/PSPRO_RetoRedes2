@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpcliente.modelo;
+package ftpcliente.conector;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,9 +13,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ftpcliente.modelo.comandos.ComLogin;
-import ftpcliente.modelo.comandos.ComLs;
-import ftpcliente.modelo.comandos.ComRegistro;
+import ftpcliente.conector.comandos.ComLogin;
+import ftpcliente.conector.comandos.ComLs;
+import ftpcliente.conector.comandos.ComRegistro;
 
 /**
  * 
@@ -26,39 +26,36 @@ public class ProcesadorOperaciones extends Thread {
 	private LinkedBlockingQueue<String> operaciones;
 	private DataInputStream dis;
 	private DataOutputStream dos;
-	private boolean funcionando = true;
-	private boolean procesar = true;
+	private boolean trabajar = true;
+
 	private Modelo modelo;
 
-	public ProcesadorOperaciones(LinkedBlockingQueue<String> operaciones, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
+	public ProcesadorOperaciones(LinkedBlockingQueue<String> operaciones, DataInputStream dis, DataOutputStream dos,
+			Modelo modelo) {
 		this.operaciones = operaciones;
 		this.dis = dis;
 		this.dos = dos;
-		this.modelo=modelo;
+		this.modelo = modelo;
 	}
 
 	@Override
 	public void run() {
-		while (funcionando) {
-			if (procesar) {
-				String operacion;
-				try {
-					operacion = operaciones.take();
+		while (trabajar) {
+			String operacion;
+			try {
+				operacion = operaciones.take();
 				String[] partes = extraerPartesComando(operacion);
 				if (partes.length > 0) {
 					String comando = partes[0];
 					switch (comando.toUpperCase()) {
-						case "REGISTRO" -> new ComRegistro(partes, dis, dos, modelo).iniciar();
-						case "LOGIN" -> new ComLogin(partes, dis, dos, modelo).iniciar();
-						case "LS" -> new ComLs(partes, dis, dos, modelo).iniciar();
+					case "REGISTRO" -> new ComRegistro(partes, dis, dos, modelo).iniciar();
+					case "LOGIN" -> new ComLogin(partes, dis, dos, modelo).iniciar();
+					case "LS" -> new ComLs(partes, dis, dos, modelo).iniciar();
 					}
 				}
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
-			}
-
 		}
 
 	}
@@ -74,6 +71,13 @@ public class ProcesadorOperaciones extends Thread {
 			partes.add(m.group(1));
 
 		return partes.toArray(new String[0]);
+	}
+
+	/**
+	 * 
+	 */
+	public void parar() {
+		trabajar=false;
 	}
 
 }

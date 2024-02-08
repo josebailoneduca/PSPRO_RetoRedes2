@@ -1,14 +1,14 @@
 /**
  * 
  */
-package ftpcliente.modelo.comandos;
+package ftpcliente.conector.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import ftpcliente.modelo.Modelo;
+import ftpcliente.conector.Modelo;
 
 /**
  * 

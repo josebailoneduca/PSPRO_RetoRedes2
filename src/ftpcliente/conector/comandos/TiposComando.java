@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpcliente.modelo.comandos;
+package ftpcliente.conector.comandos;
 
 /**
  * 
