@@ -13,6 +13,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ftpcliente.conector.comandos.ComCd;
+import ftpcliente.conector.comandos.ComExit;
 import ftpcliente.conector.comandos.ComLogin;
 import ftpcliente.conector.comandos.ComLs;
 import ftpcliente.conector.comandos.ComRegistro;
@@ -50,7 +52,9 @@ public class ProcesadorOperaciones extends Thread {
 					switch (comando.toUpperCase()) {
 					case "REGISTRO" -> new ComRegistro(partes, dis, dos, modelo).iniciar();
 					case "LOGIN" -> new ComLogin(partes, dis, dos, modelo).iniciar();
+					case "EXIT" -> new ComExit(partes, dis, dos, modelo).iniciar();
 					case "LS" -> new ComLs(partes, dis, dos, modelo).iniciar();
+					case "CD" -> new ComCd(partes, dis, dos, modelo).iniciar();
 					}
 				}
 			} catch (InterruptedException e) {
@@ -68,7 +72,7 @@ public class ProcesadorOperaciones extends Thread {
 		ArrayList<String> partes = new ArrayList<String>();
 		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(operacion);
 		while (m.find())
-			partes.add(m.group(1));
+			partes.add(m.group(1).replaceAll("\"", ""));
 
 		return partes.toArray(new String[0]);
 	}

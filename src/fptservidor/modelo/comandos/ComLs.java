@@ -34,8 +34,8 @@ public class ComLs {
 	
  
 	public Object iniciar() {
-		String ruta = usuario.getCarpeta()+sesion.getCwd();
-		File[] archivos = new File(ruta).listFiles();
+		String rutaCompleta = usuario.getCarpeta()+sesion.getCwd();
+		File[] archivos = new File(rutaCompleta).listFiles();
 		try {
 			if (archivos==null) {
 				dos.writeInt(Codigos.MAL);
@@ -43,8 +43,18 @@ public class ComLs {
 			}
 			dos.writeInt(Codigos.OK);
 			dos.writeUTF(sesion.getCwd());
-			dos.writeInt(archivos.length);
+			boolean esRaiz = sesion.getCwd().equals("/")||sesion.getCwd().equals("\\");
+			//si es raiz n archivos
+			if (esRaiz)
+				dos.writeInt(archivos.length);
+			else
+				//si no es raiz n archivos +1 para directorio padre
+				dos.writeInt(archivos.length+1);
 			
+			if (!esRaiz) {
+				dos.writeUTF("..");
+				dos.writeInt(Codigos.DIRECTORIO);
+			}
 			for (File file : archivos) {
 				dos.writeUTF(file.getName());
 				dos.writeInt((file.isDirectory()?Codigos.DIRECTORIO:Codigos.ARCHIVO));

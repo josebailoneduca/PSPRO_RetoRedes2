@@ -122,5 +122,29 @@ public class Controlador {
 		}
 		return archivos;	
 	}
+
+	/**
+	 * @param valor
+	 * @return
+	 */
+	public void comCd(String valor) {
+		if (valor !=null && modelo.isLogged()) {
+			modelo.addOperacion(TiposComando.CD+" \""+valor+"\"");
+			comLs();
+		}
+	}
+
+	/**
+	 * @param nombre
+	 */
+	public void comGet(String nombre) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void enviarComando(String comando) {
+		if (comando!=null && modelo.isLogged())
+			modelo.addOperacion(comando);
+	}
 	
 }

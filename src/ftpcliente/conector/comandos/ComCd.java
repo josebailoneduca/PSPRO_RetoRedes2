@@ -21,9 +21,9 @@ import ftpcliente.controlador.dto.DtoArchivo;
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class ComLs extends Comando{
+public class ComCd extends Comando{
 
-	public ComLs(String[] comando,DataInputStream dis, DataOutputStream dos,Modelo modelo) {
+	public ComCd(String[] comando,DataInputStream dis, DataOutputStream dos,Modelo modelo) {
 		super(comando,dis,dos,modelo);
 
 	}
@@ -32,22 +32,15 @@ public class ComLs extends Comando{
 	public void iniciar() {
 		
 		try {
-			dos.writeUTF(TiposComando.LS);
+			dos.writeUTF(TiposComando.CD);
+			if (comando.length>0)
+				dos.writeUTF(comando[1]);
+			else
+				dos.writeUTF(" ");
+
 			int res = dis.readInt();
-			if (res==Codigos.OK) {
-				String rutaActual=dis.readUTF();
-				ArrayList<DtoArchivo> archivos=new ArrayList<DtoArchivo>();
-				int nArch = dis.readInt();
-				for (int i=0;i<nArch;i++) {
-					String nombre= dis.readUTF();
-					int codTipo=dis.readInt();
-					archivos.add(new DtoArchivo(nombre, codTipo));
-					
-				}
-				modelo.actualizaLista(rutaActual,archivos);
-			}else {
-				modelo.mensajeError("No se pudo hacer LS");
-			}
+			if (res!=Codigos.OK) 
+				modelo.mensajeError("No se pudo hacer CD");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -9,6 +9,9 @@ package ftpcliente.vista.gui;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreeModel;
 
+import fptservidor.modelo.Codigos;
 import ftpcliente.Config;
 import ftpcliente.controlador.Controlador;
 import ftpcliente.controlador.dto.DtoArchivo;
@@ -78,6 +82,43 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		}
 		
 		localSelectorUnidad.addActionListener(this);
+		inputComando.addActionListener(this);
+		
+		
+		remotoTabla.addMouseListener(new MouseAdapter() {
+		    public void mousePressed(MouseEvent me) {
+	            if (me.getClickCount() == 2) {     
+	                JTable target = (JTable)me.getSource();
+	                int fila = target.getSelectedRow();
+	               clickRemoto(fila);
+	             }
+		    }
+
+		});
+		localTabla.addMouseListener(new MouseAdapter() {
+		    public void mousePressed(MouseEvent me) {
+	            if (me.getClickCount() == 2) {     
+	                JTable target = (JTable)me.getSource();
+	                int fila = target.getSelectedRow();
+	               clickLocal(fila);
+	             }
+		    }
+
+		});
+	}
+	private void clickRemoto(int fila) {
+		DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(fila);
+		if (arch.getTipo()==Codigos.DIRECTORIO)
+			controlador.comCd(arch.getNombre());
+		else
+			controlador.comGet(arch.getNombre());
+		
+	}
+
+	
+	private void clickLocal(int row) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
@@ -119,11 +160,23 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		case "SELEC_UNIDAD" -> seleccionarUnidad();
 		case "CONECTAR" -> login();
 		case "REGISTRAR" -> registrar();
-		case "DESCONECTAR" -> logout();
+		case "EXIT" -> logout();
+		case "ENVIAR" -> enviarComando();
 		case "LS" -> controlador.comLs();
+		case "CD" -> controlador.comCd(getValor("Introduzca la ruta"));
 
 		}
 
+	}
+
+	/**
+	 * @return
+	 */
+	private void enviarComando() {
+		String comando = inputComando.getText();
+		if (comando!=null && comando.length()>0)
+			controlador.enviarComando(comando);
+		inputComando.setText("");
 	}
 
 	/**
@@ -189,7 +242,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		btnConectar = new JButton();
 		btnConectar.setActionCommand("CONECTAR");//
 		btnDesconectar = new JButton();
-		btnDesconectar.setActionCommand("DESCONECTAR");//
+		btnDesconectar.setActionCommand("EXIT");//
 		btnRegistrar = new JButton();
 		btnRegistrar.setActionCommand("REGISTRAR");//
 		btnCmdLS = new JButton();
@@ -210,13 +263,14 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		localSelectorUnidad.setActionCommand("SELEC_UNIDAD");
 		btnEnviar = new JButton();
 		btnEnviar.setActionCommand("ENVIAR");
+		inputComando = new JTextField();
+		inputComando.setActionCommand("ENVIAR");
 
 		localArbol = new JTree();
 		localTabla = new JTable();
 		localRuta = new JTextField();
 		remotoTabla = new JTable();
 		remotoRuta = new JLabel();
-		inputComando = new JTextField();
 		historial = new JTextArea();
 		datosConexion = new JLabel();
 		inputHost = new JTextField();
@@ -420,6 +474,11 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
+	public String getValor(String msg) {
+		return JOptionPane.showInputDialog(msg); 
+	}
+	
+	
 	/**
 	 * @param host
 	 * @param puerto
@@ -434,6 +493,9 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 			lbConectado.setText("Desconectado");
 			datosConexion.setText("");
 			activarLogin(true);
+			remotoRuta.setText("");
+			remotoTabla.setModel(new ArchivoTableModel(new ArrayList<DtoArchivo>()));
+			remotoTabla.getColumnModel().getColumn(0).setMaxWidth(50);
 		}
 	}
 
@@ -445,5 +507,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		btnRegistrar.setVisible(b);
 		btnDesconectar.setVisible(!b);
 	}
+
+ 
 
 }// fin Ftp

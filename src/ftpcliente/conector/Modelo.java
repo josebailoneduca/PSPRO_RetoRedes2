@@ -154,6 +154,15 @@ public class Modelo {
 		conexion.logout();
 	    boolean logged=false;
 	    setEstadoLogin(false, "");
+	    
+		
+	}
+
+	/**
+	 * @param string
+	 */
+	public void mensajeError(String string) {
+		controlador.mensajeError(string);
 		
 	}
 	

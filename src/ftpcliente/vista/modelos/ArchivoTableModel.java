@@ -57,4 +57,15 @@ public class ArchivoTableModel extends AbstractTableModel{
 		default ->  "";
 		};	
 	}
+	
+	public DtoArchivo getItem(int indice) {
+		items.iterator().forEachRemaining(t -> System.out.println(t));
+		System.out.println(items.size());
+		if (items.size()>indice && indice>-1) {
+			return items.get(indice);
+		}else {
+			return null;
+		}
+		
+	}
 }

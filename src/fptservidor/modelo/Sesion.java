@@ -14,8 +14,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Paths;
 
 import fptservidor.Config;
+import fptservidor.modelo.comandos.ComCd;
 import fptservidor.modelo.comandos.ComLs;
 import fptservidor.modelo.comandos.TiposComando;
 import ftpcliente.conector.ProcesadorOperaciones;
@@ -97,6 +99,7 @@ public class Sesion extends Thread {
 					socket.close();
 				}
 				case TiposComando.LS -> new ComLs(this).iniciar();
+				case TiposComando.CD -> new ComCd(this).iniciar();
 
 				}
 
@@ -235,4 +238,25 @@ public class Sesion extends Thread {
 		return cwd;
 	}
 
+	/**
+	 * @param replace
+	 */
+	public boolean setCwd(String cwd) {
+		try {
+		cwd = cwd.replace("\\", "/");
+		cwd = cwd.replace("//", "/");
+
+		this.cwd=Paths.get(cwd).normalize().toString().replace("\\", "/");
+		return true;
+		}catch(Exception ex) {
+			return false;
+		}
+	}
+	public void exit() {
+		try {
+			this.socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
