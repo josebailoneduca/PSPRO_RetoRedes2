@@ -137,7 +137,7 @@ public class Controlador {
 	/**
 	 * @param nombre
 	 */
-	public void comGet(String nombre) {
+	public void comGet(String valor) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -145,6 +145,39 @@ public class Controlador {
 	public void enviarComando(String comando) {
 		if (comando!=null && modelo.isLogged())
 			modelo.addOperacion(comando);
+	}
+
+	/**
+	 * @param nombre
+	 */
+	public void comDel(String valor) {
+		if (valor!=null) {
+			modelo.addOperacion(TiposComando.DEL+" \""+valor+"\"");
+			comLs();
+		}
+		
+	}
+
+	/**
+	 * @param valor
+	 * @return
+	 */
+	public void comMkdir(String valor) {
+		if (valor !=null && modelo.isLogged()) {
+			modelo.addOperacion(TiposComando.MKDIR+" \""+valor+"\"");
+			comLs();
+		}
+	}
+
+	/**
+	 * @param nombre
+	 */
+	public void comRmdir(String valor) {
+		if (valor!=null) {
+			modelo.addOperacion(TiposComando.RMDIR+" \""+valor+"\"");
+			comLs();
+		}
+		
 	}
 	
 }

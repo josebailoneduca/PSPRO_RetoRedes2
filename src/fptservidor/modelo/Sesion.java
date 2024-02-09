@@ -18,7 +18,10 @@ import java.nio.file.Paths;
 
 import fptservidor.Config;
 import fptservidor.modelo.comandos.ComCd;
+import fptservidor.modelo.comandos.ComDel;
 import fptservidor.modelo.comandos.ComLs;
+import fptservidor.modelo.comandos.ComMkdir;
+import fptservidor.modelo.comandos.ComRmdir;
 import fptservidor.modelo.comandos.TiposComando;
 import ftpcliente.conector.ProcesadorOperaciones;
 
@@ -100,7 +103,9 @@ public class Sesion extends Thread {
 				}
 				case TiposComando.LS -> new ComLs(this).iniciar();
 				case TiposComando.CD -> new ComCd(this).iniciar();
-
+				case TiposComando.DEL -> new ComDel(this).iniciar();
+				case TiposComando.MKDIR-> new ComMkdir(this).iniciar();
+				case TiposComando.RMDIR-> new ComRmdir(this).iniciar();
 				}
 
 			} catch (IOException e) {

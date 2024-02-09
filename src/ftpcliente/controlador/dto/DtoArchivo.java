@@ -3,6 +3,8 @@
  */
 package ftpcliente.controlador.dto;
 
+import fptservidor.modelo.Codigos;
+
 /**
  * 
  * @author Bailon
@@ -26,6 +28,10 @@ public class DtoArchivo {
 	}
 	public void setTipo(int tipo) {
 		this.tipo = tipo;
+	}
+	
+	public boolean esDirectorio() {
+		return tipo == Codigos.DIRECTORIO;
 	}
 	@Override
 	public String toString() {

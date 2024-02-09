@@ -14,10 +14,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ftpcliente.conector.comandos.ComCd;
+import ftpcliente.conector.comandos.ComDel;
 import ftpcliente.conector.comandos.ComExit;
 import ftpcliente.conector.comandos.ComLogin;
 import ftpcliente.conector.comandos.ComLs;
+import ftpcliente.conector.comandos.ComMkdir;
 import ftpcliente.conector.comandos.ComRegistro;
+import ftpcliente.conector.comandos.ComRmdir;
 
 /**
  * 
@@ -55,6 +58,9 @@ public class ProcesadorOperaciones extends Thread {
 					case "EXIT" -> new ComExit(partes, dis, dos, modelo).iniciar();
 					case "LS" -> new ComLs(partes, dis, dos, modelo).iniciar();
 					case "CD" -> new ComCd(partes, dis, dos, modelo).iniciar();
+					case "DEL" -> new ComDel(partes, dis, dos, modelo).iniciar();
+					case "MKDIR" -> new ComMkdir(partes, dis, dos, modelo).iniciar();
+					case "RMDIR" -> new ComRmdir(partes, dis, dos, modelo).iniciar();
 					}
 				}
 			} catch (InterruptedException e) {

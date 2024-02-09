@@ -7,6 +7,7 @@ Lista de paquetes:
 package ftpcliente.vista.gui;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -23,8 +24,10 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -105,10 +108,19 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		    }
 
 		});
+		
+		remotoTabla.setComponentPopupMenu(new MenuRemoto(this,remotoTabla));
 	}
+	
+	/**
+	 * Click en tabla remota. Ejecuta CD o GET en el achivo clickado
+	 * @param fila
+	 */
 	private void clickRemoto(int fila) {
+		if (fila==-1)
+			return;
 		DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(fila);
-		if (arch.getTipo()==Codigos.DIRECTORIO)
+		if (arch.esDirectorio())
 			controlador.comCd(arch.getNombre());
 		else
 			controlador.comGet(arch.getNombre());
@@ -164,9 +176,71 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		case "ENVIAR" -> enviarComando();
 		case "LS" -> controlador.comLs();
 		case "CD" -> controlador.comCd(getValor("Introduzca la ruta"));
+		case "DEL" -> borrarArchivo();
+		case "BORRAR" -> borrarCualquiera();
+		case "MKDIR" -> controlador.comMkdir(getValor("Introduzca el nombre del directorio"));
+		case "RMDIR" -> borrarDirectorio();
 
 		}
 
+	}
+
+	
+
+	/**
+	 * @return
+	 */
+	private void borrarDirectorio() {
+        int filaSeleccionada = remotoTabla.getSelectedRow();
+        if (filaSeleccionada == -1) {
+        	msgInfo("Seleccione un archivo remoto");
+            return;//no hacer nada si no hay fila seleccionada
+        }        
+        
+        DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
+        if (arch.esDirectorio()) {
+        	controlador.comRmdir(arch.getNombre());
+        }
+        else {
+        	msgInfo("Debe elegir un directorio, no un archivo");
+        }
+	}
+	
+
+	/**
+	 * @return
+	 */
+	private void borrarCualquiera() {
+        int filaSeleccionada = remotoTabla.getSelectedRow();
+        if (filaSeleccionada == -1) {
+        	msgInfo("Seleccione un archivo remoto");
+            return;//no hacer nada si no hay fila seleccionada
+        }        
+        DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
+        if (arch.esDirectorio()) {
+        	borrarDirectorio();
+        }
+        else { 
+        	borrarArchivo();
+        }
+	}
+
+	/**
+	 * @return
+	 */
+	private void borrarArchivo() {
+        int filaSeleccionada = remotoTabla.getSelectedRow();
+        if (filaSeleccionada == -1) {
+        	msgInfo("Seleccione un archivo remoto");
+            return;//no hacer nada si no hay fila seleccionada
+        }        
+        DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
+        if (!arch.esDirectorio()) {
+        	controlador.comDel(arch.getNombre());
+        }
+        else {
+        	msgInfo("Debe elegir un archivo, no un directorio");
+        }
 	}
 
 	/**
@@ -466,6 +540,11 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	
 	
 
+	public void msgInfo(String msg) {
+		JOptionPane.showMessageDialog(this, msg, "", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	
 	/**
 	 * @param string
 	 * @return
