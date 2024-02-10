@@ -23,6 +23,10 @@ public class MenuRemoto extends JPopupMenu {
 	    itemBorrar.setActionCommand("BORRAR");
 	    itemBorrar.addActionListener(v);
 	    this.add(itemBorrar);
+	    JMenuItem itemCrearDirectorio= new JMenuItem("Crear directorio");
+	    itemCrearDirectorio.setActionCommand("MKDIR");
+	    itemCrearDirectorio.addActionListener(v);
+	    this.add(itemCrearDirectorio);
 	    
 		
 	}

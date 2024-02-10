@@ -18,16 +18,11 @@ public class MainCliente {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-//		EventQueue.invokeLater(new Runnable() {
-//			public void run() {
-//				try {
-//					Ventana frame = new Ventana();
-//					frame.setVisible(true);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
+		String archivoConf=null;
+		if (args!=null &&args.length>0) {
+			archivoConf=args[0];
+			Config.cargarConfiguracion(archivoConf);
+		}
 		Controlador controlador = new Controlador();
 	}
 

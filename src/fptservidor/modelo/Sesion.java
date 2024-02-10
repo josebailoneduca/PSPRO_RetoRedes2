@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import fptservidor.Config;
 import fptservidor.modelo.comandos.ComCd;
 import fptservidor.modelo.comandos.ComDel;
+import fptservidor.modelo.comandos.ComGet;
 import fptservidor.modelo.comandos.ComLs;
 import fptservidor.modelo.comandos.ComMkdir;
 import fptservidor.modelo.comandos.ComRmdir;
@@ -106,13 +107,15 @@ public class Sesion extends Thread {
 				case TiposComando.DEL -> new ComDel(this).iniciar();
 				case TiposComando.MKDIR-> new ComMkdir(this).iniciar();
 				case TiposComando.RMDIR-> new ComRmdir(this).iniciar();
+				case TiposComando.GET-> new ComGet(this).iniciar();
 				}
 
 			} catch (IOException e) {
+				//e.printStackTrace();
 				try {
 					socket.close();
 				} catch (IOException e1) {
-
+					e.printStackTrace();
 				}
 
 			}
@@ -158,7 +161,7 @@ public class Sesion extends Thread {
 			String nombreUsuario = dis.readUTF();
 			String contrasena = dis.readUTF();
 			
-			File carpetaUsuario = new File(Config.RUTA_ALMACENAMIENTO+"/"+nombreUsuario);
+			File carpetaUsuario = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario);
 			if (carpetaUsuario.exists())
 				return false;
 			else {
@@ -180,7 +183,7 @@ public class Sesion extends Thread {
 	 * @param nombreUsuario
 	 */
 	private void crearPasswordFile(String nombreUsuario, String contrasena) {
-		File arch = new File(Config.RUTA_ALMACENAMIENTO+"/"+nombreUsuario+".pass");
+		File arch = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario+".pass");
 		try {
 			FileWriter fw = new FileWriter(arch);
 			fw.write(contrasena);

@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import ftpcliente.conector.comandos.ComCd;
 import ftpcliente.conector.comandos.ComDel;
 import ftpcliente.conector.comandos.ComExit;
+import ftpcliente.conector.comandos.ComGet;
 import ftpcliente.conector.comandos.ComLogin;
 import ftpcliente.conector.comandos.ComLs;
 import ftpcliente.conector.comandos.ComMkdir;
@@ -61,6 +62,7 @@ public class ProcesadorOperaciones extends Thread {
 					case "DEL" -> new ComDel(partes, dis, dos, modelo).iniciar();
 					case "MKDIR" -> new ComMkdir(partes, dis, dos, modelo).iniciar();
 					case "RMDIR" -> new ComRmdir(partes, dis, dos, modelo).iniciar();
+					case "GET" -> new ComGet(partes, dis, dos, modelo).iniciar();
 					}
 				}
 			} catch (InterruptedException e) {

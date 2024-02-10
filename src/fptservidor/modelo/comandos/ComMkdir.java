@@ -48,7 +48,7 @@ public class ComMkdir {
 			//componer y comprobar validez de ruta
 			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, directorioACrear);
 			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") && 
-					!UtilesArchivo.rutaExistente(rutaCompleta) && crearDirectorio(rutaCompleta)) {
+					!UtilesArchivo.rutaExiste(rutaCompleta) && crearDirectorio(rutaCompleta)) {
 						dos.writeInt(Codigos.OK);
 			} else {
 				dos.writeInt(Codigos.MAL);

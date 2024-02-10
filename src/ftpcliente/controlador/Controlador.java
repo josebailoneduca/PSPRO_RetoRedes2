@@ -137,9 +137,10 @@ public class Controlador {
 	/**
 	 * @param nombre
 	 */
-	public void comGet(String valor) {
-		// TODO Auto-generated method stub
-		
+	public void comGet(String rutaRemota, String rutaLocal) {
+		if (rutaRemota!=null && rutaLocal!=null) {
+			modelo.addOperacion(TiposComando.GET+" \""+rutaRemota+"\" \""+rutaLocal+"\"");
+		}
 	}
 
 	public void enviarComando(String comando) {
@@ -177,6 +178,14 @@ public class Controlador {
 			modelo.addOperacion(TiposComando.RMDIR+" \""+valor+"\"");
 			comLs();
 		}
+		
+	}
+
+	/**
+	 * 
+	 */
+	public void actualizarLocal() {
+		vista.actualizarArchivosLocales();
 		
 	}
 	

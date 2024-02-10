@@ -34,6 +34,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.TreeSelectionEvent;
@@ -66,12 +67,13 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	}
 
 	private void initPropio() {
-		inputHost.setText(Config.HOST);
-		inputPuerto.setText("" + Config.PUERTO);
-		inputUsuario.setText(Config.USUARIO);
-		inputContrasena.setText(Config.CONTRASENA);
-
-		getUnidades();
+		inputHost.setText(Config.getHOST());
+		inputPuerto.setText("" + Config.getPUERTO());
+		inputUsuario.setText(Config.getUSUARIO());
+		inputContrasena.setText(Config.getCONTRASENA());
+		remotoTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		localTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		getUnidadesDisco();
 		iniEventos();
 	}
 
@@ -87,28 +89,39 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		localSelectorUnidad.addActionListener(this);
 		inputComando.addActionListener(this);
 		
-		
+		//clicks tabla remota
 		remotoTabla.addMouseListener(new MouseAdapter() {
 		    public void mousePressed(MouseEvent me) {
+		    	//seleccion con boton derecho
+		    	int r = remotoTabla.rowAtPoint(me.getPoint());
+		        if (r >= 0 && r < remotoTabla.getRowCount()) {
+		        	remotoTabla.setRowSelectionInterval(r, r);
+		        } else {
+		        	remotoTabla.clearSelection();
+		        }
+		        //evento doble click
+		    	JTable target = (JTable)me.getSource();
+		    	int fila = target.getSelectedRow();
 	            if (me.getClickCount() == 2) {     
-	                JTable target = (JTable)me.getSource();
-	                int fila = target.getSelectedRow();
 	               clickRemoto(fila);
 	             }
 		    }
 
 		});
+		
+		//clicks tabla local
 		localTabla.addMouseListener(new MouseAdapter() {
 		    public void mousePressed(MouseEvent me) {
+		    	JTable target = (JTable)me.getSource();
+		    	int fila = target.getSelectedRow();
 	            if (me.getClickCount() == 2) {     
-	                JTable target = (JTable)me.getSource();
-	                int fila = target.getSelectedRow();
 	               clickLocal(fila);
 	             }
 		    }
 
 		});
 		
+		//menu contextual tabla remota
 		remotoTabla.setComponentPopupMenu(new MenuRemoto(this,remotoTabla));
 	}
 	
@@ -123,7 +136,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		if (arch.esDirectorio())
 			controlador.comCd(arch.getNombre());
 		else
-			controlador.comGet(arch.getNombre());
+			getArchivo();
 		
 	}
 
@@ -143,7 +156,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		remotoTabla.getColumnModel().getColumn(0).setMaxWidth(50);
 	}
 
-	private void getUnidades() {
+	private void getUnidadesDisco() {
 		File[] unidades;
 		unidades = File.listRoots();
 		String[] nombres = new String[unidades.length];
@@ -180,6 +193,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		case "BORRAR" -> borrarCualquiera();
 		case "MKDIR" -> controlador.comMkdir(getValor("Introduzca el nombre del directorio"));
 		case "RMDIR" -> borrarDirectorio();
+		case "GET" -> getArchivo();
 
 		}
 
@@ -190,10 +204,31 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	/**
 	 * @return
 	 */
+	private void getArchivo() {
+
+		int filaSeleccionada = remotoTabla.getSelectedRow();
+        if (filaSeleccionada == -1) {
+        	msgInfo("Seleccione un archivo remoto");
+            return;//no hacer nada si no hay fila seleccionada
+        }     
+        DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
+        if (!arch.esDirectorio()) {
+        	String rutaRemota=remotoRuta.getText()+"/"+arch.getNombre();
+        	String rutaLocal=localRuta.getText()+"/"+arch.getNombre();
+        	controlador.comGet(rutaRemota,rutaLocal);
+        }
+        else {
+        	msgInfo("Debe elegir un archivo, no un directorio");
+        }
+	}
+
+	/**
+	 * @return
+	 */
 	private void borrarDirectorio() {
         int filaSeleccionada = remotoTabla.getSelectedRow();
         if (filaSeleccionada == -1) {
-        	msgInfo("Seleccione un archivo remoto");
+        	msgInfo("Seleccione un directorio remoto");
             return;//no hacer nada si no hay fila seleccionada
         }        
         
@@ -302,7 +337,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		actualizarArchivosLocales();
 	}
 
-	private void actualizarArchivosLocales() {
+	public void actualizarArchivosLocales() {
 		File ruta = new File(localRuta.getText());
 		localTabla.setModel(new ArchivoTableModel(controlador.getArchivosLocales(ruta)));
 		localTabla.getColumnModel().getColumn(0).setMaxWidth(50);

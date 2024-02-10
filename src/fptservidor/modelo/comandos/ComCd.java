@@ -46,7 +46,7 @@ public class ComCd {
 			//componer y comprobar validez de ruta
 			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, nuevaRuta);
 			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") && 
-					UtilesArchivo.rutaExistente(rutaCompleta) &&
+					UtilesArchivo.rutaExiste(rutaCompleta) &&
 					sesion.setCwd(rutaCompleta.replace(rutaUsuario, ""))) {
 				dos.writeInt(Codigos.OK);
 			} else {

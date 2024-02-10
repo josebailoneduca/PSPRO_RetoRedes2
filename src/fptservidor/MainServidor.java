@@ -11,6 +11,11 @@ import fptservidor.controlador.SControlador;
  */
 public class MainServidor {
 	public static void main(String[] args) {
+		String archivoConf=null;
+		if (args!=null &&args.length>0) {
+			archivoConf=args[0];
+			Config.cargarConfiguracion(archivoConf);
+		}
 		SControlador controlador = new SControlador();
 
 	}

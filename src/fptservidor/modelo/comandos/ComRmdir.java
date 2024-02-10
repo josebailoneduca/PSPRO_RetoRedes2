@@ -48,7 +48,7 @@ public class ComRmdir {
 			//componer y comprobar validez de ruta
 			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, rutaAEliminar);
 			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") && 
-					UtilesArchivo.rutaExistente(rutaCompleta)) {
+					UtilesArchivo.rutaExiste(rutaCompleta)) {
 				
 				File f = new File(rutaCompleta);
 				if (f.isDirectory()) {

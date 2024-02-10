@@ -4,6 +4,7 @@
 package fptservidor.modelo.lib;
 
 import java.io.File;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 
 /**
@@ -19,11 +20,15 @@ public class UtilesArchivo {
 	 * @return
 	 */
 	public static boolean rutaDentroDeRuta(String rutaA, String rutaB) {
+		try {
 		File fA=new File(rutaA);
 		File fB=new File(rutaB);
 		String normalizadaA=Paths.get(fA.getAbsolutePath()).normalize().toString();
 		String normalizadaB=Paths.get(fB.getAbsolutePath()).normalize().toString();
 		return normalizadaA.startsWith(normalizadaB);
+		}catch(InvalidPathException ex) {
+			return false;
+		}
 	}
 
 	
@@ -32,7 +37,7 @@ public class UtilesArchivo {
 	 * @param ruta
 	 * @return
 	 */
-	public static boolean rutaExistente(String ruta) {
+	public static boolean rutaExiste(String ruta) {
 		return new File(ruta).exists();
 	}
 

@@ -14,7 +14,7 @@ public class SControlador {
 	SModelo modelo;
 
 	public SControlador() {
-		modelo = new SModelo(Config.PUERTO);
+		modelo = new SModelo(Config.getPUERTO());
 		modelo.start();
 	}
 	

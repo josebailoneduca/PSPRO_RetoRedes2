@@ -18,4 +18,6 @@ public class Codigos {
 	public static final int ARCHIVO = 100;
 	public static final int DIRECTORIO = 200;
 	public static final int NO_VACIO = 1300;
+	public static final int CONTINUAR= 5000;
+	public static final int FIN = 5500;
 }

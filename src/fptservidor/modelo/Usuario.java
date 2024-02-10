@@ -21,12 +21,12 @@ public class Usuario {
 	private boolean anonimo=false;
 
 	public Usuario(String usuario) {
-		this.carpeta = Config.RUTA_ALMACENAMIENTO+"/"+usuario;
+		this.carpeta = Config.getRUTA_ALMACENAMIENTO()+"/"+usuario;
 		this.nombreUsuario = usuario;
 	}
 	public Usuario() {
-		this.carpeta = Config.RUTA_ALMACENAMIENTO_ANONIMO;
-		this.nombreUsuario = Config.NOMBRE_USUARIO_ANONIMO;
+		this.carpeta = Config.getRUTA_ALMACENAMIENTO_ANONIMO();
+		this.nombreUsuario = Config.getNOMBRE_USUARIO_ANONIMO();
 		this.anonimo = true;
 	}
 	
@@ -59,7 +59,7 @@ public class Usuario {
 	 * @return
 	 */
 	private String getContrasenaLocal() {
-		File f =new File(Config.RUTA_ALMACENAMIENTO+"/"+nombreUsuario+".pass");
+		File f =new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario+".pass");
 		System.out.println(f.getAbsolutePath());
 		try (FileReader fr = new FileReader(f); BufferedReader br = new BufferedReader(fr)){
 			String contrasena="";

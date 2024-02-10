@@ -165,6 +165,14 @@ public class Modelo {
 		controlador.mensajeError(string);
 		
 	}
+
+	/**
+	 * 
+	 */
+	public void actualizarLocal() {
+		controlador.actualizarLocal();
+		
+	}
 	
 	
 }

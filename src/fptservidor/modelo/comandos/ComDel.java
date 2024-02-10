@@ -48,7 +48,7 @@ public class ComDel {
 			//componer y comprobar validez de ruta
 			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, rutaAEliminar);
 			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") && 
-					UtilesArchivo.rutaExistente(rutaCompleta) && eliminarArchivo(rutaCompleta)) {
+					UtilesArchivo.rutaExiste(rutaCompleta) && eliminarArchivo(rutaCompleta)) {
 						dos.writeInt(Codigos.OK);
 			} else {
 				dos.writeInt(Codigos.MAL);
