@@ -19,6 +19,7 @@ public class Config {
 	private  static String RUTA_ALMACENAMIENTO_ANONIMO = "almacenamiento/publico";
 	private  static String NOMBRE_USUARIO_ANONIMO = "Anónimo";
 	private  static String RUTA_ALMACENAMIENTO = "almacenamiento";
+	private static  boolean MODO_TEXTO=false;
 
 	public static void cargarConfiguracion(String ruta) {
 		
@@ -32,6 +33,7 @@ public class Config {
 			RUTA_ALMACENAMIENTO_ANONIMO =  prop.getProperty("RUTA_ALMACENAMIENTO_ANONIMO", RUTA_ALMACENAMIENTO_ANONIMO);
 			NOMBRE_USUARIO_ANONIMO =  prop.getProperty("NOMBRE_USUARIO_ANONIMO", NOMBRE_USUARIO_ANONIMO);
 			RUTA_ALMACENAMIENTO =  prop.getProperty("RUTA_ALMACENAMIENTO", RUTA_ALMACENAMIENTO);
+			MODO_TEXTO = Boolean.parseBoolean(prop.getProperty("MODO_TEXTO", ""+MODO_TEXTO));
 		} catch (IOException | NumberFormatException e) {
 			System.out.println("No se ha podido cargar la configuracion");
 		}
@@ -56,6 +58,10 @@ public class Config {
 
 	public static String getRUTA_ALMACENAMIENTO() {
 		return RUTA_ALMACENAMIENTO;
+	}
+
+	public static boolean isMODO_TEXTO() {
+		return MODO_TEXTO;
 	}
 	
 	

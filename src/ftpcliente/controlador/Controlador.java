@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import ftpcliente.Config;
 import ftpcliente.conector.Modelo;
 import ftpcliente.conector.comandos.TiposComando;
 import ftpcliente.controlador.dto.DtoArchivo;
@@ -76,9 +75,9 @@ public class Controlador {
 		if (modelo.isLogged()) {
 		String usuario = modelo.getUsuario();
 		String host = modelo.getHost();
-		vista.actualizaLogin(true,host,usuario);
+		vista.actualizaLoginEstado(true,host,usuario);
 		}else {
-			vista.actualizaLogin(false,"","");
+			vista.actualizaLoginEstado(false,"","");
 		}
 		
 	}
@@ -117,8 +116,10 @@ public class Controlador {
 		List<DtoArchivo> archivos=new ArrayList<DtoArchivo>();
 		FilenameFilter filtroArchivos= (File current, String name) -> !(new File(current, name).isDirectory());
 		File[] lista = ruta.listFiles(filtroArchivos);
-		for (File arch : lista) {
-			archivos.add(new DtoArchivo(arch.getName(), (arch.isDirectory())?Codigos.DIRECTORIO:Codigos.ARCHIVO));
+		if (lista!=null) {
+			for (File arch : lista) {
+				archivos.add(new DtoArchivo(arch.getName(), (arch.isDirectory())?Codigos.DIRECTORIO:Codigos.ARCHIVO));
+			}
 		}
 		return archivos;	
 	}
@@ -186,6 +187,18 @@ public class Controlador {
 	 */
 	public void actualizarLocal() {
 		vista.actualizarArchivosLocales();
+		
+	}
+
+	/**
+	 * @param rutaLocal
+	 * @param rutaRemota
+	 */
+	public void comPut(String rutaLocal, String rutaRemota) {
+		if (rutaRemota!=null && rutaLocal!=null) {
+			modelo.addOperacion(TiposComando.PUT+" \""+rutaLocal+"\" \""+rutaRemota+"\"");
+			comLs();
+		}
 		
 	}
 	

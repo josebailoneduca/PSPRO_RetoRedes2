@@ -1,7 +1,7 @@
 /**
  * 
  */
-package fptservidor.modelo.comandos;
+package ftpcliente.conector.comandos;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -9,76 +9,74 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-import fptservidor.Config;
-import fptservidor.modelo.Codigos;
-import fptservidor.modelo.Sesion;
-import fptservidor.modelo.Usuario;
-import fptservidor.modelo.lib.UtilesArchivo;
+import ftpcliente.Config;
+import ftpcliente.conector.Modelo;
+import ftpcliente.controlador.Codigos;
 
 /**
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class ComGet {
-	private	Usuario usuario;
-	private	DataInputStream dis;
-	private	DataOutputStream dos;
-	private	Sesion sesion;
-	private	String cwd;
+public class ComPut extends Comando {
 
-	public ComGet(Sesion sesion) {
-		super();
-		this.sesion = sesion;
-		this.usuario = sesion.getUsuario();
-		this.dis = sesion.getDis();
-		this.dos = sesion.getDos();
-		this.cwd = sesion.getCwd();
+	public ComPut(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
+		super(comando, dis, dos, modelo);
+
 	}
 
-	public Object iniciar() {
-		String rutaUsuario = usuario.getCarpeta();
-		// comprobar ruta dentro del usuario
-		String cwd = sesion.getCwd();
-		String rutaArchivo;
-		String rutaCompleta = null;
-		try {
-			// leer ruta
-			rutaArchivo = dis.readUTF();
-			// componer y comprobar validez de ruta
-			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, rutaArchivo);
-			File arch = new File(rutaCompleta);
-			// comprobar si es ruta interior del usuario, si existe y si no es directorio
-			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/")
-					&& UtilesArchivo.rutaExiste(rutaCompleta) && !arch.isDirectory()) {
-				//aceptar GET y enviar archivo
-				dos.writeInt(Codigos.OK);
-				if (Config.isMODO_TEXTO())
-				enviarArchivoTexto(arch);
-				else
-				enviarArchivoBinario(arch);
-				
-			} else {
-				dos.writeInt(Codigos.NO_EXISTE);
-			}
-		} catch (IOException e) {
-			try {
-				dos.writeInt(Codigos.MAL);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			e.printStackTrace();
+	public void iniciar() {
+
+		if (comando.length < 2) {
+			return;
 		}
-		return null;
 
+		try {
+			// preparar rutas remotas y locales
+			String rutaLocal = comando[1];
+			String nombreArchivo = new File(rutaLocal).getName();
+			String archivoRemoto = "./" + nombreArchivo;
+			if (comando.length > 2)
+				archivoRemoto = comando[2];
+
+			// comprobar archivo local
+			File arch = new File(rutaLocal);
+			// si existe y si no es directorio
+			if (arch.exists() && !arch.isDirectory()) {
+				// Iniciar protocolo
+				dos.writeUTF(TiposComando.PUT);
+				dos.writeUTF(archivoRemoto);
+
+				// respuesta a ver si se permite
+				int res = dis.readInt();
+
+				if (res == Codigos.OK) {
+					if (Config.isMODO_TEXTO())
+						enviarArchivoTexto(arch);
+					else
+						enviarArchivoBinario(arch);
+				}else {
+					modelo.mensajeError("No puede sustituir un directorio con un archivo");
+				}
+
+			} else {
+				modelo.mensajeError("El archivo no existe o es un directorio: " + arch.getAbsolutePath());
+			}
+
+		} catch (IOException e) {
+			modelo.mensajeError("Error enviando archivo");
+		}
 	}
-
+	
+	
+	
+	
+	
+	
 	/**
 	 * @param arch
 	 */
@@ -125,7 +123,6 @@ public class ComGet {
 				BufferedReader br = new BufferedReader(isr);
 					){
 				
-				
 				boolean continuar=true;
 				while (continuar) {
 					lineas.clear();
@@ -140,9 +137,9 @@ public class ComGet {
 				dos.writeInt(lineas.size());
 				dos.flush();
 				for (String l : lineas) {
-
 					dos.writeUTF(l);
 				}
+				//comprobar fin de archivo
 				if (linea==null) {
 					dos.writeInt(Codigos.FIN);
 					continuar=false;
@@ -159,4 +156,7 @@ public class ComGet {
 			
 
 	}
+	
+	
+	
 }

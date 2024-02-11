@@ -1,88 +1,87 @@
 /**
  * 
  */
-package ftpcliente.conector.comandos;
+package fptservidor.modelo.comandos;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-import ftpcliente.Config;
-import ftpcliente.conector.Modelo;
-import ftpcliente.controlador.Codigos;
-import ftpcliente.controlador.dto.DtoArchivo;
+import fptservidor.Config;
+import fptservidor.modelo.Codigos;
+import fptservidor.modelo.Sesion;
+import fptservidor.modelo.Usuario;
+import fptservidor.modelo.lib.UtilesArchivo;
 
 /**
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class ComGet extends Comando {
+public class ComPut {
+	private	Usuario usuario;
+	private	DataInputStream dis;
+	private	DataOutputStream dos;
+	private	Sesion sesion;
+	private	String cwd;
 
-	public ComGet(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
-		super(comando, dis, dos, modelo);
-
+	public ComPut(Sesion sesion) {
+		super();
+		this.sesion = sesion;
+		this.usuario = sesion.getUsuario();
+		this.dis = sesion.getDis();
+		this.dos = sesion.getDos();
+		this.cwd = sesion.getCwd();
 	}
 
-	public void iniciar() {
-
-		if (comando.length < 2) {
-			return;
-		}
-
+	public Object iniciar() {
+		String rutaUsuario = usuario.getCarpeta();
+		// comprobar ruta dentro del usuario
+		String cwd = sesion.getCwd();
+		String rutaArchivo;
+		String rutaCompleta = null;
 		try {
-			// preparar rutas remotas y locales
-			String rutaRemota = comando[1];
-			String nombreArchivo = new File(rutaRemota).getName();
-			File archivoLocal = new File(new File(nombreArchivo).getAbsolutePath());
-			if (comando.length > 2)
-				archivoLocal = new File(comando[2]);
-			// comprobacion de escritura
-			
-			if (!Files.isWritable(Paths.get(archivoLocal.getParentFile().toURI()))) {
-				modelo.mensajeError("No tiene permisos para escribir en: " + archivoLocal.getAbsolutePath());
-				return;
-			}
-
-			// comenzar protocolo
-			dos.writeUTF(TiposComando.GET);
-			dos.writeUTF(rutaRemota);
-			
-			// ver si es posible
-			int res = dis.readInt();
-			if (res == Codigos.OK) {
-				//si es posible se recibe el archivo
+			// leer ruta destino
+			rutaArchivo = dis.readUTF();
+			// componer y comprobar validez de ruta
+			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, rutaArchivo);
+			File arch = new File(rutaCompleta);
+			// comprobar si es ruta interior del usuario, y si existe o no es directorio en caso de existir
+			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/")
+					&& (!UtilesArchivo.rutaExiste(rutaCompleta) || !arch.isDirectory())) {
+				//aceptar PUT y enviar archivo
+				dos.writeInt(Codigos.OK);
 				if (Config.isMODO_TEXTO())
-					recibirArchivoTexto(archivoLocal);
+				recibirArchivoTexto(arch);
 				else
-					recibirArchivoBinario(archivoLocal);
-
-				//avisar a modelo de fin
-				modelo.actualizarLocal();
-			}else if(res==Codigos.NO_EXISTE){
-				modelo.mensajeError("El archivo no existe: " + rutaRemota);
+				recibirArchivoBinario(arch);
+				
 			} else {
-				modelo.mensajeError("No se puede obtener el archivo " + rutaRemota);				
+				dos.writeInt(Codigos.MAL);
 			}
-
 		} catch (IOException e) {
+			try {
+				dos.writeInt(Codigos.MAL);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
 		}
+		return null;
+
 	}
 
+	
 	/**
 	 * @param archivoLocal
 	 */
@@ -100,7 +99,6 @@ public class ComGet extends Comando {
 
 			// ver si hay que continuar
 		} catch (IOException e) {
-			modelo.mensajeError("No se puede descargar el archivo: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -129,13 +127,10 @@ public class ComGet extends Comando {
 			bw.close();
 			fw.close();
 		} catch (IOException e) {
-			modelo.mensajeError("No se puede descargar el archivo: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
+
 	/**
 	 * @param arch
 	 */
@@ -145,4 +140,5 @@ public class ComGet extends Comando {
 			rutaDirectorio.mkdirs();
 		
 	}
+
 }

@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
@@ -62,7 +63,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		this.controlador = controlador;
 		initComponents();
 		initPropio();
-		seleccionarUnidad();
+		
 
 	}
 
@@ -73,8 +74,34 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		inputContrasena.setText(Config.getCONTRASENA());
 		remotoTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		localTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		getUnidadesDisco();
 		iniEventos();
+		inicializarRutaLocal();
+		activarLogin(true);
+	}
+
+	/**
+	 * 
+	 */
+	private void inicializarRutaLocal() {
+		//recoger unidades
+		String[] roots = getUnidadesDisco();
+		//inicializar arbol
+		TreeModel model = new ArbolArchivosModel(new ArchArbol((String) localSelectorUnidad.getSelectedItem()));
+		localArbol.setModel(model);
+		
+		//inicializar ruta actual local
+		File cwdLocal = new File(new File(".").getAbsolutePath());
+		String rootCwdLocal = cwdLocal.toPath().getRoot().toString();
+		//activar el selector de unidades a la unidad donde esta el CWDlocal
+		for (int i=0;i<roots.length;i++) {
+			if (roots[i].equals(rootCwdLocal)) {
+				localSelectorUnidad.setSelectedIndex(i);
+			}
+		}
+		//establecer el texto de ruta
+		localRuta.setText(Paths.get(cwdLocal.getAbsolutePath()).normalize().toAbsolutePath().toString());
+		actualizarArchivosLocales();
+
 	}
 
 	private void iniEventos() {
@@ -141,9 +168,13 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	}
 
 	
-	private void clickLocal(int row) {
-		// TODO Auto-generated method stub
-		
+	private void clickLocal(int fila) {
+		if (fila==-1)
+			return;
+		DtoArchivo arch = ((ArchivoTableModel)localTabla.getModel()).getItem(fila);
+		if (!arch.esDirectorio())
+			putArchivo();
+	
 	}
 
 	/**
@@ -156,7 +187,11 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		remotoTabla.getColumnModel().getColumn(0).setMaxWidth(50);
 	}
 
-	private void getUnidadesDisco() {
+	/**
+	 * Recoger unidades de disco e inicializar el selector de undidaes
+	 * @return
+	 */
+	private String[] getUnidadesDisco() {
 		File[] unidades;
 		unidades = File.listRoots();
 		String[] nombres = new String[unidades.length];
@@ -164,6 +199,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 			nombres[i] = unidades[i].getAbsolutePath();
 		}
 		localSelectorUnidad.setModel(new DefaultComboBoxModel<String>(nombres));
+		return nombres;
 	}
 
 	@Override
@@ -194,12 +230,33 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		case "MKDIR" -> controlador.comMkdir(getValor("Introduzca el nombre del directorio"));
 		case "RMDIR" -> borrarDirectorio();
 		case "GET" -> getArchivo();
+		case "PUT" -> putArchivo();
 
 		}
 
 	}
 
 	
+
+	/**
+	 * @return
+	 */
+	private void putArchivo() {
+		int filaSeleccionada = localTabla.getSelectedRow();
+        if (filaSeleccionada == -1) {
+        	msgInfo("Seleccione un archivo local");
+            return;//no hacer nada si no hay fila seleccionada
+        }     
+        DtoArchivo arch = ((ArchivoTableModel)localTabla.getModel()).getItem(filaSeleccionada);
+        if (!arch.esDirectorio()) {
+        	String rutaLocal=localRuta.getText()+"/"+arch.getNombre();
+        	String rutaRemota=remotoRuta.getText()+"/"+arch.getNombre();
+        	controlador.comPut(rutaLocal,rutaRemota);
+        }
+        else {
+        	msgInfo("Debe elegir un archivo, no un directorio");
+        }
+	}
 
 	/**
 	 * @return
@@ -415,7 +472,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		
 		panelDivisor.setDividerLocation(451);
 		panelLocalDivisor.setBorder(BorderFactory.createTitledBorder("Archivos locales"));
-		panelLocalDivisor.setDividerLocation(150);
+		panelLocalDivisor.setDividerLocation(250);
 		panelArbol.setLayout(new java.awt.BorderLayout(0, 5));
 		localSelectorUnidad.setModel(new DefaultComboBoxModel<>(new String[] { "C:\\" }));
 		panelArbol.add(localSelectorUnidad, java.awt.BorderLayout.NORTH);
@@ -429,6 +486,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		localRuta.setText("C:\\");
 		panelLocalArchivos.add(localRuta, java.awt.BorderLayout.NORTH);
 		panelLocalDivisor.setRightComponent(panelLocalArchivos);
+
 		panelDivisor.setLeftComponent(panelLocalDivisor);
 		panelRemoto.setBorder(BorderFactory.createTitledBorder("Archivos remotos"));
 		panelRemoto.setLayout(new java.awt.BorderLayout(0, 10));
@@ -437,6 +495,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		remotoRuta.setText("/");
 		panelRemoto.add(remotoRuta, java.awt.BorderLayout.NORTH);
 		panelDivisor.setRightComponent(panelRemoto);
+		panelDivisor.setDividerLocation(550);
 		GroupLayout panelCentralLayout = new GroupLayout(panelCentral);
 		panelCentral.setLayout(panelCentralLayout);
 		panelCentralLayout
@@ -598,7 +657,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	 * @param puerto
 	 * @param usuario
 	 */
-	public void actualizaLogin(boolean conectado, String host, String usuario) {
+	public void actualizaLoginEstado(boolean conectado, String host, String usuario) {
 		if (conectado) {
 			lbConectado.setText("Conectado");
 			datosConexion.setText(usuario + "@" + host);
@@ -620,6 +679,11 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		btnConectar.setVisible(b);
 		btnRegistrar.setVisible(b);
 		btnDesconectar.setVisible(!b);
+		JButton[] botones = { btnCmdCD, btnCmdDEL, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
+				btnCmdRMDIR, btnEnviar};
+		for (JButton btn : botones) {
+			btn.setEnabled(!b);
+		}
 	}
 
  

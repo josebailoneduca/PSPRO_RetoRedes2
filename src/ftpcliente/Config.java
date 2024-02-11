@@ -13,12 +13,13 @@ import java.util.Properties;
  * @author Jose Javier Bailon Ortiz
  */
 public class Config {
+	private static boolean MODO_TEXTO=false;
+	private  static  String COD_TEXTO = "UTF-8";
 	private static  String HOST="localhost";
 	private static  int PUERTO=50_000;
 	private static  String USUARIO="jose";
 	private static  String CONTRASENA="1234";
-	private static  String COD_TEXTO="UTF-8";
-	
+ 	
 	public static void cargarConfiguracion(String ruta) {
 		
 		try {
@@ -28,16 +29,30 @@ public class Config {
 			FileReader fr = new FileReader(archConf);
 			prop.load(fr);
 			}
-			
+			MODO_TEXTO = Boolean.parseBoolean(prop.getProperty("MODO_TEXTO",""+MODO_TEXTO));
 			HOST =  prop.getProperty("HOST", HOST);
 			PUERTO= Integer.parseInt(prop.getProperty("PUERTO",""+PUERTO));
 			USUARIO =  prop.getProperty("USUARIO", USUARIO);
 			CONTRASENA =  prop.getProperty("CONTRASENA", CONTRASENA);
 
-		} catch (IOException | NumberFormatException e) {
+		} catch (IOException | NumberFormatException e ) {
 			System.out.println("No se ha podido cargar la configuracion");
 		}
 	}
+	
+	
+
+	public static boolean isMODO_TEXTO() {
+		return MODO_TEXTO;
+	}
+
+
+
+	public static String getCOD_TEXTO() {
+		return COD_TEXTO;
+	}
+
+
 
 	public static String getHOST() {
 		return HOST;
@@ -55,9 +70,7 @@ public class Config {
 		return CONTRASENA;
 	}
 
-	public static String getCOD_TEXTO() {
-		return COD_TEXTO;
-	}
+ 
 	
 	
 	

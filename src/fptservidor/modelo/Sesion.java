@@ -22,6 +22,7 @@ import fptservidor.modelo.comandos.ComDel;
 import fptservidor.modelo.comandos.ComGet;
 import fptservidor.modelo.comandos.ComLs;
 import fptservidor.modelo.comandos.ComMkdir;
+import fptservidor.modelo.comandos.ComPut;
 import fptservidor.modelo.comandos.ComRmdir;
 import fptservidor.modelo.comandos.TiposComando;
 import ftpcliente.conector.ProcesadorOperaciones;
@@ -108,6 +109,7 @@ public class Sesion extends Thread {
 				case TiposComando.MKDIR-> new ComMkdir(this).iniciar();
 				case TiposComando.RMDIR-> new ComRmdir(this).iniciar();
 				case TiposComando.GET-> new ComGet(this).iniciar();
+				case TiposComando.PUT-> new ComPut(this).iniciar();
 				}
 
 			} catch (IOException e) {

@@ -20,6 +20,7 @@ import ftpcliente.conector.comandos.ComGet;
 import ftpcliente.conector.comandos.ComLogin;
 import ftpcliente.conector.comandos.ComLs;
 import ftpcliente.conector.comandos.ComMkdir;
+import ftpcliente.conector.comandos.ComPut;
 import ftpcliente.conector.comandos.ComRegistro;
 import ftpcliente.conector.comandos.ComRmdir;
 
@@ -63,6 +64,7 @@ public class ProcesadorOperaciones extends Thread {
 					case "MKDIR" -> new ComMkdir(partes, dis, dos, modelo).iniciar();
 					case "RMDIR" -> new ComRmdir(partes, dis, dos, modelo).iniciar();
 					case "GET" -> new ComGet(partes, dis, dos, modelo).iniciar();
+					case "PUT" -> new ComPut(partes, dis, dos, modelo).iniciar();
 					}
 				}
 			} catch (InterruptedException e) {
