@@ -169,7 +169,6 @@ public class Sesion extends Thread {
 			else {
 				carpetaUsuario.mkdir();
 				crearPasswordFile(nombreUsuario,contrasena);
-				
 			}
 			
 			return true;

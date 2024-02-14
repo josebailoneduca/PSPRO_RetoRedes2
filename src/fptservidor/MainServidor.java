@@ -16,6 +16,7 @@ public class MainServidor {
 			archivoConf=args[0];
 			Config.cargarConfiguracion(archivoConf);
 		}
+		Config.comprobarRutas();
 		SControlador controlador = new SControlador();
 
 	}

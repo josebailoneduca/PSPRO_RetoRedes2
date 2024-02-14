@@ -34,10 +34,27 @@ public class Config {
 			NOMBRE_USUARIO_ANONIMO =  prop.getProperty("NOMBRE_USUARIO_ANONIMO", NOMBRE_USUARIO_ANONIMO);
 			RUTA_ALMACENAMIENTO =  prop.getProperty("RUTA_ALMACENAMIENTO", RUTA_ALMACENAMIENTO);
 			MODO_TEXTO = Boolean.parseBoolean(prop.getProperty("MODO_TEXTO", ""+MODO_TEXTO));
+			comprobarRutas();
 		} catch (IOException | NumberFormatException e) {
 			System.out.println("No se ha podido cargar la configuracion");
 		}
 
+	}
+
+	/**
+	 * 
+	 */
+	public static void comprobarRutas() {
+		File f = new File(RUTA_ALMACENAMIENTO);
+		if (!f.exists()) {
+			System.out.println("La ruta de almacenamiento "+f.getAbsolutePath()+" no existe");
+			System.exit(0);
+		}
+		File fa = new File(getRUTA_ALMACENAMIENTO_ANONIMO());
+		if (!fa.exists()) {
+			System.out.println("La ruta de almacenamiento anónimo "+f.getAbsolutePath()+" no existe");
+			System.exit(0);
+		}
 	}
 
 	public static int getPUERTO() {
