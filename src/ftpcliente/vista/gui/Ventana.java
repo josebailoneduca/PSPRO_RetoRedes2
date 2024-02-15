@@ -686,6 +686,14 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		}
 	}
 
+	/**
+	 * @param msg
+	 * @return
+	 */
+	public boolean confirmar(String msg) {
+		return JOptionPane.showConfirmDialog(this,msg)==JOptionPane.YES_OPTION;
+	}
+
  
 
 }// fin Ftp

@@ -21,28 +21,36 @@ import ftpcliente.controlador.dto.DtoArchivo;
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class ComMkdir extends Comando{
+public class ComMkdir extends Comando {
 
-	public ComMkdir(String[] comando,DataInputStream dis, DataOutputStream dos,Modelo modelo) {
-		super(comando,dis,dos,modelo);
+	public ComMkdir(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
+		super(comando, dis, dos, modelo);
 
 	}
-	
- 
+
 	public void iniciar() {
-		
+
+		if (comando.length < 2)
+			return;
+
 		try {
-			if (comando.length>0) {
-				dos.writeUTF(TiposComando.MKDIR);
-				dos.writeUTF(comando[1]);
+			dos.writeUTF(TiposComando.MKDIR);
+			dos.writeUTF(comando[1]);
 
 			int res = dis.readInt();
-			if (res!=Codigos.OK) 
-				modelo.mensajeError("No se pudo crear"+comando[1]);
+			if (res == Codigos.MAL) {
+				modelo.mensajeError("No se pudo crear" + comando[1]);
+			} else if (res == Codigos.YA_EXISTE) {
+				modelo.mensajeError("El directorio " + comando[1] + " ya existe");
+			} else {
+				modelo.mensajeInfo("Directorio creado " + comando[1]);
 			}
-		} catch (IOException e) {
+
+		} catch (
+
+		IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

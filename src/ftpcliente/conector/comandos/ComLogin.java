@@ -43,7 +43,7 @@ public class ComLogin extends Comando{
 				dos.writeUTF(contrasena);
 				}
 			int res = dis.readInt();
-			if (res==Codigos.LOGIN_OK) {
+			if (res==Codigos.OK) {
 				modelo.setEstadoLogin(true,usuario);
 			}
 			else

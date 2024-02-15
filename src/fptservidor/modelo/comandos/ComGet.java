@@ -59,10 +59,16 @@ public class ComGet {
 					&& UtilesArchivo.rutaExiste(rutaCompleta) && !arch.isDirectory()) {
 				//aceptar GET y enviar archivo
 				dos.writeInt(Codigos.OK);
-				if (Config.isMODO_TEXTO())
-				enviarArchivoTexto(arch);
-				else
-				enviarArchivoBinario(arch);
+				
+				//si debe ser en texto
+				if (Config.isMODO_TEXTO()) {
+					dos.writeInt(Codigos.TIPO_TEXTO);
+					enviarArchivoTexto(arch);
+				}else {
+					//si debe ser en bytes
+					dos.writeInt(Codigos.TIPO_BYTES);
+				    enviarArchivoBinario(arch);
+				}
 				
 			} else {
 				dos.writeInt(Codigos.NO_EXISTE);

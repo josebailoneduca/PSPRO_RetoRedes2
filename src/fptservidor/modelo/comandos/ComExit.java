@@ -38,8 +38,6 @@ public class ComExit {
 		File[] archivos = new File(rutaCompleta).listFiles();
 		this.sesion.exit();
 		return null;
-		
-		
 	}
 	
 }

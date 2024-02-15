@@ -201,5 +201,13 @@ public class Controlador {
 		}
 		
 	}
+
+	/**
+	 * @param msg
+	 * @return
+	 */
+	public boolean confirmar(String msg) {
+		return vista.confirmar(msg);
+	}
 	
 }

@@ -16,32 +16,33 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Jose Javier Bailon Ortiz
  */
 public class Conexion {
-	Socket socket;
-	 ProcesadorOperaciones procOperaciones;
-	 private LinkedBlockingQueue<String> operacionesPendientes;
-	    private InputStream is;
-	    private OutputStream os;
-	    private DataInputStream dis;
-	    private DataOutputStream dos;
-	    Modelo modelo;
-	    
+	private Socket socket;
+	private ProcesadorOperaciones procOperaciones;
+	private LinkedBlockingQueue<String> operacionesPendientes;
+	private InputStream is;
+	private OutputStream os;
+	private DataInputStream dis;
+	private DataOutputStream dos;
+	Modelo modelo;
+
 	public Conexion(Socket socket, Modelo modelo) {
-		operacionesPendientes= new LinkedBlockingQueue<String>();
-		this.modelo=modelo;
+		operacionesPendientes = new LinkedBlockingQueue<String>();
+		this.modelo = modelo;
 		this.socket = socket;
 
 		try {
-			is=socket.getInputStream();
-		os=socket.getOutputStream();
-		dis=new DataInputStream(is);
-		dos=new DataOutputStream(os);
+			is = socket.getInputStream();
+			os = socket.getOutputStream();
+			dis = new DataInputStream(is);
+			dos = new DataOutputStream(os);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new IllegalArgumentException();
 		}
-		
-		System.out.println(socket.getLocalPort()+" "+socket.getLocalAddress()+" "+ socket.getPort()+""+socket.getRemoteSocketAddress());
-		procOperaciones=new ProcesadorOperaciones(operacionesPendientes, dis, dos, modelo);
+
+		System.out.println(socket.getLocalPort() + " " + socket.getLocalAddress() + " " + socket.getPort() + ""
+				+ socket.getRemoteSocketAddress());
+		procOperaciones = new ProcesadorOperaciones(operacionesPendientes, dis, dos, modelo);
 		procOperaciones.start();
 	}
 
@@ -50,16 +51,16 @@ public class Conexion {
 	 */
 	public void addOperacion(String operacion) {
 		operacionesPendientes.add(operacion);
-		
+
 	}
 
 	/**
 	 * @return
 	 */
 	public int getPuerto() {
-		if (socket!=null)
-		return socket.getPort();
-		else 
+		if (socket != null)
+			return socket.getPort();
+		else
 			return -1;
 	}
 
@@ -67,9 +68,9 @@ public class Conexion {
 	 * @return
 	 */
 	public String getHost() {
-		if (socket!=null)
-		return socket.getRemoteSocketAddress().toString();
-		else 
+		if (socket != null)
+			return socket.getRemoteSocketAddress().toString();
+		else
 			return "";
 	}
 
@@ -79,13 +80,13 @@ public class Conexion {
 	public void logout() {
 		try {
 			socket.close();
-		} catch (IOException e) {		
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		operacionesPendientes.clear();
 		procOperaciones.parar();
 		procOperaciones.interrupt();
 	}
-	
+
 }

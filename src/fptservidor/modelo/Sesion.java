@@ -142,10 +142,10 @@ public class Sesion extends Thread {
 				loginOk = true;
 			} 
 			if (loginOk) {
-				dos.writeInt(Codigos.LOGIN_OK);
+				dos.writeInt(Codigos.OK);
 				return true;
 			} else {
-				dos.writeInt(Codigos.LOGIN_MAL);
+				dos.writeInt(Codigos.MAL);
 				return false;
 			}
 

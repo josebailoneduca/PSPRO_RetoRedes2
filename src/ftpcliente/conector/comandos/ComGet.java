@@ -64,13 +64,14 @@ public class ComGet extends Comando {
 			// ver si es posible
 			int res = dis.readInt();
 			if (res == Codigos.OK) {
+				int tipo=dis.readInt();
 				//si es posible se recibe el archivo
-				if (Config.isMODO_TEXTO())
+				if (tipo==Codigos.TIPO_TEXTO)
 					recibirArchivoTexto(archivoLocal);
 				else
 					recibirArchivoBinario(archivoLocal);
 
-				//avisar a modelo de fin
+				//avisar a modelo de fin de transferencia
 				modelo.actualizarLocal();
 			}else if(res==Codigos.NO_EXISTE){
 				modelo.mensajeError("El archivo no existe: " + rutaRemota);

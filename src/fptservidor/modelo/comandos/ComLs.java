@@ -36,6 +36,7 @@ public class ComLs {
 	public Object iniciar() {
 		String rutaCompleta = usuario.getCarpeta()+sesion.getCwd();
 		File[] archivos = new File(rutaCompleta).listFiles();
+		
 		try {
 			if (archivos==null) {
 				dos.writeInt(Codigos.MAL);

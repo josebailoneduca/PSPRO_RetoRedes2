@@ -47,9 +47,14 @@ public class ComMkdir {
 			directorioACrear = dis.readUTF();
 			//componer y comprobar validez de ruta
 			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, directorioACrear);
-			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") && 
-					!UtilesArchivo.rutaExiste(rutaCompleta) && crearDirectorio(rutaCompleta)) {
+			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") ) {
+				if (UtilesArchivo.rutaExiste(rutaCompleta) ) {
+					dos.writeInt(Codigos.YA_EXISTE);
+				}else if (crearDirectorio(rutaCompleta)) {
 						dos.writeInt(Codigos.OK);
+				}else {
+						dos.writeInt(Codigos.MAL);
+				}
 			} else {
 				dos.writeInt(Codigos.MAL);
 				System.out.println("Carpeta no creada");

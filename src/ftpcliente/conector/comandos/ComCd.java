@@ -21,29 +21,30 @@ import ftpcliente.controlador.dto.DtoArchivo;
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class ComCd extends Comando{
+public class ComCd extends Comando {
 
-	public ComCd(String[] comando,DataInputStream dis, DataOutputStream dos,Modelo modelo) {
-		super(comando,dis,dos,modelo);
+	public ComCd(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
+		super(comando, dis, dos, modelo);
 
 	}
-	
- 
+
 	public void iniciar() {
-		
+		if (comando.length < 2)
+			return;
+
 		try {
 			dos.writeUTF(TiposComando.CD);
-			if (comando.length>0)
+			if (comando.length > 0)
 				dos.writeUTF(comando[1]);
 			else
 				dos.writeUTF(" ");
 
 			int res = dis.readInt();
-			if (res!=Codigos.OK) 
+			if (res != Codigos.OK)
 				modelo.mensajeError("No se pudo hacer CD");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

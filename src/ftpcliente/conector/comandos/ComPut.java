@@ -40,6 +40,7 @@ public class ComPut extends Comando {
 			String rutaLocal = comando[1];
 			String nombreArchivo = new File(rutaLocal).getName();
 			String archivoRemoto = "./" + nombreArchivo;
+			boolean enviarArchivo = false;
 			if (comando.length > 2)
 				archivoRemoto = comando[2];
 
@@ -53,30 +54,36 @@ public class ComPut extends Comando {
 
 				// respuesta a ver si se permite
 				int res = dis.readInt();
-
 				if (res == Codigos.OK) {
-					if (Config.isMODO_TEXTO())
-						enviarArchivoTexto(arch);
-					else
-						enviarArchivoBinario(arch);
-				}else {
-					modelo.mensajeError("No puede sustituir un directorio con un archivo");
+					enviarArchivo = true;
+				} else if (res == Codigos.YA_EXISTE) {
+					// si ya existe preguntar al usuario
+					if (modelo.confirmar("¿Desea sobreescribir el archivo: " + archivoRemoto + "?")) {
+						enviarArchivo = true;
+						dos.writeInt(Codigos.CONTINUAR);
+					} else {
+						dos.writeInt(Codigos.FIN);
+					}
+				} else {
+					modelo.mensajeError("No puede enviar el archivo " + archivoRemoto);
 				}
-
 			} else {
-				modelo.mensajeError("El archivo no existe o es un directorio: " + arch.getAbsolutePath());
+				modelo.mensajeError(
+						"No puede enviar el archivo " + archivoRemoto + " por no existir o ser un directorio");
+			}
+			if (enviarArchivo) {
+				int tipo = dis.readInt();
+				if (tipo == Codigos.TIPO_TEXTO)
+					enviarArchivoTexto(arch);
+				else
+					enviarArchivoBinario(arch);
 			}
 
 		} catch (IOException e) {
 			modelo.mensajeError("Error enviando archivo");
 		}
 	}
-	
-	
-	
-	
-	
-	
+
 	/**
 	 * @param arch
 	 */
@@ -87,24 +94,20 @@ public class ComPut extends Comando {
 		ArrayList<String> lineas = new ArrayList<String>();
 
 		// leer archivo
-			try (
-				RandomAccessFile raf =new RandomAccessFile(arch, "r");
-				){
-				//enviar longitud
-				dos.writeLong(nBytes);
-				byte[] bytes = new byte[(int) nBytes];
-				int leidos=raf.read(bytes, 0, bytes.length);
-				try {
-					dos.write(bytes, 0, bytes.length);
- 				}catch(EOFException ex) {
-					
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+		try (RandomAccessFile raf = new RandomAccessFile(arch, "r");) {
+			// enviar longitud
+			dos.writeLong(nBytes);
+			byte[] bytes = new byte[(int) nBytes];
+			int leidos = raf.read(bytes, 0, bytes.length);
+			try {
+				dos.write(bytes, 0, bytes.length);
+			} catch (EOFException ex) {
+
 			}
-			
-			
-		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	/**
@@ -117,46 +120,39 @@ public class ComPut extends Comando {
 		ArrayList<String> lineas = new ArrayList<String>();
 
 		// leer archivo
-			try (
-				FileInputStream fis = new FileInputStream(arch);
+		try (FileInputStream fis = new FileInputStream(arch);
 				InputStreamReader isr = new InputStreamReader(fis, Config.getCOD_TEXTO());
-				BufferedReader br = new BufferedReader(isr);
-					){
-				
-				boolean continuar=true;
-				while (continuar) {
-					lineas.clear();
+				BufferedReader br = new BufferedReader(isr);) {
+
+			boolean continuar = true;
+			while (continuar) {
+				lineas.clear();
 				int i = maxLineas;
-				String linea="";
-				while (i > 0 && (linea=br.readLine())!=null) {
+				String linea = "";
+				while (i > 0 && (linea = br.readLine()) != null) {
 					lineas.add(linea);
 					i--;
 				}
-				
-				//enviar contenido recogido
+
+				// enviar contenido recogido
 				dos.writeInt(lineas.size());
 				dos.flush();
 				for (String l : lineas) {
 					dos.writeUTF(l);
 				}
-				//comprobar fin de archivo
-				if (linea==null) {
+				// comprobar fin de archivo
+				if (linea == null) {
 					dos.writeInt(Codigos.FIN);
-					continuar=false;
-				}
-				else {
+					continuar = false;
+				} else {
 					dos.writeInt(Codigos.CONTINUAR);
 				}
 			}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
-	
-	
-	
+
 }

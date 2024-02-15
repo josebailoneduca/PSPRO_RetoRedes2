@@ -30,8 +30,9 @@ public class ComRmdir extends Comando {
 
 	public void iniciar() {
 
+		if (comando.length < 2) 
+			return;
 		try {
-			if (comando.length > 0) {
 				dos.writeUTF(TiposComando.RMDIR);
 				dos.writeUTF(comando[1]);
 				int res = dis.readInt();
@@ -39,8 +40,10 @@ public class ComRmdir extends Comando {
 					modelo.mensajeError("No se pudo eliminar " + comando[1]);
 				} else if (res == Codigos.NO_VACIO) {
 					modelo.mensajeError("El directorio no está vacío. No se pudo eliminar: " + comando[1]);
+				}else if (res==Codigos.OK) {
+					modelo.mensajeInfo("Directorio borrado "+comando[1]);
 				}
-			}
+		
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

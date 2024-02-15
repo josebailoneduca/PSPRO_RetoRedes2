@@ -13,7 +13,6 @@ import java.util.Properties;
  * @author Jose Javier Bailon Ortiz
  */
 public class Config {
-	private static boolean MODO_TEXTO=false;
 	private  static  String COD_TEXTO = "UTF-8";
 	private static  String HOST="localhost";
 	private static  int PUERTO=50_000;
@@ -29,7 +28,6 @@ public class Config {
 			FileReader fr = new FileReader(archConf);
 			prop.load(fr);
 			}
-			MODO_TEXTO = Boolean.parseBoolean(prop.getProperty("MODO_TEXTO",""+MODO_TEXTO));
 			HOST =  prop.getProperty("HOST", HOST);
 			PUERTO= Integer.parseInt(prop.getProperty("PUERTO",""+PUERTO));
 			USUARIO =  prop.getProperty("USUARIO", USUARIO);
@@ -41,10 +39,6 @@ public class Config {
 	}
 	
 	
-
-	public static boolean isMODO_TEXTO() {
-		return MODO_TEXTO;
-	}
 
 
 

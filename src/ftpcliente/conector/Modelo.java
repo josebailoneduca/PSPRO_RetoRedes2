@@ -174,5 +174,15 @@ public class Modelo {
 		
 	}
 	
-	
+	public boolean confirmar(String msg) {
+		return controlador.confirmar(msg);
+	}
+
+	/**
+	 * @param string
+	 */
+	public void mensajeInfo(String msg) {
+		controlador.mensajeError(msg);
+		
+	}
 }

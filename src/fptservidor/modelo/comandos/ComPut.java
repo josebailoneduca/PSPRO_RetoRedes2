@@ -29,11 +29,11 @@ import fptservidor.modelo.lib.UtilesArchivo;
  * @author Jose Javier Bailon Ortiz
  */
 public class ComPut {
-	private	Usuario usuario;
-	private	DataInputStream dis;
-	private	DataOutputStream dos;
-	private	Sesion sesion;
-	private	String cwd;
+	private Usuario usuario;
+	private DataInputStream dis;
+	private DataOutputStream dos;
+	private Sesion sesion;
+	private String cwd;
 
 	public ComPut(Sesion sesion) {
 		super();
@@ -50,25 +50,43 @@ public class ComPut {
 		String cwd = sesion.getCwd();
 		String rutaArchivo;
 		String rutaCompleta = null;
+		boolean recibirArchivo = false;
 		try {
 			// leer ruta destino
 			rutaArchivo = dis.readUTF();
 			// componer y comprobar validez de ruta
 			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, rutaArchivo);
 			File arch = new File(rutaCompleta);
-			// comprobar si es ruta interior del usuario, y si existe o no es directorio en caso de existir
-			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/")
-					&& (!UtilesArchivo.rutaExiste(rutaCompleta) || !arch.isDirectory())) {
-				//aceptar PUT y enviar archivo
-				dos.writeInt(Codigos.OK);
-				if (Config.isMODO_TEXTO())
-				recibirArchivoTexto(arch);
-				else
-				recibirArchivoBinario(arch);
-				
-			} else {
+			// comprobar si es ruta interior del usuario o es directorio contestamos que no
+			if (!UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") || !arch.isDirectory()) {
+
 				dos.writeInt(Codigos.MAL);
+				// si no existe acepta
+			} else if (!UtilesArchivo.rutaExiste(rutaCompleta)) {
+				dos.writeInt(Codigos.OK);
+				recibirArchivo = true;
+				// si existe avisa y espera orden de fin o continuar sobreescribiendo
+			} else {
+				dos.writeInt(Codigos.YA_EXISTE);
+				int resp = dis.readInt();
+				// si responde CONTIUAR continua la recepcion
+				if (resp == Codigos.CONTINUAR)
+					recibirArchivo = true;
 			}
+			
+			//si se la ruta es permitida y no existe el archivo o se ha permitido la sobreescritura
+			//se recibe el archivo
+			if (recibirArchivo) {
+				// enviar tipo de comunicacion y recibir archivo
+				if (Config.isMODO_TEXTO()) {
+					dos.writeInt(Codigos.TIPO_TEXTO);
+					recibirArchivoTexto(arch);
+				} else {
+					dos.writeInt(Codigos.TIPO_BYTES);
+					recibirArchivoBinario(arch);
+				}
+			}
+
 		} catch (IOException e) {
 			try {
 				dos.writeInt(Codigos.MAL);
@@ -81,7 +99,6 @@ public class ComPut {
 
 	}
 
-	
 	/**
 	 * @param archivoLocal
 	 */
@@ -138,7 +155,7 @@ public class ComPut {
 		File rutaDirectorio = new File(arch.getParentFile().getAbsolutePath());
 		if (!rutaDirectorio.exists())
 			rutaDirectorio.mkdirs();
-		
+
 	}
 
 }
