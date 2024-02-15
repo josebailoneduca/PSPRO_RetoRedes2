@@ -8,6 +8,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
 
 import ftpcliente.conector.Modelo;
@@ -114,8 +115,15 @@ public class Controlador {
 	public List<DtoArchivo> getArchivosLocales(File ruta) {
 
 		List<DtoArchivo> archivos=new ArrayList<DtoArchivo>();
-		FilenameFilter filtroArchivos= (File current, String name) -> !(new File(current, name).isDirectory());
-		File[] lista = ruta.listFiles(filtroArchivos);
+		//FilenameFilter filtroArchivos= (File current, String name) -> !(new File(current, name).isDirectory());
+		//agregar .. si no es root
+		
+		if (ruta.toPath().getNameCount()!=0) {
+			archivos.add(new DtoArchivo("..", Codigos.DIRECTORIO));
+		}
+		
+		
+		File[] lista = ruta.listFiles();
 		if (lista!=null) {
 			for (File arch : lista) {
 				archivos.add(new DtoArchivo(arch.getName(), (arch.isDirectory())?Codigos.DIRECTORIO:Codigos.ARCHIVO));
@@ -208,6 +216,21 @@ public class Controlador {
 	 */
 	public boolean confirmar(String msg) {
 		return vista.confirmar(msg);
+	}
+
+
+		/**
+		 * Recoger unidades de disco e inicializar el selector de undidaes
+		 * @return
+		 */
+		public String[] getUnidadesDisco() {
+			File[] unidades;
+			unidades = File.listRoots();
+			String[] nombres = new String[unidades.length];
+			for (int i = 0; i < unidades.length; i++) {
+				nombres[i] = unidades[i].getAbsolutePath();
+			}
+			return nombres;
 	}
 	
 }

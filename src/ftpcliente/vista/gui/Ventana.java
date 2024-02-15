@@ -6,7 +6,9 @@ Lista de paquetes:
  */
 package ftpcliente.vista.gui;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,10 +40,12 @@ import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.border.LineBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 import fptservidor.modelo.Codigos;
 import ftpcliente.Config;
@@ -58,7 +62,7 @@ import ftpcliente.vista.modelos.ArchivoTableModel;
 public class Ventana extends JFrame implements TreeSelectionListener, ActionListener {
 
 	Controlador controlador;
-
+	TreePath ultimoPath;
 	public Ventana(Controlador controlador) {
 		this.controlador = controlador;
 		initComponents();
@@ -84,7 +88,9 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	 */
 	private void inicializarRutaLocal() {
 		//recoger unidades
-		String[] roots = getUnidadesDisco();
+		String[] roots = controlador.getUnidadesDisco();
+		localSelectorUnidad.setModel(new DefaultComboBoxModel<String>(roots));
+
 		//inicializar arbol
 		TreeModel model = new ArbolArchivosModel(new ArchArbol((String) localSelectorUnidad.getSelectedItem()));
 		localArbol.setModel(model);
@@ -154,6 +160,11 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		remotoTabla.setComponentPopupMenu(new MenuRemoto(this,remotoTabla));
 		//menu contextual tabla local
 		localTabla.setComponentPopupMenu(new MenuLocal(this,localTabla));
+		
+		
+		
+
+		
 	}
 	
 	/**
@@ -176,9 +187,25 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		if (fila==-1)
 			return;
 		DtoArchivo arch = ((ArchivoTableModel)localTabla.getModel()).getItem(fila);
-		if (!arch.esDirectorio())
+		if (arch.esDirectorio())
+			cambiarDirectorioLocal(localRuta.getText()+"/"+arch.getNombre());
+		else
 			putArchivo();
+		
+		
+//		if (!arch.esDirectorio())
+//			putArchivo();
 	
+	}
+
+	/**
+	 * @param string
+	 */
+	private void cambiarDirectorioLocal(String string) {
+		String rutaNormalizada = Paths.get(new File(string).getAbsolutePath()).normalize().toAbsolutePath().toString();
+		localRuta.setText(rutaNormalizada);
+		actualizarArchivosLocales();
+		
 	}
 
 	/**
@@ -191,24 +218,11 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		remotoTabla.getColumnModel().getColumn(0).setMaxWidth(50);
 	}
 
-	/**
-	 * Recoger unidades de disco e inicializar el selector de undidaes
-	 * @return
-	 */
-	private String[] getUnidadesDisco() {
-		File[] unidades;
-		unidades = File.listRoots();
-		String[] nombres = new String[unidades.length];
-		for (int i = 0; i < unidades.length; i++) {
-			nombres[i] = unidades[i].getAbsolutePath();
-		}
-		localSelectorUnidad.setModel(new DefaultComboBoxModel<String>(nombres));
-		return nombres;
-	}
+
 
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-
+		ultimoPath=e.getPath();
 		ArchArbol node = (ArchArbol) ((JTree) e.getSource()).getLastSelectedPathComponent();
 		if (node == null) {
 			// since Nothing is selected.
@@ -372,6 +386,15 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		File ruta = new File(localRuta.getText());
 		localTabla.setModel(new ArchivoTableModel(controlador.getArchivosLocales(ruta)));
 		localTabla.getColumnModel().getColumn(0).setMaxWidth(50);
+		
+		TreePath p = ultimoPath;
+		
+		
+		ArbolArchivosModel m = (ArbolArchivosModel)localArbol.getModel();
+		String rutaRoot = ((ArchArbol)m.getRoot()).getAbsolutePath();
+		TreeModel model = new ArbolArchivosModel(new ArchArbol((String) localSelectorUnidad.getSelectedItem()));
+		localArbol.setModel(model);
+		localArbol.expandPath(p);
 	}
 
 
@@ -456,9 +479,11 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		panelLocalArchivos.setLayout(new java.awt.BorderLayout(0, 10));
 		scrollLocalArchivos.setViewportView(localTabla);
 		panelLocalArchivos.add(scrollLocalArchivos, java.awt.BorderLayout.CENTER);
+
 		localRuta.setEditable(false);
 		localRuta.setText("C:\\");
 		panelLocalArchivos.add(localRuta, java.awt.BorderLayout.NORTH);
+	
 		panelLocalDivisor.setRightComponent(panelLocalArchivos);
 
 		panelDivisor.setLeftComponent(panelLocalDivisor);
