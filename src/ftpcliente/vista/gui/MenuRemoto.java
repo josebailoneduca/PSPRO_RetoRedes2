@@ -27,6 +27,10 @@ public class MenuRemoto extends JPopupMenu {
 	    itemCrearDirectorio.setActionCommand("MKDIR");
 	    itemCrearDirectorio.addActionListener(v);
 	    this.add(itemCrearDirectorio);
+	    JMenuItem itemDescargar= new JMenuItem("Descargar");
+	    itemDescargar.setActionCommand("GET");
+	    itemDescargar.addActionListener(v);
+	    this.add(itemDescargar);
 	    
 		
 	}

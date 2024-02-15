@@ -96,12 +96,12 @@ public class ComGet {
 
 		// leer archivo
 			try (
-				RandomAccessFile raf =new RandomAccessFile(arch, "r");
+				FileInputStream fis =new FileInputStream(arch);
 				){
 				//enviar longitud
 				dos.writeLong(nBytes);
 				byte[] bytes = new byte[(int) nBytes];
-				int leidos=raf.read(bytes, 0, bytes.length);
+				int leidos=fis.read(bytes, 0, bytes.length);
 				try {
 					dos.write(bytes, 0, bytes.length);
  				}catch(EOFException ex) {

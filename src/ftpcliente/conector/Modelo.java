@@ -81,7 +81,9 @@ public class Modelo {
 	
 	
 	public void addOperacion(String operacion) {
-		conexion.addOperacion(operacion);
+		if (conexion!=null) {
+			conexion.addOperacion(operacion);
+	}
 	}
  
 	/*

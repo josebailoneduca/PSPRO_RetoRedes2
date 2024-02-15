@@ -72,8 +72,8 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		inputPuerto.setText("" + Config.getPUERTO());
 		inputUsuario.setText(Config.getUSUARIO());
 		inputContrasena.setText(Config.getCONTRASENA());
-		remotoTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		localTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//		remotoTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//		localTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		iniEventos();
 		inicializarRutaLocal();
 		activarLogin(true);
@@ -107,8 +107,10 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	private void iniEventos() {
 		localArbol.addTreeSelectionListener(this);
 		
-		JButton[] botones = { btnCmdCD, btnCmdDEL, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
-				btnCmdRMDIR, btnConectar, btnDesconectar, btnEnviar, btnRegistrar };
+//		JButton[] botones = { btnCmdCD, btnCmdDEL, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
+//				btnCmdRMDIR, btnConectar, btnDesconectar, btnEnviar, btnRegistrar };
+		JButton[] botones = { btnCmdCD, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
+				 btnConectar, btnDesconectar, btnEnviar, btnRegistrar };
 		for (JButton boton: botones) {
 			boton.addActionListener(this);
 		}
@@ -120,12 +122,12 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		remotoTabla.addMouseListener(new MouseAdapter() {
 		    public void mousePressed(MouseEvent me) {
 		    	//seleccion con boton derecho
-		    	int r = remotoTabla.rowAtPoint(me.getPoint());
-		        if (r >= 0 && r < remotoTabla.getRowCount()) {
-		        	remotoTabla.setRowSelectionInterval(r, r);
-		        } else {
-		        	remotoTabla.clearSelection();
-		        }
+//		    	int r = remotoTabla.rowAtPoint(me.getPoint());
+//		        if (r >= 0 && r < remotoTabla.getRowCount()) {
+//		        	remotoTabla.setRowSelectionInterval(r, r);
+//		        } else {
+//		        	remotoTabla.clearSelection();
+//		        }
 		        //evento doble click
 		    	JTable target = (JTable)me.getSource();
 		    	int fila = target.getSelectedRow();
@@ -150,6 +152,8 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		
 		//menu contextual tabla remota
 		remotoTabla.setComponentPopupMenu(new MenuRemoto(this,remotoTabla));
+		//menu contextual tabla local
+		localTabla.setComponentPopupMenu(new MenuLocal(this,localTabla));
 	}
 	
 	/**
@@ -210,7 +214,8 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 			// since Nothing is selected.
 			return;
 		}
-		localRuta.setText(node.getAbsolutePath());
+		String ruta=node.getAbsolutePath();
+		localRuta.setText(ruta);
 		actualizarArchivosLocales();
 	}
 
@@ -225,12 +230,13 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		case "ENVIAR" -> enviarComando();
 		case "LS" -> controlador.comLs();
 		case "CD" -> controlador.comCd(getValor("Introduzca la ruta"));
-		case "DEL" -> borrarArchivo();
-		case "BORRAR" -> borrarCualquiera();
+		case "DEL" -> borrar();
+		case "BORRAR" -> borrar();
 		case "MKDIR" -> controlador.comMkdir(getValor("Introduzca el nombre del directorio"));
-		case "RMDIR" -> borrarDirectorio();
+		case "RMDIR" -> borrar();
 		case "GET" -> getArchivo();
 		case "PUT" -> putArchivo();
+		case "ACTUALIZAR" -> actualizarArchivosLocales();
 
 		}
 
@@ -242,20 +248,20 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	 * @return
 	 */
 	private void putArchivo() {
-		int filaSeleccionada = localTabla.getSelectedRow();
-        if (filaSeleccionada == -1) {
-        	msgInfo("Seleccione un archivo local");
-            return;//no hacer nada si no hay fila seleccionada
-        }     
-        DtoArchivo arch = ((ArchivoTableModel)localTabla.getModel()).getItem(filaSeleccionada);
+		int[] filasSeleccionadas = localTabla.getSelectedRows();
+
+		for (int i=0;i<filasSeleccionadas.length;i++) {
+			int filaSeleccionada=filasSeleccionadas[i];
+		DtoArchivo arch = ((ArchivoTableModel)localTabla.getModel()).getItem(filaSeleccionada);
         if (!arch.esDirectorio()) {
         	String rutaLocal=localRuta.getText()+"/"+arch.getNombre();
         	String rutaRemota=remotoRuta.getText()+"/"+arch.getNombre();
         	controlador.comPut(rutaLocal,rutaRemota);
         }
         else {
-        	msgInfo("Debe elegir un archivo, no un directorio");
+        	msgInfo("Los directorios no se pueden subir directamente");
         }
+		}
 	}
 
 	/**
@@ -263,11 +269,13 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	 */
 	private void getArchivo() {
 
-		int filaSeleccionada = remotoTabla.getSelectedRow();
-        if (filaSeleccionada == -1) {
-        	msgInfo("Seleccione un archivo remoto");
-            return;//no hacer nada si no hay fila seleccionada
-        }     
+
+		int[] filasSeleccionadas = remotoTabla.getSelectedRows();
+		
+		
+ 
+		for (int i = 0;i<filasSeleccionadas.length;i++) {
+			int filaSeleccionada = filasSeleccionadas[i];
         DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
         if (!arch.esDirectorio()) {
         	String rutaRemota=remotoRuta.getText()+"/"+arch.getNombre();
@@ -275,65 +283,31 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
         	controlador.comGet(rutaRemota,rutaLocal);
         }
         else {
-        	msgInfo("Debe elegir un archivo, no un directorio");
+        	msgInfo("Lo directorios no se pueden descargar directamente");
         }
+		}
 	}
 
-	/**
-	 * @return
-	 */
-	private void borrarDirectorio() {
-        int filaSeleccionada = remotoTabla.getSelectedRow();
-        if (filaSeleccionada == -1) {
-        	msgInfo("Seleccione un directorio remoto");
-            return;//no hacer nada si no hay fila seleccionada
-        }        
-        
-        DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
-        if (arch.esDirectorio()) {
-        	controlador.comRmdir(arch.getNombre());
-        }
-        else {
-        	msgInfo("Debe elegir un directorio, no un archivo");
-        }
-	}
+ 
 	
 
 	/**
 	 * @return
 	 */
-	private void borrarCualquiera() {
-        int filaSeleccionada = remotoTabla.getSelectedRow();
-        if (filaSeleccionada == -1) {
-        	msgInfo("Seleccione un archivo remoto");
-            return;//no hacer nada si no hay fila seleccionada
-        }        
+	private void borrar() {
+        int[] filasSeleccionadas = remotoTabla.getSelectedRows();
+        for (int i=0;i<filasSeleccionadas.length;i++) {
+        	int filaSeleccionada=filasSeleccionadas[i];
         DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
         if (arch.esDirectorio()) {
-        	borrarDirectorio();
+        	controlador.comRmdir(arch.getNombre());
         }
         else { 
-        	borrarArchivo();
-        }
-	}
-
-	/**
-	 * @return
-	 */
-	private void borrarArchivo() {
-        int filaSeleccionada = remotoTabla.getSelectedRow();
-        if (filaSeleccionada == -1) {
-        	msgInfo("Seleccione un archivo remoto");
-            return;//no hacer nada si no hay fila seleccionada
-        }        
-        DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
-        if (!arch.esDirectorio()) {
         	controlador.comDel(arch.getNombre());
         }
-        else {
-        	msgInfo("Debe elegir un archivo, no un directorio");
         }
 	}
+ 
 
 	/**
 	 * @return
@@ -419,12 +393,12 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		btnCmdPUT.setActionCommand("PUT");
 		btnCmdCD = new JButton();
 		btnCmdCD.setActionCommand("CD");
-		btnCmdDEL = new JButton();
-		btnCmdDEL.setActionCommand("DEL");
+//		btnCmdDEL = new JButton();
+//		btnCmdDEL.setActionCommand("DEL");
 		btnCmdMKDIR = new JButton();
 		btnCmdMKDIR.setActionCommand("MKDIR");
-		btnCmdRMDIR = new JButton();
-		btnCmdRMDIR.setActionCommand("RMDIR");
+//		btnCmdRMDIR = new JButton();
+//		btnCmdRMDIR.setActionCommand("RMDIR");
 		localSelectorUnidad = new JComboBox<>();
 		localSelectorUnidad.setActionCommand("SELEC_UNIDAD");
 		btnEnviar = new JButton();
@@ -570,12 +544,12 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		panelBotonera.add(btnCmdPUT);
 		btnCmdCD.setText("CD");
 		panelBotonera.add(btnCmdCD);
-		btnCmdDEL.setText("DEL");
-		panelBotonera.add(btnCmdDEL);
+//		btnCmdDEL.setText("DEL");
+//		panelBotonera.add(btnCmdDEL);
 		btnCmdMKDIR.setText("MKDIR");
 		panelBotonera.add(btnCmdMKDIR);
-		btnCmdRMDIR.setText("RMDIR");
-		panelBotonera.add(btnCmdRMDIR);
+//		btnCmdRMDIR.setText("RMDIR");
+//		panelBotonera.add(btnCmdRMDIR);
 		panelSuperior.add(panelBotonera, java.awt.BorderLayout.CENTER);
 		getContentPane().add(panelSuperior, java.awt.BorderLayout.NORTH);
 		pack();
@@ -583,12 +557,12 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 
 
 	private JButton btnCmdCD;
-	private JButton btnCmdDEL;
+//	private JButton btnCmdDEL;
 	private JButton btnCmdGET;
 	private JButton btnCmdLS;
 	private JButton btnCmdMKDIR;
 	private JButton btnCmdPUT;
-	private JButton btnCmdRMDIR;
+//	private JButton btnCmdRMDIR;
 	private JButton btnConectar;
 	private JButton btnDesconectar;
 	private JButton btnEnviar;
@@ -679,8 +653,10 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		btnConectar.setVisible(b);
 		btnRegistrar.setVisible(b);
 		btnDesconectar.setVisible(!b);
-		JButton[] botones = { btnCmdCD, btnCmdDEL, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
-				btnCmdRMDIR, btnEnviar};
+//		JButton[] botones = { btnCmdCD, btnCmdDEL, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
+//				btnCmdRMDIR, btnEnviar};
+		JButton[] botones = { btnCmdCD,  btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
+				btnEnviar};
 		for (JButton btn : botones) {
 			btn.setEnabled(!b);
 		}

@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,34 +52,43 @@ public class ComGet extends Comando {
 			if (comando.length > 2)
 				archivoLocal = new File(comando[2]);
 			// comprobacion de escritura
-			
+
 			if (!Files.isWritable(Paths.get(archivoLocal.getParentFile().toURI()))) {
 				modelo.mensajeError("No tiene permisos para escribir en: " + archivoLocal.getAbsolutePath());
 				return;
 			}
 
-			// comenzar protocolo
-			dos.writeUTF(TiposComando.GET);
-			dos.writeUTF(rutaRemota);
-			
-			// ver si es posible
-			int res = dis.readInt();
-			if (res == Codigos.OK) {
-				int tipo=dis.readInt();
-				//si es posible se recibe el archivo
-				if (tipo==Codigos.TIPO_TEXTO)
-					recibirArchivoTexto(archivoLocal);
-				else
-					recibirArchivoBinario(archivoLocal);
-
-				//avisar a modelo de fin de transferencia
-				modelo.actualizarLocal();
-			}else if(res==Codigos.NO_EXISTE){
-				modelo.mensajeError("El archivo no existe: " + rutaRemota);
+			boolean recibirArchivo = false;
+			if (archivoLocal.exists()) {
+				if (modelo.confirmar("¿Desea sobreescribir el archivo " + archivoLocal.getAbsolutePath() + "?"))
+					recibirArchivo = true;
 			} else {
-				modelo.mensajeError("No se puede obtener el archivo " + rutaRemota);				
+				recibirArchivo = true;
 			}
 
+			if (recibirArchivo) {
+				// comenzar protocolo
+				dos.writeUTF(TiposComando.GET);
+				dos.writeUTF(rutaRemota);
+
+				// ver si es posible
+				int res = dis.readInt();
+				if (res == Codigos.OK) {
+					int tipo = dis.readInt();
+					// si es posible se recibe el archivo
+					if (tipo == Codigos.TIPO_TEXTO)
+						recibirArchivoTexto(archivoLocal);
+					else
+						recibirArchivoBinario(archivoLocal);
+
+					// avisar a modelo de fin de transferencia
+					modelo.actualizarLocal();
+				} else if (res == Codigos.NO_EXISTE) {
+					modelo.mensajeError("El archivo no existe: " + rutaRemota);
+				} else {
+					modelo.mensajeError("No se puede obtener el archivo " + rutaRemota);
+				}
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -89,13 +99,13 @@ public class ComGet extends Comando {
 	 */
 	private void recibirArchivoBinario(File arch) {
 		crearRuta(arch);
-		try (RandomAccessFile raf = new RandomAccessFile(arch, "rw")) {
+		try (FileOutputStream fos = new FileOutputStream(arch)) {
 			long cantidadBytes = dis.readLong();
 			byte[] bytes = new byte[(int) cantidadBytes];
 			int offset = 0;
 			while (offset < cantidadBytes) {
 				int leidos = dis.read(bytes, offset, bytes.length - offset);
-				raf.write(bytes, offset, leidos);
+				fos.write(bytes, offset, leidos);
 				offset += leidos;
 			}
 
@@ -134,9 +144,7 @@ public class ComGet extends Comando {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
+
 	/**
 	 * @param arch
 	 */
@@ -144,6 +152,6 @@ public class ComGet extends Comando {
 		File rutaDirectorio = new File(arch.getParentFile().getAbsolutePath());
 		if (!rutaDirectorio.exists())
 			rutaDirectorio.mkdirs();
-		
+
 	}
 }

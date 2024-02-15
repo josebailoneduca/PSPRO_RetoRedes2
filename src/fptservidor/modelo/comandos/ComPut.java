@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -57,8 +58,8 @@ public class ComPut {
 			// componer y comprobar validez de ruta
 			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, rutaArchivo);
 			File arch = new File(rutaCompleta);
-			// comprobar si es ruta interior del usuario o es directorio contestamos que no
-			if (!UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") || !arch.isDirectory()) {
+			// comprobar si no es ruta interior del usuario o es directorio contestamos que no
+			if (!UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") || arch.isDirectory()) {
 
 				dos.writeInt(Codigos.MAL);
 				// si no existe acepta
@@ -104,13 +105,13 @@ public class ComPut {
 	 */
 	private void recibirArchivoBinario(File arch) {
 		crearRuta(arch);
-		try (RandomAccessFile raf = new RandomAccessFile(arch, "rw")) {
+		try (FileOutputStream fos = new FileOutputStream(arch)) {
 			long cantidadBytes = dis.readLong();
 			byte[] bytes = new byte[(int) cantidadBytes];
 			int offset = 0;
 			while (offset < cantidadBytes) {
 				int leidos = dis.read(bytes, offset, bytes.length - offset);
-				raf.write(bytes, offset, leidos);
+				fos.write(bytes, offset, leidos);
 				offset += leidos;
 			}
 
