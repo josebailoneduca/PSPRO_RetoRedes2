@@ -9,9 +9,11 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import ftpcliente.Config;
@@ -34,12 +36,13 @@ public class ComPut extends Comando {
 		if (comando.length < 2) {
 			return;
 		}
-
+		String archivoRemoto=null;
+		String rutaLocal=null;
 		try {
 			// preparar rutas remotas y locales
-			String rutaLocal = comando[1];
+			rutaLocal = comando[1];
 			String nombreArchivo = new File(rutaLocal).getName();
-			String archivoRemoto = "./" + nombreArchivo;
+			 archivoRemoto = "./" + nombreArchivo;
 			boolean enviarArchivo = false;
 			if (comando.length > 2)
 				archivoRemoto = comando[2];
@@ -65,11 +68,11 @@ public class ComPut extends Comando {
 						dos.writeInt(Codigos.FIN);
 					}
 				} else {
-					modelo.mensajeError("No puede enviar el archivo " + archivoRemoto);
+					modelo.msgError("PUT erroneo. No puede enviar el archivo " + archivoRemoto);
 				}
 			} else {
-				modelo.mensajeError(
-						"No puede enviar el archivo " + archivoRemoto + " por no existir o ser un directorio");
+				modelo.msgError(
+						"PUT erroneo. No puede enviar el archivo " + archivoRemoto + " por no existir o ser un directorio");
 			}
 			if (enviarArchivo) {
 				int tipo = dis.readInt();
@@ -77,24 +80,34 @@ public class ComPut extends Comando {
 					enviarArchivoTexto(arch);
 				else
 					enviarArchivoBinario(arch);
+				
+				modelo.msgInfo("PUT exitoso. "+archivoRemoto);
 			}
 
-		} catch (IOException e) {
-			modelo.mensajeError("Error enviando archivo");
+		} catch(UnsupportedEncodingException ex) {
+			modelo.msgError("PUT erroneo. No se soporta la codificacion del archivo "+rutaLocal);
+			try {
+				dos.writeInt(0);
+				dos.writeInt(Codigos.FIN);
+			} catch (IOException e) {
+			}
+		}catch (IOException e) {
+			modelo.msgError("PUT erroneo. Error enviando archivo "+archivoRemoto);
 		}
 	}
 
 	/**
 	 * @param arch
+	 * @throws IOException 
 	 */
-	private void enviarArchivoBinario(File arch) {
+	private void enviarArchivoBinario(File arch) throws IOException {
 
 		long nBytes = arch.length();
 
 		ArrayList<String> lineas = new ArrayList<String>();
 
 		// leer archivo
-		try (FileInputStream fis = new FileInputStream(arch);) {
+		FileInputStream fis = new FileInputStream(arch);
 			// enviar longitud
 			dos.writeLong(nBytes);
 			byte[] bytes = new byte[(int) nBytes];
@@ -104,25 +117,24 @@ public class ComPut extends Comando {
 			} catch (EOFException ex) {
 
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 
 	}
 
 	/**
 	 * @param arch
+	 * @throws IOException 
 	 */
-	private void enviarArchivoTexto(File arch) {
+	private void enviarArchivoTexto(File arch) throws IOException {
 
 		int maxLineas = 10;
 
 		ArrayList<String> lineas = new ArrayList<String>();
 
 		// leer archivo
-		try (FileInputStream fis = new FileInputStream(arch);
+		FileInputStream fis = new FileInputStream(arch);
 				InputStreamReader isr = new InputStreamReader(fis, Config.getCOD_TEXTO());
-				BufferedReader br = new BufferedReader(isr);) {
+				BufferedReader br = new BufferedReader(isr);
 
 			boolean continuar = true;
 			while (continuar) {
@@ -148,10 +160,7 @@ public class ComPut extends Comando {
 					dos.writeInt(Codigos.CONTINUAR);
 				}
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 
 	}
 

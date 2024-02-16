@@ -86,12 +86,24 @@ public class Controlador {
 	/**
 	 * @param string
 	 */
-	public void mensajeError(String string) {
-		SwingUtilities.invokeLater(() -> 
-		vista.msgError(string));
+	public void mensajeError(String msg) {
+		SwingUtilities.invokeLater(() -> {
+		vista.msgError(msg);
+		vista.addHistorial("ERROR: "+ msg);
+		});
+		
 		
 	}
 
+	/**
+	 * @param msg
+	 */
+	public void mensajeInfo(String msg) {
+		SwingUtilities.invokeLater(() -> vista.addHistorial("INFO: "+ msg));
+		//vista.msgInfo(msg));
+	}
+	
+	
 	/**
 	 * 
 	 */
@@ -243,5 +255,7 @@ public class Controlador {
 				return false;
 			}
 		}
+
+	
 	
 }

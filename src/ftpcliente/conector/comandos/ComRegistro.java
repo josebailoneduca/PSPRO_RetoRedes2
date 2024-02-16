@@ -39,10 +39,13 @@ public class ComRegistro extends Comando{
 			dos.writeUTF(contrasena);
 			int res = dis.readInt();
 			if (res==Codigos.OK) {
+				modelo.msgInfo("Registro con exito: "+usuario);
 				modelo.setEstadoLogin(true,usuario);
 			}
-			else
-			modelo.malRegistro();
+			else {
+				modelo.malRegistro();
+				modelo.msgError("Registro erroneo: "+usuario);
+			}
 		} catch (IOException e) {
 			 modelo.malRegistro();
 		}

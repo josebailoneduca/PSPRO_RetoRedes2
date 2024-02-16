@@ -46,8 +46,8 @@ public class SModelo extends Thread {
 					Sesion sesion = new Sesion(servSocketOperar, socketInicial);
 					sesiones.add(sesion);
 					sesion.start();
-					Msg.msgHora("Nueva conexion con " + socketInicial.getInetAddress() + "en " + puerto
-							+ ". Esperando conexion de operaciones en el puerto local" + servSocketOperar.getLocalPort());
+					Msg.msgHora("Nueva conexion con " + socketInicial.getInetAddress() + " en puerto local " + puerto
+							+ ". Esperando conexion de operaciones en el puerto local " + servSocketOperar.getLocalPort());
 					dos.writeInt(Codigos.OK);
 					dos.writeInt(servSocketOperar.getLocalPort());
 					limpiarSesiones();

@@ -45,11 +45,13 @@ public class ComLs extends Comando{
 					
 				}
 				modelo.actualizaLista(rutaActual,archivos);
+				modelo.msgError("LS correcto de ruta "+rutaActual);
 			}else {
-				modelo.mensajeError("No se pudo hacer LS");
+				modelo.msgError("LS erroneo");
 			}
 		} catch (IOException e) {
 			modelo.setEstadoLogin(false, null);
+			modelo.msgError("LS erroneo");
 		}
 	}
 	

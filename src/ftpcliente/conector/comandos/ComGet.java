@@ -44,17 +44,17 @@ public class ComGet extends Comando {
 			return;
 		}
 
+		String rutaRemota = comando[1];
 		try {
 			// preparar rutas remotas y locales
-			String rutaRemota = comando[1];
-			String nombreArchivo = new File(rutaRemota).getName();
-			File archivoLocal = new File(new File(nombreArchivo).getAbsolutePath());
+			String nombreArchivoRemoto = new File(rutaRemota).getName();
+			File archivoLocal = new File(new File(nombreArchivoRemoto).getAbsolutePath());
 			if (comando.length > 2)
 				archivoLocal = new File(comando[2]);
 			// comprobacion de escritura
 
 			if (!Files.isWritable(Paths.get(archivoLocal.getParentFile().toURI()))) {
-				modelo.mensajeError("No tiene permisos para escribir en: " + archivoLocal.getAbsolutePath());
+				modelo.msgError("GET erroneo. No tiene permisos para escribir en: " + archivoLocal.getAbsolutePath());
 				return;
 			}
 
@@ -83,23 +83,26 @@ public class ComGet extends Comando {
 
 					// avisar a modelo de fin de transferencia
 					modelo.actualizarLocal();
+
+
 				} else if (res == Codigos.NO_EXISTE) {
-					modelo.mensajeError("El archivo no existe: " + rutaRemota);
+					modelo.msgError("GET erroneo. El archivo no existe: " + rutaRemota);
 				} else {
-					modelo.mensajeError("No se puede obtener el archivo " + rutaRemota);
+					modelo.msgError("GET erroneo.No se puede obtener el archivo " + rutaRemota);
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			modelo.msgError("GET erroneo.No se puede descargar el archivo: " + rutaRemota+" - "+e.getMessage());
 		}
 	}
 
 	/**
 	 * @param archivoLocal
+	 * @throws IOException 
 	 */
-	private void recibirArchivoBinario(File arch) {
+	private void recibirArchivoBinario(File arch) throws IOException {
 		crearRuta(arch);
-		try (FileOutputStream fos = new FileOutputStream(arch)) {
+		 FileOutputStream fos = new FileOutputStream(arch); 
 			long cantidadBytes = dis.readLong();
 			byte[] bytes = new byte[(int) cantidadBytes];
 			int offset = 0;
@@ -108,21 +111,19 @@ public class ComGet extends Comando {
 				fos.write(bytes, offset, leidos);
 				offset += leidos;
 			}
-
-			// ver si hay que continuar
-		} catch (IOException e) {
-			modelo.mensajeError("No se puede descargar el archivo: " + e.getMessage());
-			e.printStackTrace();
-		}
+			
+			 
 	}
 
 	/**
+	 * @throws IOException 
 	 * 
 	 */
 
-	private void recibirArchivoTexto(File arch) {
+	private void recibirArchivoTexto(File arch) throws IOException {
 		crearRuta(arch);
-		try (FileWriter fw = new FileWriter(arch); BufferedWriter bw = new BufferedWriter(fw);) {
+		FileWriter fw = new FileWriter(arch); 
+		BufferedWriter bw = new BufferedWriter(fw);
 			boolean continuar = true;
 			while (continuar) {
 				int cantidadLineas = dis.readInt();
@@ -139,10 +140,6 @@ public class ComGet extends Comando {
 			}
 			bw.close();
 			fw.close();
-		} catch (IOException e) {
-			modelo.mensajeError("No se puede descargar el archivo: " + e.getMessage());
-			e.printStackTrace();
-		}
 	}
 
 	/**

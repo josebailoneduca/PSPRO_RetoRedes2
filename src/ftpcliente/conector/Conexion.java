@@ -41,9 +41,6 @@ public class Conexion {
 			e.printStackTrace();
 			throw new IllegalArgumentException();
 		}
-
-		System.out.println(socket.getLocalPort() + " " + socket.getLocalAddress() + " " + socket.getPort() + ""
-				+ socket.getRemoteSocketAddress());
 		procOperaciones = new ProcesadorOperaciones(operacionesPendientes, dis, dos, modelo);
 		procOperaciones.start();
 	}

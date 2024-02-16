@@ -39,17 +39,17 @@ public class ComMkdir extends Comando {
 
 			int res = dis.readInt();
 			if (res == Codigos.MAL) {
-				modelo.mensajeError("No se pudo crear" + comando[1]);
+				modelo.msgError("MKDIR erroneo. No se pudo crear" + comando[1]);
 			} else if (res == Codigos.YA_EXISTE) {
-				modelo.mensajeError("El directorio " + comando[1] + " ya existe");
+				modelo.msgError("MKDIR erroneo. El directorio " + comando[1] + " ya existe");
 			} else {
-				modelo.mensajeInfo("Directorio creado " + comando[1]);
+				modelo.msgInfo("MKDIR exitoso. Directorio creado " + comando[1]);
 			}
 
 		} catch (
 
 		IOException e) {
-			e.printStackTrace();
+			modelo.msgError("MKDIR erroneo. No se pudo crear" + comando[1]);
 		}
 	}
 

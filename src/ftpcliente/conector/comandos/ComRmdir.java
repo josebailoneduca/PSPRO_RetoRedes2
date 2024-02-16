@@ -37,11 +37,11 @@ public class ComRmdir extends Comando {
 				dos.writeUTF(comando[1]);
 				int res = dis.readInt();
 				if (res == Codigos.MAL) {
-					modelo.mensajeError("No se pudo eliminar " + comando[1]);
+					modelo.msgError("No se pudo eliminar " + comando[1]);
 				} else if (res == Codigos.NO_VACIO) {
-					modelo.mensajeError("El directorio no está vacío. No se pudo eliminar: " + comando[1]);
+					modelo.msgError("El directorio no está vacío. No se pudo eliminar: " + comando[1]);
 				}else if (res==Codigos.OK) {
-					modelo.mensajeInfo("Directorio borrado "+comando[1]);
+					modelo.msgInfo("Directorio borrado "+comando[1]);
 				}
 		
 		} catch (IOException e) {

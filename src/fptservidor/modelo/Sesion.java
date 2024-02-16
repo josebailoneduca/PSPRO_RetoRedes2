@@ -95,7 +95,7 @@ public class Sesion extends Thread {
 			
 		}
 		if (socket!=null) {
-			Msg.msgHora("Conexion terminada con "+ ((usuario!=null) ? usuario+ " en ":"" ) + socket.getRemoteSocketAddress());
+			Msg.msgHora(((usuario!=null) ? usuario+" ":"" ) + socket.getRemoteSocketAddress()+" conexion terminada");
 		}
 	}
 
@@ -148,7 +148,7 @@ public class Sesion extends Thread {
 			} 
 			if (loginOk) {
 				dos.writeInt(Codigos.OK);
-				Msg.msgHora("Login de "+usuario.getNombreUsuario()+" desde "+socket.getRemoteSocketAddress());
+				Msg.msgHora(usuario.getNombreUsuario()+" Login desde "+socket.getRemoteSocketAddress());
 				return true;
 			} else {
 				usuario=null;
@@ -282,7 +282,7 @@ public class Sesion extends Thread {
 	public void exit() {
 		try {
 			if (socket!=null) 
-				Msg.msgHora("El usuario "+ ((usuario!=null) ? usuario+ " en ":"" ) + socket.getRemoteSocketAddress()+" cierra la sesion");
+				Msg.msgHora(((usuario!=null) ? usuario+" " :"" ) + socket.getRemoteSocketAddress()+" cierra la sesion");
 				
 			dos.writeInt(Codigos.OK);
 			socket.close();
@@ -293,7 +293,7 @@ public class Sesion extends Thread {
 
  
 	public String getDatosUsuario() {
-		return usuario.getNombreUsuario()+"-"+socket.getRemoteSocketAddress();
+		return usuario.getNombreUsuario()+" "+socket.getRemoteSocketAddress();
 	}
 	
 }

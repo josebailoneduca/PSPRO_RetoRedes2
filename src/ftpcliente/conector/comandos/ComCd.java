@@ -41,7 +41,9 @@ public class ComCd extends Comando {
 
 			int res = dis.readInt();
 			if (res != Codigos.OK)
-				modelo.mensajeError("No se pudo hacer CD");
+				modelo.msgError("CD erroneo a "+comando[1]);
+			else
+				modelo.msgInfo("CD correcto a "+comando[1]);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

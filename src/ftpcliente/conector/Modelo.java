@@ -109,6 +109,7 @@ public class Modelo {
 		}else {
 		    logged=false;
 		    usuario="";
+		    msgInfo("Desconectado");
 		}
 		controlador.actualizaLogin();
 	}
@@ -163,7 +164,7 @@ public class Modelo {
 	/**
 	 * @param string
 	 */
-	public void mensajeError(String string) {
+	public void msgError(String string) {
 		controlador.mensajeError(string);
 		
 	}
@@ -183,8 +184,8 @@ public class Modelo {
 	/**
 	 * @param string
 	 */
-	public void mensajeInfo(String msg) {
-		controlador.mensajeError(msg);
+	public void msgInfo(String msg) {
+		controlador.mensajeInfo(msg);
 		
 	}
 

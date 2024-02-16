@@ -370,8 +370,11 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		}
 		String usuario = inputUsuario.getText();
 		String contrasena = inputContrasena.getText();
-		if (!controlador.login(host, puerto, usuario, contrasena))
-			msgError("No se puede conectar");
+		if (!controlador.login(host, puerto, usuario, contrasena)) {
+			String msg ="ERROR no se puede conectar a "+host+":"+puerto;
+			msgError(msg);
+			addHistorial(msg);
+		}
 	}
 
 	private void registrar() {
@@ -711,6 +714,14 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	 */
 	public boolean confirmar(String msg) {
 		return JOptionPane.showConfirmDialog(this,msg)==JOptionPane.YES_OPTION;
+	}
+
+	/**
+	 * @param string
+	 */
+	public void addHistorial(String msg) {
+		historial.setText(historial.getText()+"\n"+msg);
+		
 	}
 
  

@@ -45,9 +45,12 @@ public class ComLogin extends Comando{
 			int res = dis.readInt();
 			if (res==Codigos.OK) {
 				modelo.setEstadoLogin(true,usuario);
+				modelo.msgInfo("Sesión iniciada como "+usuario+" en "+modelo.getHost());
 			}
-			else
-			modelo.setEstadoLogin(false,null);
+			else {
+				modelo.setEstadoLogin(false,null);
+				modelo.msgError("Login erroneo");
+			}
 		} catch (IOException e) {
 			 modelo.setEstadoLogin(false,null);
 		}

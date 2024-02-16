@@ -53,13 +53,13 @@ public class ComCd {
 					UtilesArchivo.rutaExiste(rutaCompleta) &&
 					sesion.setCwd(rutaCompleta.replace(rutaUsuario, ""))) {
 				dos.writeInt(Codigos.OK);
-				Msg.msgHora(sesion.getDatosUsuario()+" CD exitoso a "+sesion.getCwd());
+				Msg.msgHora(sesion.getDatosUsuario()+" CD exitoso a "+rutaCompleta);
 			} else {
 				dos.writeInt(Codigos.MAL);
-				Msg.msgHora(sesion.getDatosUsuario()+"CD erroneo a "+rutaCompleta);
+				Msg.msgHora(sesion.getDatosUsuario()+" CD erroneo a "+rutaCompleta);
 			}
 		} catch (IOException e) {
-			Msg.msgHora(sesion.getDatosUsuario()+"CD erroneo a "+rutaCompleta);
+			Msg.msgHora(sesion.getDatosUsuario()+" CD erroneo a "+rutaCompleta);
 			try {
 				dos.writeInt(Codigos.MAL);
 			} catch (IOException e1) {
