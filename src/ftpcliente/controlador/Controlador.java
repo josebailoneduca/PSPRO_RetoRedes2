@@ -232,5 +232,16 @@ public class Controlador {
 			}
 			return nombres;
 	}
+
+		/**
+		 * @return
+		 */
+		public boolean comMkdirLocal(String ruta) {
+			try {
+				return new File(ruta).mkdirs();
+			}catch(SecurityException ex) {
+				return false;
+			}
+		}
 	
 }

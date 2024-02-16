@@ -60,7 +60,6 @@ public class Usuario {
 	 */
 	private String getContrasenaLocal() {
 		File f =new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario+".pass");
-		System.out.println(f.getAbsolutePath());
 		try (FileReader fr = new FileReader(f); BufferedReader br = new BufferedReader(fr)){
 			String contrasena="";
 			contrasena=br.readLine();
@@ -78,4 +77,10 @@ public class Usuario {
 	public boolean esAnonimo() {
 		return anonimo;
 	}
+	@Override
+	public String toString() {
+		return nombreUsuario ;
+	}
+	
+	
 }

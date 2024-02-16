@@ -20,15 +20,19 @@ public class MenuLocal extends JPopupMenu {
 		this.t = t;
 		
 	
-	    JMenuItem itemCrearDirectorio= new JMenuItem("Actualizar");
-	    itemCrearDirectorio.setActionCommand("ACTUALIZAR");
-	    itemCrearDirectorio.addActionListener(v);
-	    this.add(itemCrearDirectorio);
+	    JMenuItem itemActualizar= new JMenuItem("Actualizar");
+	    itemActualizar.setActionCommand("ACTUALIZAR");
+	    itemActualizar.addActionListener(v);
+	    this.add(itemActualizar);
 	    JMenuItem itemDescargar= new JMenuItem("Subir/PUT");
 	    itemDescargar.setActionCommand("PUT");
 	    itemDescargar.addActionListener(v);
 	    this.add(itemDescargar);
-	    
+	    JMenuItem itemCrearDirectorio= new JMenuItem("Crear directorio");
+	    itemCrearDirectorio.setActionCommand("MKDIRLOCAL");
+	    itemCrearDirectorio.addActionListener(v);
+	    this.add(itemCrearDirectorio);
+
 		
 	}
 	 

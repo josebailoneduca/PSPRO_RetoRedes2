@@ -14,9 +14,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.file.Paths;
 
 import fptservidor.Config;
+import fptservidor.Msg;
 import fptservidor.modelo.comandos.ComCd;
 import fptservidor.modelo.comandos.ComDel;
 import fptservidor.modelo.comandos.ComGet;
@@ -41,7 +43,7 @@ public class Sesion extends Thread {
 	DataInputStream dis;
 	DataOutputStream dos;
 	private int tipoSesion = 0;
-	private Usuario usuario = new Usuario("jose");
+	private Usuario usuario;
 	private String cwd = "/";
 
 	boolean conectado = false;
@@ -59,18 +61,21 @@ public class Sesion extends Thread {
 	public void run() {
 		try {
 			// coger nuevo socket
-			serverSocket.setSoTimeout(100000);
+			serverSocket.setSoTimeout(10000);;
 			socket = serverSocket.accept();
 			// cerrar socket inicial
 			this.socketInicial.close();
 			// cerrar server socket
 			serverSocket.close();
+			
+			socket.setSoTimeout(60000);
+			
 			conectado = true;
 			is = socket.getInputStream();
 			os = socket.getOutputStream();
 			dis = new DataInputStream(is);
 			dos = new DataOutputStream(os);
-
+			Msg.msgHora("Conexion iniciada con "+socket.getRemoteSocketAddress());
 			// gestionar login y registro
 			String operacion = dis.readUTF();
 			boolean permitido = false;
@@ -83,19 +88,22 @@ public class Sesion extends Thread {
 				buclePeticiones();
 			}
 			socket.close();
+		} catch (SocketTimeoutException ex) {
+			Msg.msgHora("Cerrando serversocket en puerto "+serverSocket.getLocalPort()+" por falta de respuesta");
 		} catch (IOException e) {
+			
 		}
-		System.out.println(
-				"Conexion terminada con " + usuario.getNombreUsuario() + " en " + socket.getRemoteSocketAddress());
+		if (socket!=null) {
+			Msg.msgHora("Conexion terminada con "+ ((usuario!=null) ? usuario+ " en ":"" ) + socket.getRemoteSocketAddress());
+		}
 	}
 
 	/**
 	 * 
 	 */
 	private void buclePeticiones() {
-		System.out.println("bucle peticiones");
-		System.out.println(usuario.getNombreUsuario());
 		while (estaConectado()) {
+			System.out.println("bucleeee");
 			try {
 				String codigoPeticion = dis.readUTF();
 				switch (codigoPeticion) {
@@ -113,7 +121,7 @@ public class Sesion extends Thread {
 				}
 
 			} catch (IOException e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 				try {
 					socket.close();
 				} catch (IOException e1) {
@@ -143,9 +151,12 @@ public class Sesion extends Thread {
 			} 
 			if (loginOk) {
 				dos.writeInt(Codigos.OK);
+				Msg.msgHora("Login de "+usuario.getNombreUsuario()+" desde "+socket.getRemoteSocketAddress());
 				return true;
 			} else {
+				usuario=null;
 				dos.writeInt(Codigos.MAL);
+				Msg.msgHora("Login erróneo desde "+socket.getRemoteSocketAddress());
 				return false;
 			}
 
@@ -164,18 +175,23 @@ public class Sesion extends Thread {
 			String contrasena = dis.readUTF();
 			
 			File carpetaUsuario = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario);
-			if (carpetaUsuario.exists())
+			if (carpetaUsuario.exists()) {
+				Msg.msgHora("Registro erróneo desde "+socket.getRemoteSocketAddress());
+				dos.writeInt(Codigos.MAL);
 				return false;
+			}
 			else {
 				carpetaUsuario.mkdir();
 				crearPasswordFile(nombreUsuario,contrasena);
+				
 			}
-			
+			Msg.msgHora("Registro de nuevo usuario "+nombreUsuario+" dede"+socket.getRemoteSocketAddress());
+			usuario = new Usuario(nombreUsuario);
+			dos.writeInt(Codigos.OK);
 			return true;
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Msg.msgHora("Registro erróneo desde "+socket.getRemoteSocketAddress());
 			return false;
 		}
 	}
@@ -268,4 +284,7 @@ public class Sesion extends Thread {
 			e.printStackTrace();
 		}
 	}
+
+ 
+	
 }

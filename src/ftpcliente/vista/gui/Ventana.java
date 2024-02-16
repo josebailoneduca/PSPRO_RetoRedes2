@@ -192,10 +192,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		else
 			putArchivo();
 		
-		
-//		if (!arch.esDirectorio())
-//			putArchivo();
-	
+ 
 	}
 
 	/**
@@ -251,12 +248,24 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		case "GET" -> getArchivo();
 		case "PUT" -> putArchivo();
 		case "ACTUALIZAR" -> actualizarArchivosLocales();
+		case "MKDIRLOCAL" -> crearDirectorioLocal();
 
 		}
 
 	}
 
 	
+
+	/**
+	 * @return
+	 */
+	private void crearDirectorioLocal() {
+		String ruta=localRuta.getText()+"/"+getValor("Introduzca el nombre del directorio");
+		if(controlador.comMkdirLocal(ruta))
+			actualizarArchivosLocales();
+		else
+			msgError("No se pudo crear el directorio: \n"+ruta);
+	}
 
 	/**
 	 * @return

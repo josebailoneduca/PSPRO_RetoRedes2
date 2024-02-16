@@ -11,20 +11,25 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import fptservidor.Msg;
+
 /**
  * 
  * @author Jose Javier Bailon Ortiz
  */
 public class SModelo extends Thread{
 	private ServerSocket serverSocket;
-	private Thread hiloEscucha;
 	private ArrayList<Sesion> sesiones = new ArrayList<Sesion>();
 	private int puerto=0;
+	
+	
 	public SModelo(int puerto) {
 		this.puerto=puerto;
 	}
 
 	public boolean iniciar()  {
+		
+		
 		try {
 			serverSocket=new ServerSocket(puerto);
 			return true;
@@ -39,15 +44,16 @@ public class SModelo extends Thread{
 	 */
 	public void run() {
 			iniciar();
+			Msg.cuadro(new String[] {"SERVIDOR INICIADO","PUERTO: "+puerto});
 			while(escuchando()) {
 				try {
 					Socket socketInicial = serverSocket.accept();
-					
 					DataOutputStream dos = new DataOutputStream(socketInicial.getOutputStream());
 					ServerSocket servSocketOperar = new ServerSocket(0);
 					Sesion sesion=new Sesion(servSocketOperar,socketInicial);
 					sesiones.add(sesion);
 					sesion.start();
+					Msg.msgHora("Esperando conexion con "+socketInicial.getInetAddress()+" en el puerto local "+servSocketOperar.getLocalPort());
 					dos.writeInt(Codigos.OK);
 					dos.writeInt(servSocketOperar.getLocalPort());
 					limpiarSesiones();
@@ -55,6 +61,8 @@ public class SModelo extends Thread{
 					e.printStackTrace();
 				}
 			}
+			Msg.msgHora("Servidor terminado");
+
 	}
 
 	/**

@@ -49,7 +49,7 @@ public class ComLs extends Comando{
 				modelo.mensajeError("No se pudo hacer LS");
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			modelo.setEstadoLogin(false, null);
 		}
 	}
 	
