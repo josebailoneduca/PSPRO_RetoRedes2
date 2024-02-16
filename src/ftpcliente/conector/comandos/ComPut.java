@@ -52,7 +52,7 @@ public class ComPut extends Comando {
 			// si existe y si no es directorio
 			if (arch.exists() && !arch.isDirectory()) {
 				// Iniciar protocolo
-				dos.writeUTF(TiposComando.PUT);
+				dos.writeUTF(Comando.PUT);
 				dos.writeUTF(archivoRemoto);
 
 				// respuesta a ver si se permite
@@ -118,7 +118,7 @@ public class ComPut extends Comando {
 				byte[] bytes = new byte[leer];
 				int leidos=fis.read(bytes, 0, bytes.length);
 				nBytes-=leidos;
-				dos.write(bytes, 0, bytes.length);
+				dos.write(bytes, 0, leidos);
 			}
 			fis.close();
 		} catch (EOFException ex) {

@@ -3,16 +3,10 @@
  */
 package ftpservidor.modelo.comandos;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-
 import ftpservidor.Msg;
 import ftpservidor.modelo.Codigos;
 import ftpservidor.modelo.Sesion;
-import ftpservidor.modelo.Usuario;
 import ftpservidor.modelo.lib.UtilesArchivo;
 
 /**
@@ -20,31 +14,7 @@ import ftpservidor.modelo.lib.UtilesArchivo;
  *  
  * @author Jose Javier Bailon Ortiz
  */
-public class ComCd {
-	/**
-	 * Usuario que ejecuta el comando
-	 */
-	private Usuario usuario;
-	
-	/**
-	 * DataInputStream de la operacion
-	 */
-	private DataInputStream dis;
-	
-	/**
-	 * DataOutputStream de la operacion
-	 */
-	private DataOutputStream dos;
-	
-	/**
-	 * Sesion de la operacion
-	 */
-	private Sesion sesion;
-	
-	/**
-	 * CWD de la sesion
-	 */
-	private String cwd;
+public class ComCd extends Comando{
 
 	
 	/**
@@ -53,12 +23,7 @@ public class ComCd {
 	 * @param sesion Sesion que realiza la operacion
 	 */
 	public ComCd(Sesion sesion) {
-		super();
-		this.sesion = sesion;
-		this.usuario = sesion.getUsuario();
-		this.dis = sesion.getDis();
-		this.dos = sesion.getDos();
-		this.cwd = sesion.getCwd();
+		super(sesion);
 	}
 
 	
@@ -67,7 +32,7 @@ public class ComCd {
 	 */
 	public void iniciar() {
 		//ruta de la carpeta de usuario
-		String rutaUsuario = usuario.getCarpeta();
+		String rutaUsuario = usuario.getDirUsuario();
 		// nueva ruta a establecer(relativa a CWD o la de usuario)
 		String nuevaRuta;
 		

@@ -4,10 +4,14 @@
 package ftpservidor.modelo;
 
 /**
+ * Codigos de control de los protocolos.
+ * Ver protocolos en la documentacion para informacion 
+ * del uso de los codigos
  * 
  * @author Jose Javier Bailon Ortiz
  */
 public class Codigos {
+
 	public static final int LOGIN_ANONIMO=0;
 	public static final int LOGIN_NORMAL=1;
 	

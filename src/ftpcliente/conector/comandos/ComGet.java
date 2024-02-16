@@ -68,7 +68,7 @@ public class ComGet extends Comando {
 
 			if (recibirArchivo) {
 				// comenzar protocolo
-				dos.writeUTF(TiposComando.GET);
+				dos.writeUTF(Comando.GET);
 				dos.writeUTF(rutaRemota);
 
 				// ver si es posible

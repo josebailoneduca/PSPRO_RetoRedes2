@@ -30,9 +30,10 @@ public class ComRegistro extends Comando{
 	
  
 	public void iniciar() {
-		
+		if (comando.length<3)
+			return;
 		try {
-			dos.writeUTF(TiposComando.REGISTRO);
+			dos.writeUTF(Comando.REGISTRO);
 			String usuario=comando[1];
 			String contrasena = comando[2];
 			dos.writeUTF(usuario);

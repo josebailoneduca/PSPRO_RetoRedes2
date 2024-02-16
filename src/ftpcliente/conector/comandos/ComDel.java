@@ -34,7 +34,7 @@ public class ComDel extends Comando {
 			return;
 
 		try {
-			dos.writeUTF(TiposComando.DEL);
+			dos.writeUTF(Comando.DEL);
 			dos.writeUTF(comando[1]);
 
 			int res = dis.readInt();

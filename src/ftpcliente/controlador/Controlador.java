@@ -12,7 +12,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
 
 import ftpcliente.conector.Modelo;
-import ftpcliente.conector.comandos.TiposComando;
+import ftpcliente.conector.comandos.Comando;
 import ftpcliente.controlador.dto.DtoArchivo;
 import ftpcliente.vista.gui.Ventana;
 
@@ -50,8 +50,7 @@ public class Controlador {
 			if (usuario.length()==0){
 				tipo=Codigos.LOGIN_ANONIMO;
 			}
-			modelo.addOperacion(TiposComando.LOGIN+" "+tipo+" "+usuario+" "+contrasena);
-			modelo.addOperacion("LS");
+			modelo.addOperacion(Comando.LOGIN+" "+tipo+" "+usuario+" "+contrasena);
 			return true;
 		}else {
 			return false;
@@ -60,7 +59,7 @@ public class Controlador {
 
 	public boolean registrar(String host, int puerto, String usuario, String contrasena) {
 		if (modelo.iniciarConexion(host, puerto)) {
-			modelo.addOperacion(TiposComando.REGISTRO+" "+usuario+" "+contrasena);
+			modelo.addOperacion(Comando.REGISTRO+" "+usuario+" "+contrasena);
 			modelo.addOperacion("LS");
 			return true;
 		}else {
@@ -117,7 +116,7 @@ public class Controlador {
 	 */
 	public void comLs() {
 		if (modelo.isLogged())
-			modelo.addOperacion(TiposComando.LS);
+			modelo.addOperacion(Comando.LS);
 	}
 
 	/**
@@ -150,7 +149,7 @@ public class Controlador {
 	 */
 	public void comCd(String valor) {
 		if (valor !=null && modelo.isLogged()) {
-			modelo.addOperacion(TiposComando.CD+" \""+valor+"\"");
+			modelo.addOperacion(Comando.CD+" \""+valor+"\"");
 			comLs();
 		}
 	}
@@ -160,7 +159,7 @@ public class Controlador {
 	 */
 	public void comGet(String rutaRemota, String rutaLocal) {
 		if (rutaRemota!=null && rutaLocal!=null) {
-			modelo.addOperacion(TiposComando.GET+" \""+rutaRemota+"\" \""+rutaLocal+"\"");
+			modelo.addOperacion(Comando.GET+" \""+rutaRemota+"\" \""+rutaLocal+"\"");
 		}
 	}
 
@@ -174,7 +173,7 @@ public class Controlador {
 	 */
 	public void comDel(String valor) {
 		if (valor!=null) {
-			modelo.addOperacion(TiposComando.DEL+" \""+valor+"\"");
+			modelo.addOperacion(Comando.DEL+" \""+valor+"\"");
 			comLs();
 		}
 		
@@ -186,7 +185,7 @@ public class Controlador {
 	 */
 	public void comMkdir(String valor) {
 		if (valor !=null && modelo.isLogged()) {
-			modelo.addOperacion(TiposComando.MKDIR+" \""+valor+"\"");
+			modelo.addOperacion(Comando.MKDIR+" \""+valor+"\"");
 			comLs();
 		}
 	}
@@ -196,7 +195,7 @@ public class Controlador {
 	 */
 	public void comRmdir(String valor) {
 		if (valor!=null) {
-			modelo.addOperacion(TiposComando.RMDIR+" \""+valor+"\"");
+			modelo.addOperacion(Comando.RMDIR+" \""+valor+"\"");
 			comLs();
 		}
 		
@@ -216,7 +215,7 @@ public class Controlador {
 	 */
 	public void comPut(String rutaLocal, String rutaRemota) {
 		if (rutaRemota!=null && rutaLocal!=null) {
-			modelo.addOperacion(TiposComando.PUT+" \""+rutaLocal+"\" \""+rutaRemota+"\"");
+			modelo.addOperacion(Comando.PUT+" \""+rutaLocal+"\" \""+rutaRemota+"\"");
 			comLs();
 		}
 		

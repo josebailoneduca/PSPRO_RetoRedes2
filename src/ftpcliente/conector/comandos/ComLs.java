@@ -32,7 +32,7 @@ public class ComLs extends Comando{
 	public void iniciar() {
 		
 		try {
-			dos.writeUTF(TiposComando.LS);
+			dos.writeUTF(Comando.LS);
 			int res = dis.readInt();
 			if (res==Codigos.OK) {
 				String rutaActual=dis.readUTF();

@@ -23,7 +23,7 @@ public class ComExit extends Comando{
 	public void iniciar() {
 		
 		try {
-			dos.writeUTF(TiposComando.EXIT);
+			dos.writeUTF(Comando.EXIT);
 		} catch (IOException e) {
 		}
 		modelo.setEstadoLogin(false,null);

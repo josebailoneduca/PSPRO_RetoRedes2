@@ -33,7 +33,7 @@ public class ComCd extends Comando {
 			return;
 
 		try {
-			dos.writeUTF(TiposComando.CD);
+			dos.writeUTF(Comando.CD);
 			if (comando.length > 0)
 				dos.writeUTF(comando[1]);
 			else

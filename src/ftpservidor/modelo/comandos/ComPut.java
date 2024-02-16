@@ -3,70 +3,64 @@
  */
 package ftpservidor.modelo.comandos;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-
 import ftpservidor.Config;
 import ftpservidor.Msg;
 import ftpservidor.modelo.Codigos;
 import ftpservidor.modelo.Sesion;
-import ftpservidor.modelo.Usuario;
 import ftpservidor.modelo.lib.UtilesArchivo;
 
 /**
+ * Se encarga de manejar un comando PUT en el servidor
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class ComPut {
-	private Usuario usuario;
-	private DataInputStream dis;
-	private DataOutputStream dos;
-	private Sesion sesion;
-	private String cwd;
+public class ComPut extends Comando{
+ 
 
+	/**
+	 * Constructor
+	 * 
+	 * @param sesion Sesion que realiza la operacion
+	 */
 	public ComPut(Sesion sesion) {
-		super();
-		this.sesion = sesion;
-		this.usuario = sesion.getUsuario();
-		this.dis = sesion.getDis();
-		this.dos = sesion.getDos();
-		this.cwd = sesion.getCwd();
+		super(sesion);
 	}
 
-	public Object iniciar() {
-		String rutaUsuario = usuario.getCarpeta();
+	/**
+	 * Inicia la operacion siguiendo el protocolo PUT (Ver estructura del protocolo
+	 * en la documentacion)
+	 */
+	public void iniciar() {
+		String rutaUsuario = usuario.getDirUsuario();
 		// comprobar ruta dentro del usuario
- 
 		String rutaArchivo;
 		String rutaCompleta = null;
 		boolean recibirArchivo = false;
 		try {
 			// leer ruta destino
 			rutaArchivo = dis.readUTF();
-			// componer y comprobar validez de ruta
+
+			// componer ruta completa
 			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, rutaArchivo);
 			File arch = new File(rutaCompleta);
-			// comprobar si no es ruta interior del usuario o es directorio contestamos que no
+
+			// si no es ruta interior del usuario o es directorio contestamos que no se
+			// puede
 			if (!UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") || arch.isDirectory()) {
-				Msg.msgHora(sesion.getDatosUsuario()+" PUT bloqueado en ruta no permitida: "+rutaCompleta);
+				Msg.msgHora(sesion.getDatosUsuario() + " PUT bloqueado en ruta no permitida: " + rutaCompleta);
 				dos.writeInt(Codigos.MAL);
 				// si no existe acepta
+
+				// si no es directorio se recibe
 			} else if (!UtilesArchivo.rutaExiste(rutaCompleta)) {
 				dos.writeInt(Codigos.OK);
 				recibirArchivo = true;
+
 				// si existe avisa y espera orden de fin o continuar sobreescribiendo
 			} else {
 				dos.writeInt(Codigos.YA_EXISTE);
@@ -75,82 +69,99 @@ public class ComPut {
 				if (resp == Codigos.CONTINUAR)
 					recibirArchivo = true;
 			}
-			
-			//si la ruta es permitida y no existe el archivo o se ha permitido la sobreescritura
-			//se recibe el archivo
+
+			// si la ruta es permitida y no existe el archivo o se ha permitido la
+			// sobreescritura
+			// se recibe el archivo
 			if (recibirArchivo) {
-				// enviar tipo de comunicacion y recibir archivo
+				// si debe ser en texto se recibe siguiendo el protocolo en la parte de texto
 				if (Config.isMODO_TEXTO()) {
 					dos.writeInt(Codigos.TIPO_TEXTO);
 					recibirArchivoTexto(arch);
 				} else {
+					// si debe ser en bytes recibe siguiendo el protocolo en la parte de bytes
 					dos.writeInt(Codigos.TIPO_BYTES);
-					recibirArchivoBinario(arch);
+					recibirArchivoBytes(arch);
 				}
-				Msg.msgHora(sesion.getDatosUsuario()+" PUT exitoso en ruta: "+rutaCompleta);
+				Msg.msgHora(sesion.getDatosUsuario() + " PUT exitoso en ruta: " + rutaCompleta);
 			}
 
 		} catch (IOException e) {
-			Msg.msgHora(sesion.getDatosUsuario()+" PUT erroneo en: "+rutaCompleta);
+			Msg.msgHora(sesion.getDatosUsuario() + " PUT erroneo en: " + rutaCompleta);
 
 			try {
 				dos.writeInt(Codigos.MAL);
 			} catch (IOException e1) {
 			}
 		}
-		return null;
-
 	}
 
 	/**
-	 * @param archivoLocal
-	 * @throws IOException 
+	 * Recibe y escribe el archivo en disco siguiendo el protocolo PUT en su modo de
+	 * envio por bytes
+	 * 
+	 * @param arch Archivo a escribir
+	 * 
+	 * @throws IOException Si se produce algun problema con la escritura
 	 */
-	private void recibirArchivoBinario(File arch) throws IOException {
+	private void recibirArchivoBytes(File arch) throws IOException {
 		crearRuta(arch);
 		FileOutputStream fos = new FileOutputStream(arch);
-			long cantidadBytes = dis.readLong();
-			byte[] bytes = new byte[(int) cantidadBytes];
-			int offset = 0;
-			while (offset < cantidadBytes) {
-				int leidos = dis.read(bytes, offset, bytes.length - offset);
-				fos.write(bytes, offset, leidos);
-				offset += leidos;
-			}
-			fos.close();
-	}
+		// recoger cantidad de bytes
+		long cantidadBytes = dis.readLong();
 
-	
-	/**
-	 * 
-	 */
-
-	private void recibirArchivoTexto(File arch) {
-		crearRuta(arch);
-		try (FileWriter fw = new FileWriter(arch); BufferedWriter bw = new BufferedWriter(fw);) {
-			boolean continuar = true;
-			while (continuar) {
-				int cantidadLineas = dis.readInt();
-				for (int i = 0; i < cantidadLineas; i++) {
-					String linea = dis.readUTF();
-					bw.write(linea);
-					bw.newLine();
-					bw.flush();
-				}
-				// ver si hay que continuar
-				int resContinua;
-				resContinua = dis.readInt();
-				continuar = resContinua == Codigos.CONTINUAR;
-			}
-			bw.close();
-			fw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		// leer los bytes y escribirlos a disco
+		byte[] bytes = new byte[(int) cantidadBytes];
+		int offset = 0;
+		while (offset < cantidadBytes) {
+			int leidos = dis.read(bytes, offset, bytes.length - offset);
+			fos.write(bytes, offset, leidos);
+			offset += leidos;
 		}
+		fos.close();
 	}
 
 	/**
-	 * @param arch
+	 * Recibe un archivo siguiendo el protocolo PUT en su modo de texto
+	 * 
+	 * @param arch El archivo a escribir
+	 * 
+	 * @throws IOException Si hay algun problema con la escritura
+	 */
+	private void recibirArchivoTexto(File arch) throws IOException {
+		// crea la ruta del archivo
+		crearRuta(arch);
+
+		FileWriter fw = new FileWriter(arch);
+		BufferedWriter bw = new BufferedWriter(fw);
+		boolean continuar = true;
+		
+		//bucle de lectura
+		while (continuar) {
+			//leer cantidad de lineas en la siguiente tanda
+			int cantidadLineas = dis.readInt();
+			
+			//leer lineas de la tanda
+			for (int i = 0; i < cantidadLineas; i++) {
+				String linea = dis.readUTF();
+				bw.write(linea);
+				bw.newLine();
+				bw.flush();
+			}
+			// ver si hay que continuar o ha terminado
+			int resContinua;
+			resContinua = dis.readInt();
+			continuar = resContinua == Codigos.CONTINUAR;
+		}
+		//cerrar archivo
+		bw.close();
+		fw.close();
+	}
+
+	/**
+	 * Crea la ruta hasta el archivo
+	 * 
+	 * @param arch El archivo
 	 */
 	private void crearRuta(File arch) {
 		File rutaDirectorio = new File(arch.getParentFile().getAbsolutePath());

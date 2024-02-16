@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import ftpcliente.conector.comandos.TiposComando;
+import ftpcliente.conector.comandos.Comando;
 
 /**
  * 
@@ -78,7 +78,7 @@ public class Conexion {
 	 */
 	public void logout() {
 		try {
-			dos.writeUTF(TiposComando.EXIT);
+			dos.writeUTF(Comando.EXIT);
 			socket.close();
 		} catch (IOException e) {
 		}

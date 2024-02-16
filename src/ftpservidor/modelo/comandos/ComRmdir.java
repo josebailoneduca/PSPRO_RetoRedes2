@@ -18,61 +18,69 @@ import ftpservidor.modelo.Usuario;
 import ftpservidor.modelo.lib.UtilesArchivo;
 
 /**
+ * Se encarga de manejar un comando RMDIR en el servidor
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class ComRmdir {
-	private Usuario usuario;
-	private DataInputStream dis;
-	private DataOutputStream dos;
-	private Sesion sesion;
-	private String cwd;
-
+public class ComRmdir extends Comando {
+ 
+ 
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param sesion Sesion que realiza la operacion
+	 */
 	public ComRmdir(Sesion sesion) {
-		super();
-		this.sesion = sesion;
-		this.usuario = sesion.getUsuario();
-		this.dis = sesion.getDis();
-		this.dos = sesion.getDos();
-		this.cwd = sesion.getCwd();
+		super(sesion);
 	}
 
-	public Object iniciar() {
-		String rutaUsuario = usuario.getCarpeta();
-		// ruta dentro del usuario
-		String cwd = sesion.getCwd();
+	
+	/**
+	 * Inicia la operacion siguiendo el protocolo RMDIR (Ver estructura del protocolo
+	 * en la documentacion)
+	 */
+	public void iniciar() {
+		String rutaUsuario = usuario.getDirUsuario();
 		String rutaAEliminar;
-		String rutaCompleta=null;
+		String rutaCompleta = null;
 		try {
-			//leer ruta
+			// leer ruta
 			rutaAEliminar = dis.readUTF();
-			//componer y comprobar validez de ruta
+			// componer y comprobar validez de ruta
 			rutaCompleta = UtilesArchivo.componerRuta(rutaUsuario, cwd, rutaAEliminar);
-			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") && 
-					UtilesArchivo.rutaExiste(rutaCompleta)) {
-				
+			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/")
+					&& UtilesArchivo.rutaExiste(rutaCompleta)) {
+
 				File f = new File(rutaCompleta);
+				//comprobar que es directorio
 				if (f.isDirectory()) {
+					//si se borra correctamente se avisa
 					if (f.delete()) {
-						dos.writeInt(Codigos.OK);	
-						Msg.msgHora(sesion.getDatosUsuario()+" RMDIR exitoso en: "+rutaCompleta);
-					}else {
+						dos.writeInt(Codigos.OK);
+						Msg.msgHora(sesion.getDatosUsuario() + " RMDIR exitoso en: " + rutaCompleta);
+						
+					//si no se borra es porque no esta vacio, se avisa	
+					} else {
 						dos.writeInt(Codigos.NO_VACIO);
-						Msg.msgHora(sesion.getDatosUsuario()+" RMDIR bloqueado por no estar vacio: "+rutaCompleta);
+						Msg.msgHora(sesion.getDatosUsuario() + " RMDIR bloqueado por no estar vacio: " + rutaCompleta);
 					}
-				}else {
+					
+				//si no es directorio se avisa de que no existe como archivo	
+				} else {
 					dos.writeInt(Codigos.NO_EXISTE);
-					Msg.msgHora(sesion.getDatosUsuario()+" RMDIR bloqueado por no ser directorio: "+rutaCompleta);
+					Msg.msgHora(sesion.getDatosUsuario() + " RMDIR bloqueado por no ser directorio: " + rutaCompleta);
 				}
-				return null;		
+
+			//Si la ruta no es valida avisamos de mal resultado	
 			} else {
 				dos.writeInt(Codigos.MAL);
-				Msg.msgHora(sesion.getDatosUsuario()+" PUT bloqueado por ruta no permitida/existente: "+rutaCompleta);
+				Msg.msgHora(
+						sesion.getDatosUsuario() + " PUT bloqueado por ruta no permitida/existente: " + rutaCompleta);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
 
 	}
 }

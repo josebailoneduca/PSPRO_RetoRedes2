@@ -33,7 +33,7 @@ public class ComRmdir extends Comando {
 		if (comando.length < 2) 
 			return;
 		try {
-				dos.writeUTF(TiposComando.RMDIR);
+				dos.writeUTF(Comando.RMDIR);
 				dos.writeUTF(comando[1]);
 				int res = dis.readInt();
 				if (res == Codigos.MAL) {

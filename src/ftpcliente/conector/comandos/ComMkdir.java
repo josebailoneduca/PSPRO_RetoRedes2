@@ -34,7 +34,7 @@ public class ComMkdir extends Comando {
 			return;
 
 		try {
-			dos.writeUTF(TiposComando.MKDIR);
+			dos.writeUTF(Comando.MKDIR);
 			dos.writeUTF(comando[1]);
 
 			int res = dis.readInt();

@@ -27,49 +27,107 @@ import ftpservidor.modelo.comandos.ComLs;
 import ftpservidor.modelo.comandos.ComMkdir;
 import ftpservidor.modelo.comandos.ComPut;
 import ftpservidor.modelo.comandos.ComRmdir;
-import ftpservidor.modelo.comandos.TiposComando;
+import ftpservidor.modelo.comandos.Comando;
 
 /**
+ * Control de las transferencias de una sesion concreta.
+ * 
+ * En el inicio de la carrera gestiona la conexion inicial en puerto efimero exclusivo para esta sesion.
+ * Una vez la conexion esta en marcha cierra la conexion antigua de puerto fijo y compienza la gestion
+ * de registro o login.
+ * 
+ * 
+ * 
+ * Una vez se ha registrado o logueado se comienza un bucle que dura mientras se esta conectado.
+ * Este bucle espera recepciones de operaciones en el metodo {@link Sesion#buclePeticiones()}
+ * 
  * 
  * @author Jose Javier Bailon Ortiz
  */
 public class Sesion extends Thread {
 
+	/**
+	 * Socket abierto con la conexion inicial en el puerto publico fijo
+	 */
 	private Socket socketInicial;
-	private ServerSocket serverSocket;
+	
+	/**
+	 * Serversocket para iniciar la conexion en puerto efimero
+	 */
+	private ServerSocket serverSocketEfimero;
+	
+	/**
+	 * Socket principal de operaciones para la sesion
+	 */
 	private Socket socket;
+	
+	/**
+	 * InputStream del socket
+	 */
 	private InputStream is;
+	
+	/**
+	 * OutputStream del socket
+	 */
 	private OutputStream os;
+	
+	/**
+	 * DataInputStream del socket
+	 */
 	private DataInputStream dis;
+	
+	/**
+	 * DataoutputStream del socket
+	 */
 	private DataOutputStream dos;
+	
+	/**
+	 * Tipo de sesion LOGIN_NORMAL, LOGIN_ANONIMO
+	 */
 	private int tipoSesion = 0;//LOGIN_NORMAL LOGIN_ANONIMO
+	
+	/**
+	 * Usuario al que pertenece la sesion
+	 */
 	private Usuario usuario;
+	
+	/**
+	 * Directorio actual de trabajo. Ruta depediente de la carpeta de usuario.
+	 */
 	private String cwd = "/";
 
  
 	/**
-	 * @param s
+	 * Constructor
+	 * 
+	 * 
+	 * @param serverSocket ServerSocket de puerto efimero para iniciar la comunicacion de operaciones.
+	 * 
+	 * @param socketInicial Socket de conexion inicial en el puerto fijo de escucha del servidor
 	 */
 	public Sesion(ServerSocket serverSocket, Socket socketInicial) {
-		this.serverSocket = serverSocket;
+		this.serverSocketEfimero = serverSocket;
 		this.socketInicial = socketInicial;
 	}
 
+	
+	
 	@Override
 	public void run() {
 		try {
 			// coger nuevo socket
-			serverSocket.setSoTimeout(10000);;
-			socket = serverSocket.accept();
+			serverSocketEfimero.setSoTimeout(10000);;
+			socket = serverSocketEfimero.accept();
 			socket.setSoTimeout(60000);
 			
-			// cerrar socket inicial
+			// cerrar socket inicial de puerto publico fijo
 			this.socketInicial.close();
 			
-			// cerrar server socket
-			serverSocket.close();
+			// cerrar server socket efimero
+			serverSocketEfimero.close();
 			
 			
+			//recoger stream y crear envolventes
 			is = socket.getInputStream();
 			os = socket.getOutputStream();
 			dis = new DataInputStream(is);
@@ -80,17 +138,21 @@ public class Sesion extends Thread {
 			// gestionar login y registro
 			String operacion = dis.readUTF();
 			boolean permitido = false;
-			if (operacion.toUpperCase().equals(TiposComando.LOGIN)) 
+			if (operacion.toUpperCase().equals(Comando.LOGIN)) 
 				permitido = gestionaLogin();
-			else if (operacion.toUpperCase().equals(TiposComando.REGISTRO))
+			else if (operacion.toUpperCase().equals(Comando.REGISTRO))
 				permitido = gestionarRegistro();
-			// bucle de operaciones
+			
+			
+			// Si ha ganado acceso iniciar el bucle de operaciones
 			if (permitido) {
 				buclePeticiones();
 			}
+			//al terminar el bucle de operacines cerrar el socket
 			socket.close();
+			
 		} catch (SocketTimeoutException ex) {
-			Msg.msgHora("Cerrando serversocket en puerto "+serverSocket.getLocalPort()+" por falta de respuesta");
+			Msg.msgHora("Cerrando serversocket en puerto "+serverSocketEfimero.getLocalPort()+" por falta de respuesta");
 		} catch (IOException e) {
 			
 		}
@@ -100,56 +162,61 @@ public class Sesion extends Thread {
 	}
 
 	/**
-	 * 
+	 * Bucle de operaciones. Se encarga de escuchar la llegada de comandos e iniciar el protocolo necesario 
+	 * para gestionarlo
 	 */
 	private void buclePeticiones() {
 		while (estaConectado()) {
 			try {
 				String codigoPeticion = dis.readUTF();
 				switch (codigoPeticion) {
-				case TiposComando.EXIT -> exit();
-				case TiposComando.LS -> new ComLs(this).iniciar();
-				case TiposComando.CD -> new ComCd(this).iniciar();
-				case TiposComando.DEL -> new ComDel(this).iniciar();
-				case TiposComando.MKDIR-> new ComMkdir(this).iniciar();
-				case TiposComando.RMDIR-> new ComRmdir(this).iniciar();
-				case TiposComando.GET-> new ComGet(this).iniciar();
-				case TiposComando.PUT-> new ComPut(this).iniciar();
+				case Comando.EXIT -> exit();
+				case Comando.LS -> new ComLs(this).iniciar();
+				case Comando.CD -> new ComCd(this).iniciar();
+				case Comando.DEL -> new ComDel(this).iniciar();
+				case Comando.MKDIR-> new ComMkdir(this).iniciar();
+				case Comando.RMDIR-> new ComRmdir(this).iniciar();
+				case Comando.GET-> new ComGet(this).iniciar();
+				case Comando.PUT-> new ComPut(this).iniciar();
 				}
 
 			} catch (IOException e) {
-				//e.printStackTrace();
-				try {
-					socket.close();
-				} catch (IOException e1) {
-					//e.printStackTrace();
-				}
-
+				try {socket.close();} catch (IOException e1) {}
 			}
 		}
-
 	}
 
 	/**
-	 * @return
+	 * Gestiona el login.
+	 * Ver protocolo LOGIN en la documentacion
+	 * 
+	 * @return True si hace login exitoso, false si no lo hace.
 	 */
 	private boolean gestionaLogin() {
 		boolean loginOk = false;
 		try {
+			//leer tipo de login
 			tipoSesion = dis.readInt();
+			//si login normal
 			if (tipoSesion == Codigos.LOGIN_NORMAL) {
 				String nombreUsuario = dis.readUTF();
 				String contrasena = dis.readUTF();
 				usuario = new Usuario(nombreUsuario);
 				loginOk = usuario.login(contrasena);
+				
+			//si login anonimo
 			} else if (tipoSesion==Codigos.LOGIN_ANONIMO) {
 				usuario = new Usuario();
 				loginOk = true;
 			} 
+			
+			//si ha conseguido iniciar sesion avisar
 			if (loginOk) {
 				dos.writeInt(Codigos.OK);
 				Msg.msgHora(usuario.getNombreUsuario()+" Login desde "+socket.getRemoteSocketAddress());
 				return true;
+				
+			//en caso contrario avisar del rechazo
 			} else {
 				usuario=null;
 				dos.writeInt(Codigos.MAL);
@@ -164,12 +231,17 @@ public class Sesion extends Thread {
 	}
 
 	/**
-	 * @return
+	 * Gestiona el registro de un nuevo usuario logeandolo si el registro tiene exito
+	 * 
+	 * @return True si se ha registrado, False si no lo ha hechoa
 	 */
 	private boolean gestionarRegistro() {
 		try {
+			//leer nombre y contraseña
 			String nombreUsuario = dis.readUTF();
 			String contrasena = dis.readUTF();
+			
+			//comprobar si no existe, se puede crear la carpeta y su archivo con la clave
 			boolean registroCorrecto=false;
 			File carpetaUsuario = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario);
 			if (!carpetaUsuario.exists() &&
@@ -177,11 +249,15 @@ public class Sesion extends Thread {
 				crearPasswordFile(nombreUsuario,contrasena)) {
 					registroCorrecto=true;
 			}
+			
+			//si el registro es correcto se avisa
 			if (registroCorrecto) {
 				Msg.msgHora("Registro de nuevo usuario "+nombreUsuario+" dede"+socket.getRemoteSocketAddress());
 				usuario = new Usuario(nombreUsuario);
 				dos.writeInt(Codigos.OK);
 				return true;
+				
+			//si no es correcto se avisa del rechazo
 			}else {
 				Msg.msgHora("Registro erróneo desde "+socket.getRemoteSocketAddress());
 				dos.writeInt(Codigos.MAL);
@@ -198,7 +274,12 @@ public class Sesion extends Thread {
 	}
 
 	/**
-	 * @param nombreUsuario
+	 * Crea un archivo para un usuario que contiene su clave
+	 * 
+	 * @param nombreUsuario Nombre de usuario
+	 * @param contrasena Contrasena
+	 * 
+	 * @return True si se ha creado, false si no se ha creado
 	 */
 	private boolean crearPasswordFile(String nombreUsuario, String contrasena) {
 		File arch = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario+".pass");
@@ -227,44 +308,51 @@ public class Sesion extends Thread {
 		return false;
 	}
 
-	public Socket getSocket() {
-		return socket;
-	}
-
-	public void setSocket(Socket socket) {
-		this.socket = socket;
-	}
-
-	public InputStream getIs() {
-		return is;
-	}
-
-	public OutputStream getOs() {
-		return os;
-	}
-
+	
+	 
+	/**
+	 * Devuelve el DataInputStream de la sesion
+	 * 
+	 * @return El data input stream
+	 */
 	public DataInputStream getDis() {
 		return dis;
 	}
 
+	/**
+	 * Devuelve el DataOutputStream de la sesion
+	 * 
+	 * @return El data output stream
+	 */
 	public DataOutputStream getDos() {
 		return dos;
 	}
 
-	public int getTipoSesion() {
-		return tipoSesion;
-	}
-
+	/**
+	 * Devuelve el usuario de la sesion
+	 * 
+	 * @return El usuario
+	 */
 	public Usuario getUsuario() {
 		return usuario;
 	}
 
+	/**
+	 * Devuelve el Directorio de trabajo actual de la sesion
+	 * 
+	 * @return El CWD
+	 */
 	public String getCwd() {
 		return cwd;
 	}
 
+	
 	/**
-	 * @param replace
+	 * Define el CWD
+	 * 
+	 * @param cwd El nuevo directorio actual de trabajo a establecer
+	 * 
+	 * @return True si s e ha cambiado, false si no se ha cambiado
 	 */
 	public boolean setCwd(String cwd) {
 		try {
@@ -279,6 +367,9 @@ public class Sesion extends Thread {
 	}
 	
 	
+	/**
+	 * Cierra la sesion
+	 */
 	public void exit() {
 		try {
 			if (socket!=null) 
@@ -292,6 +383,11 @@ public class Sesion extends Thread {
 	}
 
  
+	/**
+	 * Devuelve un strean con los datos de usuario: Nombre + direccion del socket
+	 * 
+	 * @return El nombre de usuario y direccion y puerto de conexion
+	 */
 	public String getDatosUsuario() {
 		return usuario.getNombreUsuario()+" "+socket.getRemoteSocketAddress();
 	}

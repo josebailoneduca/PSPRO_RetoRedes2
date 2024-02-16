@@ -30,9 +30,11 @@ public class ComLogin extends Comando{
 	
  
 	public void iniciar() {
+		if (comando.length<4)
+			return;
 		
 		try {
-			dos.writeUTF(TiposComando.LOGIN);
+			dos.writeUTF(Comando.LOGIN);
 			int tipo = Integer.parseInt(comando[1]);
 			String usuario="ANONIMO";
 			dos.writeInt(tipo);
@@ -46,6 +48,7 @@ public class ComLogin extends Comando{
 			if (res==Codigos.OK) {
 				modelo.setEstadoLogin(true,usuario);
 				modelo.msgInfo("Sesión iniciada como "+usuario+" en "+modelo.getHost());
+				modelo.addOperacion("LS");
 			}
 			else {
 				modelo.setEstadoLogin(false,null);

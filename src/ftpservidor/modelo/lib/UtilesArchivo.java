@@ -8,16 +8,19 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 
 /**
+ * Utilidades para la gestion de archivos
  * 
  * @author Jose Javier Bailon Ortiz
  */
 public class UtilesArchivo {
 
 	/**
-	 * Comprueba si ruta A esta dentro de rutaB
-	 * @param rutaA
-	 * @param rutaB
-	 * @return
+	 * Comprueba si ruta A esta dentro de rutaB. Usado para comprobar que las peticiones de un
+	 * usuario son de archivos dentro de su carpeta permitida
+	 * 
+	 * @param rutaA Ruta a comprobar
+	 * @param rutaB Ruta a comprobar
+	 * @return True si rutaA es hija o igual que rutaB. False en caso contrario 
 	 */
 	public static boolean rutaDentroDeRuta(String rutaA, String rutaB) {
 		try {
@@ -34,27 +37,41 @@ public class UtilesArchivo {
 	
 	/**
 	 * Devuelve si una ruta existe
-	 * @param ruta
-	 * @return
+	 * @param ruta La ruta a comprobar
+	 * @return True si existe false si no existe
 	 */
 	public static boolean rutaExiste(String ruta) {
 		return new File(ruta).exists();
 	}
 
+	
+	
 	/**
-	 * @param rutaUsuario
-	 * @param cwd
-	 * @param nuevaRuta
-	 * @return
+	 * Compone una ruta a usando el directorio de usuario, su CWD y una ruta extra que en caso de ser
+	 * relativa se compone respecto al CWD y en caso de empezar con / se supone absoluta a partir
+	 * de la ruta. 
+	 * 
+	 * <p>Asi si la ruta empieza con / la composcion es:
+	 * dicrectorioUsuario/rutaExtra </p>
+	 * 
+	 * <p>Si la ruta no empieza con / entonces la composicion es:
+	 * directorioUsuario/CWD/rutaExtra</p>
+	 * 
+	 * 
+	 * @param rutaUsuario Directorio del usuario
+	 * @param cwd : Directorio actual de la sesion dentro del directorio de usuario
+	 * @param rutaExtra: ruta extra a agregar
+	 * 
+	 * @return La ruta compuesta
 	 */
-	public static String componerRuta(String rutaUsuario, String cwd, String nuevaRuta) {
-		 if (nuevaRuta==null || nuevaRuta.length()==0)
+	public static String componerRuta(String rutaUsuario, String cwd, String rutaExtra) {
+		 if (rutaExtra==null || rutaExtra.length()==0)
 			 return rutaUsuario+cwd;
 		 String rutaCompleta = rutaUsuario;
-		 if (nuevaRuta.charAt(0)=='/' || nuevaRuta.charAt(0)=='\\')
-			 rutaCompleta +=nuevaRuta;
+		 if (rutaExtra.charAt(0)=='/' || rutaExtra.charAt(0)=='\\')
+			 rutaCompleta +=rutaExtra;
 		 else
-			 rutaCompleta += cwd+'/'+nuevaRuta;
+			 rutaCompleta += cwd+'/'+rutaExtra;
 		
 		return rutaCompleta;
 	}
