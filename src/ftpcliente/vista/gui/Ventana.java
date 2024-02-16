@@ -12,6 +12,8 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -162,8 +164,13 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		localTabla.setComponentPopupMenu(new MenuLocal(this,localTabla));
 		
 		
-		
-
+		//cambio de tamaño de la ventana
+		this.addComponentListener(new ComponentAdapter() {
+		    public void componentResized(ComponentEvent componentEvent) {
+		        panelDivisor.setDividerLocation(getWidth()*60/100);
+		        panelLocalDivisor.setDividerLocation(getWidth()*30/100);
+		    }
+		});
 		
 	}
 	
@@ -444,6 +451,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		remotoTabla = new JTable();
 		remotoRuta = new JLabel();
 		historial = new JTextArea();
+		historial.setEditable(false);
 		datosConexion = new JLabel();
 		inputHost = new JTextField();
 		inputPuerto = new JTextField();
@@ -520,13 +528,14 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		getContentPane().add(panelCentral, java.awt.BorderLayout.CENTER);
 
 		panelInferior.setLayout(new java.awt.BorderLayout());
+		
 		panelComandos.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		panelComandos.setLayout(new java.awt.BorderLayout(5, 5));
 		panelComandos.add(inputComando, java.awt.BorderLayout.CENTER);
 		btnEnviar.setText("Enviar");
 		panelComandos.add(btnEnviar, java.awt.BorderLayout.LINE_END);
 		historial.setColumns(20);
-		historial.setRows(5);
+		historial.setRows(10);
 		scrollHistorial.setViewportView(historial);
 		panelComandos.add(scrollHistorial, java.awt.BorderLayout.PAGE_START);
 		lbComando.setText("Comando:");

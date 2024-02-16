@@ -51,6 +51,10 @@ public class ProcesadorOperaciones extends Thread {
 			String operacion;
 			try {
 				operacion = operaciones.take();
+				if (!modelo.isConectado()) {
+					modelo.logout();
+					return;
+				}
 				String[] partes = extraerPartesComando(operacion);
 				if (partes.length > 0) {
 					String comando = partes[0];

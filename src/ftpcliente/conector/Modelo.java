@@ -30,7 +30,7 @@ public class Modelo {
     private Conexion conexion;
     boolean logged=false;
     String usuario="";
-    
+    Socket socketOperaciones;
     
     
     
@@ -41,7 +41,7 @@ public class Modelo {
 
 	public boolean iniciarConexion(String host, int puerto) {
 		Socket socketConexion=null;
-		Socket socketOperaciones=null;
+		socketOperaciones=null;
 		try {
 			//conexion inicial
 			socketConexion= new Socket(host,puerto);
@@ -186,5 +186,18 @@ public class Modelo {
 	public void mensajeInfo(String msg) {
 		controlador.mensajeError(msg);
 		
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isConectado() {
+		if (this.socketOperaciones!=null &&
+				this.socketOperaciones.isConnected() &&
+				!this.socketOperaciones.isClosed()
+				)
+			return true;
+		else
+		return false;
 	}
 }

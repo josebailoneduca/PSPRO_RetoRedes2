@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import fptservidor.Config;
+import fptservidor.Msg;
 import fptservidor.modelo.Codigos;
 import fptservidor.modelo.Sesion;
 import fptservidor.modelo.Usuario;
@@ -48,7 +49,7 @@ public class ComPut {
 	public Object iniciar() {
 		String rutaUsuario = usuario.getCarpeta();
 		// comprobar ruta dentro del usuario
-		String cwd = sesion.getCwd();
+ 
 		String rutaArchivo;
 		String rutaCompleta = null;
 		boolean recibirArchivo = false;
@@ -60,7 +61,7 @@ public class ComPut {
 			File arch = new File(rutaCompleta);
 			// comprobar si no es ruta interior del usuario o es directorio contestamos que no
 			if (!UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") || arch.isDirectory()) {
-
+				Msg.msgHora(sesion.getDatosUsuario()+" PUT bloqueado en ruta no permitida: "+rutaCompleta);
 				dos.writeInt(Codigos.MAL);
 				// si no existe acepta
 			} else if (!UtilesArchivo.rutaExiste(rutaCompleta)) {
@@ -75,7 +76,7 @@ public class ComPut {
 					recibirArchivo = true;
 			}
 			
-			//si se la ruta es permitida y no existe el archivo o se ha permitido la sobreescritura
+			//si la ruta es permitida y no existe el archivo o se ha permitido la sobreescritura
 			//se recibe el archivo
 			if (recibirArchivo) {
 				// enviar tipo de comunicacion y recibir archivo
@@ -86,9 +87,12 @@ public class ComPut {
 					dos.writeInt(Codigos.TIPO_BYTES);
 					recibirArchivoBinario(arch);
 				}
+				Msg.msgHora(sesion.getDatosUsuario()+" PUT exitoso en ruta: "+rutaCompleta);
 			}
 
 		} catch (IOException e) {
+			Msg.msgHora(sesion.getDatosUsuario()+" PUT erroneo en: "+rutaCompleta);
+
 			try {
 				dos.writeInt(Codigos.MAL);
 			} catch (IOException e1) {

@@ -35,26 +35,24 @@ import ftpcliente.conector.ProcesadorOperaciones;
  */
 public class Sesion extends Thread {
 
-	Socket socketInicial;
-	ServerSocket serverSocket;
-	Socket socket;
-	InputStream is;
-	OutputStream os;
-	DataInputStream dis;
-	DataOutputStream dos;
-	private int tipoSesion = 0;
+	private Socket socketInicial;
+	private ServerSocket serverSocket;
+	private Socket socket;
+	private InputStream is;
+	private OutputStream os;
+	private DataInputStream dis;
+	private DataOutputStream dos;
+	private int tipoSesion = 0;//LOGIN_NORMAL LOGIN_ANONIMO
 	private Usuario usuario;
 	private String cwd = "/";
 
-	boolean conectado = false;
-
+ 
 	/**
 	 * @param s
 	 */
 	public Sesion(ServerSocket serverSocket, Socket socketInicial) {
 		this.serverSocket = serverSocket;
 		this.socketInicial = socketInicial;
-
 	}
 
 	@Override
@@ -63,19 +61,22 @@ public class Sesion extends Thread {
 			// coger nuevo socket
 			serverSocket.setSoTimeout(10000);;
 			socket = serverSocket.accept();
+			socket.setSoTimeout(60000);
+			
 			// cerrar socket inicial
 			this.socketInicial.close();
+			
 			// cerrar server socket
 			serverSocket.close();
 			
-			socket.setSoTimeout(60000);
 			
-			conectado = true;
 			is = socket.getInputStream();
 			os = socket.getOutputStream();
 			dis = new DataInputStream(is);
 			dos = new DataOutputStream(os);
 			Msg.msgHora("Conexion iniciada con "+socket.getRemoteSocketAddress());
+			
+			
 			// gestionar login y registro
 			String operacion = dis.readUTF();
 			boolean permitido = false;
@@ -103,14 +104,10 @@ public class Sesion extends Thread {
 	 */
 	private void buclePeticiones() {
 		while (estaConectado()) {
-			System.out.println("bucleeee");
 			try {
 				String codigoPeticion = dis.readUTF();
 				switch (codigoPeticion) {
-				case TiposComando.EXIT -> {
-					dos.writeInt(Codigos.OK);
-					socket.close();
-				}
+				case TiposComando.EXIT -> exit();
 				case TiposComando.LS -> new ComLs(this).iniciar();
 				case TiposComando.CD -> new ComCd(this).iniciar();
 				case TiposComando.DEL -> new ComDel(this).iniciar();
@@ -121,11 +118,11 @@ public class Sesion extends Thread {
 				}
 
 			} catch (IOException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 				try {
 					socket.close();
 				} catch (IOException e1) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 
 			}
@@ -161,7 +158,7 @@ public class Sesion extends Thread {
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			Msg.msgHora("Login erróneo desde "+socket.getRemoteSocketAddress());
 			return false;
 		}
 	}
@@ -173,25 +170,29 @@ public class Sesion extends Thread {
 		try {
 			String nombreUsuario = dis.readUTF();
 			String contrasena = dis.readUTF();
-			
+			boolean registroCorrecto=false;
 			File carpetaUsuario = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario);
-			if (carpetaUsuario.exists()) {
+			if (!carpetaUsuario.exists() &&
+				carpetaUsuario.mkdir()&&
+				crearPasswordFile(nombreUsuario,contrasena)) {
+					registroCorrecto=true;
+			}
+			if (registroCorrecto) {
+				Msg.msgHora("Registro de nuevo usuario "+nombreUsuario+" dede"+socket.getRemoteSocketAddress());
+				usuario = new Usuario(nombreUsuario);
+				dos.writeInt(Codigos.OK);
+				return true;
+			}else {
 				Msg.msgHora("Registro erróneo desde "+socket.getRemoteSocketAddress());
 				dos.writeInt(Codigos.MAL);
 				return false;
 			}
-			else {
-				carpetaUsuario.mkdir();
-				crearPasswordFile(nombreUsuario,contrasena);
-				
-			}
-			Msg.msgHora("Registro de nuevo usuario "+nombreUsuario+" dede"+socket.getRemoteSocketAddress());
-			usuario = new Usuario(nombreUsuario);
-			dos.writeInt(Codigos.OK);
-			return true;
 			
 		} catch (IOException e) {
 			Msg.msgHora("Registro erróneo desde "+socket.getRemoteSocketAddress());
+			try {
+				dos.writeInt(Codigos.MAL);
+			} catch (IOException e1) {}
 			return false;
 		}
 	}
@@ -199,18 +200,17 @@ public class Sesion extends Thread {
 	/**
 	 * @param nombreUsuario
 	 */
-	private void crearPasswordFile(String nombreUsuario, String contrasena) {
+	private boolean crearPasswordFile(String nombreUsuario, String contrasena) {
 		File arch = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario+".pass");
 		try {
 			FileWriter fw = new FileWriter(arch);
 			fw.write(contrasena);
 			fw.flush();
 			fw.close();
-			
-			
+			return true;
 		} catch (IOException e) {
-		
-			e.printStackTrace();
+			Msg.msgHora("Error creando archivo de password "+arch.getAbsolutePath());
+			return false;
 		}
 		
 		
@@ -277,14 +277,23 @@ public class Sesion extends Thread {
 			return false;
 		}
 	}
+	
+	
 	public void exit() {
 		try {
-			this.socket.close();
+			if (socket!=null) 
+				Msg.msgHora("El usuario "+ ((usuario!=null) ? usuario+ " en ":"" ) + socket.getRemoteSocketAddress()+" cierra la sesion");
+				
+			dos.writeInt(Codigos.OK);
+			socket.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			
 		}
 	}
 
  
+	public String getDatosUsuario() {
+		return usuario.getNombreUsuario()+"-"+socket.getRemoteSocketAddress();
+	}
 	
 }

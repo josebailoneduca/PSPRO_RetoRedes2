@@ -17,6 +17,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import fptservidor.Config;
+import fptservidor.Msg;
 import fptservidor.modelo.Codigos;
 import fptservidor.modelo.Sesion;
 import fptservidor.modelo.Usuario;
@@ -45,7 +46,6 @@ public class ComGet {
 	public Object iniciar() {
 		String rutaUsuario = usuario.getCarpeta();
 		// comprobar ruta dentro del usuario
-		String cwd = sesion.getCwd();
 		String rutaArchivo;
 		String rutaCompleta = null;
 		try {
@@ -69,17 +69,18 @@ public class ComGet {
 					dos.writeInt(Codigos.TIPO_BYTES);
 				    enviarArchivoBinario(arch);
 				}
-				
+				Msg.msgHora(sesion.getDatosUsuario()+" GET exitoso: "+rutaCompleta);
 			} else {
 				dos.writeInt(Codigos.NO_EXISTE);
+				Msg.msgHora(sesion.getDatosUsuario()+" GET archivo no existente/permitido bloqueado: "+rutaCompleta);
 			}
 		} catch (IOException e) {
 			try {
 				dos.writeInt(Codigos.MAL);
+				Msg.msgHora(sesion.getDatosUsuario()+" GET erroneo: "+rutaCompleta);
 			} catch (IOException e1) {
-				e1.printStackTrace();
+
 			}
-			e.printStackTrace();
 		}
 		return null;
 

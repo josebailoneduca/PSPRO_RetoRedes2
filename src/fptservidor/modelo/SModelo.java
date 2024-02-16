@@ -10,50 +10,44 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.io.File;
+import fptservidor.Config;
 import fptservidor.Msg;
 
 /**
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class SModelo extends Thread{
+public class SModelo extends Thread {
 	private ServerSocket serverSocket;
 	private ArrayList<Sesion> sesiones = new ArrayList<Sesion>();
-	private int puerto=0;
-	
-	
+	private int puerto = 0;
+
 	public SModelo(int puerto) {
-		this.puerto=puerto;
+		this.puerto = puerto;
 	}
 
-	public boolean iniciar()  {
-		
-		
-		try {
-			serverSocket=new ServerSocket(puerto);
-			return true;
-		} catch (IOException e) {
-		return false;
-		}
-	}
-
-	
 	/**
 	 * Bucle de escucha. Se genera en otro hilo
 	 */
 	public void run() {
-			iniciar();
-			Msg.cuadro(new String[] {"SERVIDOR INICIADO","PUERTO: "+puerto});
-			while(escuchando()) {
+		if (iniciar()) {
+			Msg.cuadro(new String[] { 
+					"SERVIDOR FTP INICIADO", 
+					"ESCUCHANDO EN PUERTO: " + puerto ,
+					"ALM. USUARIOS: "+ (new File(Config.getRUTA_ALMACENAMIENTO()).getAbsolutePath()),
+					"ALM. ANONIMO: "+ (new File(Config.getRUTA_ALMACENAMIENTO_ANONIMO()).getAbsolutePath()),
+					});
+			while (isEscuchando()) {
 				try {
 					Socket socketInicial = serverSocket.accept();
 					DataOutputStream dos = new DataOutputStream(socketInicial.getOutputStream());
 					ServerSocket servSocketOperar = new ServerSocket(0);
-					Sesion sesion=new Sesion(servSocketOperar,socketInicial);
+					Sesion sesion = new Sesion(servSocketOperar, socketInicial);
 					sesiones.add(sesion);
 					sesion.start();
-					Msg.msgHora("Esperando conexion con "+socketInicial.getInetAddress()+" en el puerto local "+servSocketOperar.getLocalPort());
+					Msg.msgHora("Nueva conexion con " + socketInicial.getInetAddress() + "en " + puerto
+							+ ". Esperando conexion de operaciones en el puerto local" + servSocketOperar.getLocalPort());
 					dos.writeInt(Codigos.OK);
 					dos.writeInt(servSocketOperar.getLocalPort());
 					limpiarSesiones();
@@ -61,15 +55,29 @@ public class SModelo extends Thread{
 					e.printStackTrace();
 				}
 			}
-			Msg.msgHora("Servidor terminado");
+		}
+		Msg.msgHora("Servidor terminado");
 
 	}
 
+	
+	public boolean iniciar() {
+
+		try {
+			serverSocket = new ServerSocket(puerto);
+			return true;
+		} catch (IOException e) {
+			Msg.msgHora(e.getMessage() + ". En puerto " + puerto);
+			return false;
+		}
+	}
+	
+	
 	/**
 	 * 
 	 */
 	private void limpiarSesiones() {
-		List<Sesion> borrar=new ArrayList<Sesion>();
+		List<Sesion> borrar = new ArrayList<Sesion>();
 		for (Sesion sesion : sesiones) {
 			if (!sesion.isAlive())
 				borrar.add(sesion);
@@ -80,9 +88,9 @@ public class SModelo extends Thread{
 	/**
 	 * @return
 	 */
-	private boolean escuchando() {
-		boolean res= serverSocket!=null && !serverSocket.isClosed();
+	private boolean isEscuchando() {
+		boolean res = serverSocket != null && !serverSocket.isClosed();
 		return res;
 	}
-	
+
 }

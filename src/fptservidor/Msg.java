@@ -19,7 +19,7 @@ public class Msg {
 	}
 
 	public static void cuadro (String[] msgs) {
-		int ancho=58;
+		int ancho=90;
 		System.out.println("*".repeat(ancho));
 		for (String msg : msgs) {
 			System.out.println(String.format("* %-"+(ancho-4)+"s *", msg));

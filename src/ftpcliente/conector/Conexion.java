@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import ftpcliente.conector.comandos.TiposComando;
+
 /**
  * 
  * @author Jose Javier Bailon Ortiz
@@ -79,9 +81,9 @@ public class Conexion {
 	 */
 	public void logout() {
 		try {
+			dos.writeUTF(TiposComando.EXIT);
 			socket.close();
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 
 		operacionesPendientes.clear();

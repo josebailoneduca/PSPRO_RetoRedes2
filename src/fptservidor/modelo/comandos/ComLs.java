@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import fptservidor.Msg;
 import fptservidor.modelo.Codigos;
 import fptservidor.modelo.Sesion;
 import fptservidor.modelo.Usuario;
@@ -18,11 +19,11 @@ import fptservidor.modelo.Usuario;
  * @author Jose Javier Bailon Ortiz
  */
 public class ComLs {
-	Usuario usuario;
-	DataInputStream dis;
-	DataOutputStream dos;
-	Sesion sesion;
-	String cwd;
+	private Usuario usuario;
+	private DataInputStream dis;
+	private DataOutputStream dos;
+	private Sesion sesion;
+	private String cwd;
 	public ComLs(Sesion sesion) {
 		super();
 		this.sesion = sesion;
@@ -39,17 +40,18 @@ public class ComLs {
 		
 		try {
 			if (archivos==null) {
+				Msg.msgHora(sesion.getDatosUsuario()+"LS erroneo en: "+rutaCompleta);
 				dos.writeInt(Codigos.MAL);
 				return null;
 			}
 			dos.writeInt(Codigos.OK);
-			dos.writeUTF(sesion.getCwd());
-			boolean esRaiz = sesion.getCwd().equals("/")||sesion.getCwd().equals("\\");
+			dos.writeUTF(cwd);
+			boolean esRaiz = cwd.equals("/")||cwd.equals("\\");
 			//si es raiz n archivos
 			if (esRaiz)
 				dos.writeInt(archivos.length);
 			else
-				//si no es raiz n archivos +1 para directorio padre
+				//si no es raiz n archivos +1 para incluir directorio padre
 				dos.writeInt(archivos.length+1);
 			
 			if (!esRaiz) {
@@ -60,10 +62,10 @@ public class ComLs {
 				dos.writeUTF(file.getName());
 				dos.writeInt((file.isDirectory()?Codigos.DIRECTORIO:Codigos.ARCHIVO));
 			}
-			
+			Msg.msgHora(sesion.getDatosUsuario()+" LS exitoso en: "+rutaCompleta);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Msg.msgHora(sesion.getDatosUsuario()+" LS erroneo en: "+rutaCompleta);
+
 		}
 		return null;
 		

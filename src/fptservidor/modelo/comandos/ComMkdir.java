@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
+import fptservidor.Msg;
 import fptservidor.modelo.Codigos;
 import fptservidor.modelo.Sesion;
 import fptservidor.modelo.Usuario;
@@ -21,11 +22,11 @@ import fptservidor.modelo.lib.UtilesArchivo;
  * @author Jose Javier Bailon Ortiz
  */
 public class ComMkdir {
-	Usuario usuario;
-	DataInputStream dis;
-	DataOutputStream dos;
-	Sesion sesion;
-	String cwd;
+	private Usuario usuario;
+	private DataInputStream dis;
+	private DataOutputStream dos;
+	private Sesion sesion;
+	private String cwd;
 
 	public ComMkdir(Sesion sesion) {
 		super();
@@ -39,7 +40,6 @@ public class ComMkdir {
 	public Object iniciar() {
 		String rutaUsuario = usuario.getCarpeta();
 		// ruta dentro del usuario
-		String cwd = sesion.getCwd();
 		String directorioACrear;
 		String rutaCompleta=null;
 		try {
@@ -50,17 +50,24 @@ public class ComMkdir {
 			if (UtilesArchivo.rutaDentroDeRuta(rutaCompleta, rutaUsuario + "/") ) {
 				if (UtilesArchivo.rutaExiste(rutaCompleta) ) {
 					dos.writeInt(Codigos.YA_EXISTE);
+					Msg.msgHora(sesion.getDatosUsuario()+" MKDIR erroneo por existir: "+rutaCompleta);
 				}else if (crearDirectorio(rutaCompleta)) {
 						dos.writeInt(Codigos.OK);
+						Msg.msgHora(sesion.getDatosUsuario()+" MKDIR exitoso en ruta: "+rutaCompleta);
 				}else {
 						dos.writeInt(Codigos.MAL);
+						Msg.msgHora(sesion.getDatosUsuario()+" MKDIR erroneo en ruta: "+rutaCompleta);
 				}
 			} else {
+				Msg.msgHora(sesion.getDatosUsuario()+" MKDIR bloqueado en ruta no permitida: "+rutaCompleta);
 				dos.writeInt(Codigos.MAL);
-				System.out.println("Carpeta no creada");
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			Msg.msgHora(sesion.getDatosUsuario()+" MKDIR erroneo en ruta: "+rutaCompleta);
+			try {
+				dos.writeInt(Codigos.MAL);
+			} catch (IOException e1) {
+			}
 		}
 		return null;
 

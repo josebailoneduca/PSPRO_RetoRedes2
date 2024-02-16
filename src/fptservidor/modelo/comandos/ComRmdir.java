@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
+import fptservidor.Msg;
 import fptservidor.modelo.Codigos;
 import fptservidor.modelo.Sesion;
 import fptservidor.modelo.Usuario;
@@ -21,11 +22,11 @@ import fptservidor.modelo.lib.UtilesArchivo;
  * @author Jose Javier Bailon Ortiz
  */
 public class ComRmdir {
-	Usuario usuario;
-	DataInputStream dis;
-	DataOutputStream dos;
-	Sesion sesion;
-	String cwd;
+	private Usuario usuario;
+	private DataInputStream dis;
+	private DataOutputStream dos;
+	private Sesion sesion;
+	private String cwd;
 
 	public ComRmdir(Sesion sesion) {
 		super();
@@ -53,22 +54,20 @@ public class ComRmdir {
 				File f = new File(rutaCompleta);
 				if (f.isDirectory()) {
 					if (f.delete()) {
-						dos.writeInt(Codigos.OK);						
+						dos.writeInt(Codigos.OK);	
+						Msg.msgHora(sesion.getDatosUsuario()+" RMDIR exitoso en: "+rutaCompleta);
 					}else {
 						dos.writeInt(Codigos.NO_VACIO);
+						Msg.msgHora(sesion.getDatosUsuario()+" RMDIR bloqueado por no estar vacio: "+rutaCompleta);
 					}
 				}else {
 					dos.writeInt(Codigos.NO_EXISTE);
+					Msg.msgHora(sesion.getDatosUsuario()+" RMDIR bloqueado por no ser directorio: "+rutaCompleta);
 				}
-					
-				
-				return false;
-				
-						
-						
+				return null;		
 			} else {
 				dos.writeInt(Codigos.MAL);
-				System.out.println("Archivo no eliminado");
+				Msg.msgHora(sesion.getDatosUsuario()+" PUT bloqueado por ruta no permitida/existente: "+rutaCompleta);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -76,7 +75,4 @@ public class ComRmdir {
 		return null;
 
 	}
-
- 
-
 }

@@ -11,7 +11,7 @@ import fptservidor.modelo.SModelo;
  * @author Jose Javier Bailon Ortiz
  */
 public class SControlador {
-	SModelo modelo;
+	private  SModelo modelo;
 
 	public SControlador() {
 		modelo = new SModelo(Config.getPUERTO());
