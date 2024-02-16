@@ -3,7 +3,7 @@
  */
 package ftpcliente.controlador.dto;
 
-import fptservidor.modelo.Codigos;
+import ftpservidor.modelo.Codigos;
 
 /**
  * 

@@ -104,19 +104,26 @@ public class ComPut extends Comando {
 
 		long nBytes = arch.length();
 
-		ArrayList<String> lineas = new ArrayList<String>();
-
+ 
 		// leer archivo
 		FileInputStream fis = new FileInputStream(arch);
+		try {
 			// enviar longitud
 			dos.writeLong(nBytes);
-			byte[] bytes = new byte[(int) nBytes];
-			int leidos = fis.read(bytes, 0, bytes.length);
-			try {
+			//enviar tandas de 500 bytes hasta consumir el archivo
+			while(nBytes>0) {
+				int leer=500;
+				if (nBytes<500)
+					leer=(int)nBytes;
+				byte[] bytes = new byte[leer];
+				int leidos=fis.read(bytes, 0, bytes.length);
+				nBytes-=leidos;
 				dos.write(bytes, 0, bytes.length);
-			} catch (EOFException ex) {
-
 			}
+			fis.close();
+		} catch (EOFException ex) {
+			}
+			fis.close();
 
 
 	}

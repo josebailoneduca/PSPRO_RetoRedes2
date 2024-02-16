@@ -83,7 +83,7 @@ public class ComGet extends Comando {
 
 					// avisar a modelo de fin de transferencia
 					modelo.actualizarLocal();
-
+					modelo.msgInfo("GET exitoso. Archivo: " + archivoLocal);
 
 				} else if (res == Codigos.NO_EXISTE) {
 					modelo.msgError("GET erroneo. El archivo no existe: " + rutaRemota);
@@ -111,7 +111,7 @@ public class ComGet extends Comando {
 				fos.write(bytes, offset, leidos);
 				offset += leidos;
 			}
-			
+			fos.close();
 			 
 	}
 

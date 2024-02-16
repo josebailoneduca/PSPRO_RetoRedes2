@@ -11,11 +11,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-import fptservidor.modelo.Codigos;
-import fptservidor.modelo.Sesion;
-import fptservidor.modelo.Usuario;
 import ftpcliente.conector.Modelo;
 import ftpcliente.controlador.dto.DtoArchivo;
+import ftpservidor.modelo.Codigos;
+import ftpservidor.modelo.Sesion;
+import ftpservidor.modelo.Usuario;
 
 /**
  * 
@@ -39,7 +39,7 @@ public class ComDel extends Comando {
 
 			int res = dis.readInt();
 			if (res == Codigos.OK) {
-				modelo.msgInfo("DEL erroneo. Exitoso. Archivo " + comando[1] + " eliminado");
+				modelo.msgInfo("DEL Exitoso. Archivo " + comando[1] + " eliminado");
 			} else if (res == Codigos.NO_EXISTE) {
 				modelo.msgError("DEL erroneo. No se pudo eliminar. El archivo " + comando[1] + " no existe");
 			} else {

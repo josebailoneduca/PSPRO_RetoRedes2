@@ -49,13 +49,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import fptservidor.modelo.Codigos;
 import ftpcliente.Config;
 import ftpcliente.controlador.Controlador;
 import ftpcliente.controlador.dto.DtoArchivo;
 import ftpcliente.vista.modelos.ArbolArchivosModel;
 import ftpcliente.vista.modelos.ArchArbol;
 import ftpcliente.vista.modelos.ArchivoTableModel;
+import ftpservidor.modelo.Codigos;
 
 /**
  *

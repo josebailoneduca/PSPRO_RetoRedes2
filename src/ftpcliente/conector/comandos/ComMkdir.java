@@ -11,11 +11,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-import fptservidor.modelo.Codigos;
-import fptservidor.modelo.Sesion;
-import fptservidor.modelo.Usuario;
 import ftpcliente.conector.Modelo;
 import ftpcliente.controlador.dto.DtoArchivo;
+import ftpservidor.modelo.Codigos;
+import ftpservidor.modelo.Sesion;
+import ftpservidor.modelo.Usuario;
 
 /**
  * 
