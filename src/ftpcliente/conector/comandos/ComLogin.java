@@ -5,17 +5,10 @@ package ftpcliente.conector.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 
-import ftpcliente.conector.Modelo;
-import ftpcliente.controlador.dto.DtoArchivo;
-import ftpservidor.modelo.Codigos;
-import ftpservidor.modelo.Sesion;
-import ftpservidor.modelo.Usuario;
+import ftpcliente.conector.Codigos;
+import ftpcliente.conector.Sesion;
 
 /**
  *  Se encarga de manejar un comando LOGIN en el cliente
@@ -30,10 +23,10 @@ public class ComLogin extends Comando{
 	 * @param comando Partes del comando siendo el primer elemento el codigo del comando y los siguientes los parametros
 	 * @param dis DataInputStream a usar por el comando
 	 * @param dos  DataOutputStream a usar por el comando
-	 * @param modelo Referencia al modelo
+	 * @param sesion Referencia a la sesion
 	 */
-	public ComLogin(String[] comando,DataInputStream dis, DataOutputStream dos,Modelo modelo) {
-		super(comando,dis,dos,modelo);
+	public ComLogin(String[] comando,DataInputStream dis, DataOutputStream dos,Sesion sesion) {
+		super(comando,dis,dos,sesion);
 
 	}
 	
@@ -43,10 +36,10 @@ public class ComLogin extends Comando{
 	 */
 	public void iniciar() {
 		//anular si ya se esta logueado
-		if (modelo.isLogged())
+		if (sesion.isLogged())
 			return;
 		//ver si hay parametros suficientes
-		if (comando.length<4)
+		if (comando.length<2)
 			return;
 		
 		try {
@@ -71,18 +64,19 @@ public class ComLogin extends Comando{
 			
 			//respuesta afirmativa, lanzar LS automaticamente
 			if (res==Codigos.OK) {
-				modelo.setEstadoLogin(true,usuario);
-				modelo.msgInfo("Sesión iniciada como "+usuario+" en "+modelo.getHost());
-				modelo.addOperacion("LS");
+				sesion.setEstadoLogin(true,usuario);
+				conector.msgInfo("Sesión iniciada como "+usuario+" en "+conector.getHost());
+				conector.addOperacion("LS");
 			}
 			
 			//respuesta negativa
 			else {
-				modelo.setEstadoLogin(false,null);
-				modelo.msgError("Login erroneo");
+				
+				conector.msgError("Login erroneo");
+				sesion.logout();
 			}
 		} catch (IOException e) {
-			 modelo.setEstadoLogin(false,null);
+				sesion.logout();
 		}
 	
 	}

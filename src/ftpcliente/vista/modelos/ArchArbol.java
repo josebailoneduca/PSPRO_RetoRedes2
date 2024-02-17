@@ -10,18 +10,33 @@ package ftpcliente.vista.modelos;
 import java.io.File;
 
 /**
- *
+ * Estructura de datos para ser usada en un ArbolArchivosModel
+ * 
  * @author Jose Javier Bailon Ortiz
+ * @see ArbolArchivosModel
  */
     public class ArchArbol extends File{
 
+    	/**
+    	 * Constructor
+    	 * @param f Archivo a partir del cual crearlo
+    	 */
         public ArchArbol(File f) {
             super(f.getAbsolutePath());
         }
+        
+        /**
+         * Constructor a partir de una ruta
+         * @param path
+         */
         public ArchArbol(String path) {
             super(path);
         }
         
+        /**
+         *  Constructor a partir de un padre y el nombre de su hijo
+         * 
+         */
         public ArchArbol (ArchArbol padre, String name){
             super (padre,name);
         }

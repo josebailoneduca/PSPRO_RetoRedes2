@@ -6,7 +6,7 @@ package ftpcliente.conector.comandos;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import ftpcliente.conector.Modelo;
+import ftpcliente.conector.Sesion;
 
 /**
  *  Se encarga de manejar un comando EXIT en el cliente
@@ -21,25 +21,21 @@ public class ComExit extends Comando{
 	 * @param comando Partes del comando siendo el primer elemento el codigo del comando y los siguientes los parametros
 	 * @param dis DataInputStream a usar por el comando
 	 * @param dos  DataOutputStream a usar por el comando
-	 * @param modelo Referencia al modelo
+	 * @param sesion Referencia a la sesion
 	 */
-	public ComExit(String[] comando,DataInputStream dis, DataOutputStream dos,Modelo modelo) {
-		super(comando,dis,dos,modelo);
+	public ComExit(String[] comando,DataInputStream dis, DataOutputStream dos,Sesion sesion) {
+		super(comando,dis,dos,sesion);
 	}
 	
 	/**
 	 * Inicia la operacion siguiendo el protocolo EXIT (Ver estructura del protocolo en la documentacion)
 	 */
 	public void iniciar() {
-		
 		try {
-			//escribir codigo de comando
 			dos.writeUTF(Comando.EXIT);
 		} catch (IOException e) {
 		}
-		//Establecer la sesion como terminada
-		modelo.setEstadoLogin(false,null);
-	
+		sesion.logout();
 	}
 	
 }

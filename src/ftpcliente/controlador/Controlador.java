@@ -11,250 +11,287 @@ import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
 
-import ftpcliente.conector.Modelo;
+import ftpcliente.conector.Codigos;
+import ftpcliente.conector.Conector;
 import ftpcliente.conector.comandos.Comando;
 import ftpcliente.controlador.dto.DtoArchivo;
 import ftpcliente.vista.gui.Ventana;
 
 /**
+ * Controlador. sirve de puetne entre la vista y el conector. Tiene metodos que
+ * transforman llamadas de la interfaz en comandos en formato string que puede
+ * entender el conector. Ademas sirve de puente para mensajes, confirmaciones y
+ * comandos en texto entre vista y conector
  * 
  * @author Jose Javier Bailon Ortiz
  */
 public class Controlador {
-	private Modelo modelo;
+
+	/**
+	 * Referencia al conector
+	 */
+	private Conector conector;
+
+	/**
+	 * Referencia a la vista
+	 */
 	private Ventana vista;
+
+	/**
+	 * Constructor. Crea el conector y la vista
+	 */
 	public Controlador() {
-		modelo=new Modelo(this);
+		conector = new Conector(this);
 		vista = new Ventana(this);
 		vista.setVisible(true);
-
-		
-		
-		//conectar("","");
-		
 	}
 
 	/**
-	 * @param rutaActual
-	 * @param archivos
+	 * Ordena a vista que muestre los datos de ruta remota y lista de archivos
+	 * 
+	 * @param rutaActual La ruta remota
+	 * @param archivos   La lista de archivos
 	 */
 	public void actualizaListaArchivosRemotos(String rutaActual, ArrayList<DtoArchivo> archivos) {
-		SwingUtilities.invokeLater(() -> 
-			vista.actualizaListaRemota(rutaActual,archivos));
-	}
-	
-	
-	public boolean login(String host, int puerto, String usuario, String contrasena) {
-		if (modelo.iniciarConexion(host, puerto)) {
-			int tipo = Codigos.LOGIN_NORMAL;
-			if (usuario.length()==0){
-				tipo=Codigos.LOGIN_ANONIMO;
-			}
-			modelo.addOperacion(Comando.LOGIN+" "+tipo+" "+usuario+" "+contrasena);
-			return true;
-		}else {
-			return false;
-		}
-	}
-
-	public boolean registrar(String host, int puerto, String usuario, String contrasena) {
-		if (modelo.iniciarConexion(host, puerto)) {
-			modelo.addOperacion(Comando.REGISTRO+" "+usuario+" "+contrasena);
-			modelo.addOperacion("LS");
-			return true;
-		}else {
-			return false;
-		}
-
+		SwingUtilities.invokeLater(() -> vista.actualizaListaRemota(rutaActual, archivos));
 	}
 
 	/**
+	 * Transforma los valores en un comando LOGIN y lo envia a conector
 	 * 
+	 * @param host       El host del servidor
+	 * @param puerto     El puerto del servidor
+	 * @param usuario    Usuario para iniciar sesion
+	 * @param contrasena Contrasena para iniciar sesion
+	 */
+	public void login(String host, int puerto, String usuario, String contrasena) {
+		conector.addOperacion(Comando.LOGIN + " " + host + " " + puerto + " " + usuario + " " + contrasena);
+	}
+
+	/**
+	 * Transforma los valores en un comando REGISTRO y lo envia a conector
+	 * 
+	 * @param host       El host del servidor
+	 * @param puerto     El puerto del servidor
+	 * @param usuario    Usuario para registrar
+	 * @param contrasena Contrasena para registrar
+	 */
+	public void registrar(String host, int puerto, String usuario, String contrasena) {
+		conector.addOperacion(Comando.REGISTRO + " " + host + " " + puerto + " " + usuario + " " + contrasena);
+	}
+
+	/**
+	 * Recopila los datos de login actual y los envia a vista para que los muestre
 	 */
 	public void actualizaLogin() {
-		if (modelo.isLogged()) {
-		String usuario = modelo.getUsuario();
-		String host = modelo.getHost();
-		vista.actualizaLoginEstado(true,host,usuario);
-		}else {
-			vista.actualizaLoginEstado(false,"","");
+		if (conector.isLogged()) {
+			String usuario = conector.getUsuario();
+			String host = conector.getHost();
+			vista.actualizaLoginEstado(true, host, usuario);
+		} else {
+			vista.actualizaLoginEstado(false, "", "");
 		}
-		
+
 	}
 
 	/**
-	 * @param string
+	 * Envia a vista un mensaje de error para que lo muestre
+	 * 
+	 * @param msg Esl mensaje
 	 */
 	public void mensajeError(String msg) {
 		SwingUtilities.invokeLater(() -> {
-		vista.msgError(msg);
-		vista.addHistorial("ERROR: "+ msg);
+			vista.msgError(msg);
+			vista.addHistorial("ERROR: " + msg);
 		});
-		
-		
+
 	}
 
 	/**
-	 * @param msg
+	 * Envia a vista un mensaje informativo para que lo muestre
+	 * 
+	 * @param msg El mensaje
 	 */
 	public void mensajeInfo(String msg) {
-		SwingUtilities.invokeLater(() -> vista.addHistorial("INFO: "+ msg));
-		//vista.msgInfo(msg));
+		SwingUtilities.invokeLater(() -> vista.addHistorial("INFO: " + msg));
 	}
-	
-	
+
 	/**
+	 * Pide a vista que meustre un dialogo de confirmacion
 	 * 
-	 */
-	public void logout() {
-		modelo.logout();
-		
-	}
-
-	/**
-	 * @return
-	 */
-	public void comLs() {
-		if (modelo.isLogged())
-			modelo.addOperacion(Comando.LS);
-	}
-
-	/**
-	 * @param ruta
-	 * @return
-	 */
-	public List<DtoArchivo> getArchivosLocales(File ruta) {
-
-		List<DtoArchivo> archivos=new ArrayList<DtoArchivo>();
-		//FilenameFilter filtroArchivos= (File current, String name) -> !(new File(current, name).isDirectory());
-		//agregar .. si no es root
-		
-		if (ruta.toPath().getNameCount()!=0) {
-			archivos.add(new DtoArchivo("..", Codigos.DIRECTORIO));
-		}
-		
-		
-		File[] lista = ruta.listFiles();
-		if (lista!=null) {
-			for (File arch : lista) {
-				archivos.add(new DtoArchivo(arch.getName(), (arch.isDirectory())?Codigos.DIRECTORIO:Codigos.ARCHIVO));
-			}
-		}
-		return archivos;	
-	}
-
-	/**
-	 * @param valor
-	 * @return
-	 */
-	public void comCd(String valor) {
-		if (valor !=null && modelo.isLogged()) {
-			modelo.addOperacion(Comando.CD+" \""+valor+"\"");
-			comLs();
-		}
-	}
-
-	/**
-	 * @param nombre
-	 */
-	public void comGet(String rutaRemota, String rutaLocal) {
-		if (rutaRemota!=null && rutaLocal!=null) {
-			modelo.addOperacion(Comando.GET+" \""+rutaRemota+"\" \""+rutaLocal+"\"");
-		}
-	}
-
-	public void enviarComando(String comando) {
-		if (comando!=null && modelo.isLogged())
-			modelo.addOperacion(comando);
-	}
-
-	/**
-	 * @param nombre
-	 */
-	public void comDel(String valor) {
-		if (valor!=null) {
-			modelo.addOperacion(Comando.DEL+" \""+valor+"\"");
-			comLs();
-		}
-		
-	}
-
-	/**
-	 * @param valor
-	 * @return
-	 */
-	public void comMkdir(String valor) {
-		if (valor !=null && modelo.isLogged()) {
-			modelo.addOperacion(Comando.MKDIR+" \""+valor+"\"");
-			comLs();
-		}
-	}
-
-	/**
-	 * @param nombre
-	 */
-	public void comRmdir(String valor) {
-		if (valor!=null) {
-			modelo.addOperacion(Comando.RMDIR+" \""+valor+"\"");
-			comLs();
-		}
-		
-	}
-
-	/**
+	 * @param msg El mensaje a mostrar en el dialogo
 	 * 
-	 */
-	public void actualizarArchivosLocalesl() {
-		vista.actualizarArchivosLocales();
-		
-	}
-
-	/**
-	 * @param rutaLocal
-	 * @param rutaRemota
-	 */
-	public void comPut(String rutaLocal, String rutaRemota) {
-		if (rutaRemota!=null && rutaLocal!=null) {
-			modelo.addOperacion(Comando.PUT+" \""+rutaLocal+"\" \""+rutaRemota+"\"");
-			comLs();
-		}
-		
-	}
-
-	/**
-	 * @param msg
-	 * @return
+	 * @return True si el usuario a aceptado, false si no lo ha hecho
 	 */
 	public boolean confirmar(String msg) {
 		return vista.confirmar(msg);
 	}
 
+	/**
+	 * Devuelve el listado de archvios de una carpeta local, agregando ".." si no se
+	 * trata de la raiz de un disco
+	 * 
+	 * @param ruta La ruta a inspeccionar
+	 * 
+	 * @return La lista de archivos contenidos en la ruta
+	 */
+	public List<DtoArchivo> getArchivosLocales(File ruta) {
 
-		/**
-		 * Recoger unidades de disco e inicializar el selector de undidaes
-		 * @return
-		 */
-		public String[] getUnidadesDisco() {
-			File[] unidades;
-			unidades = File.listRoots();
-			String[] nombres = new String[unidades.length];
-			for (int i = 0; i < unidades.length; i++) {
-				nombres[i] = unidades[i].getAbsolutePath();
-			}
-			return nombres;
-	}
+		List<DtoArchivo> archivos = new ArrayList<DtoArchivo>();
 
-		/**
-		 * @return
-		 */
-		public boolean comMkdirLocal(String ruta) {
-			try {
-				return new File(ruta).mkdirs();
-			}catch(SecurityException ex) {
-				return false;
-			}
+		// agregar .. si no es root
+		if (ruta.toPath().getNameCount() != 0) {
+			archivos.add(new DtoArchivo("..", Codigos.DIRECTORIO));
 		}
 
+		// recoger archivos
+		File[] lista = ruta.listFiles();
+		if (lista != null) {
+			for (File arch : lista) {
+				archivos.add(
+						new DtoArchivo(arch.getName(), (arch.isDirectory()) ? Codigos.DIRECTORIO : Codigos.ARCHIVO));
+			}
+		}
+		return archivos;
+	}
+
+	
+	/**
+	 * Devuelve las unidades de disco del sitema
+	 * 
+	 * @return La lista con las unidades
+	 */
+	public String[] getUnidadesDisco() {
+		File[] unidades;
+		unidades = File.listRoots();
+		String[] nombres = new String[unidades.length];
+		for (int i = 0; i < unidades.length; i++) {
+			nombres[i] = unidades[i].getAbsolutePath();
+		}
+		return nombres;
+	}
 	
 	
+	/**
+	 * Ordena a la vista que actualice el listado de archivos locales
+	 */
+	public void actualizarArchivosLocalesl() {
+		vista.actualizarArchivosLocales();
+
+	}
+
+	/**
+	 * Envia al conector la orden de cerrar sesion
+	 */
+	public void logout() {
+		conector.logout();
+
+	}
+
+	/**
+	 * Envia a conector un comando como string
+	 */
+	public void enviarComando(String comando) {
+		if (comando != null)
+			conector.addOperacion(comando);
+	}
+
+	/**
+	 * Envia a conector el comando LS
+	 */
+	public void comLs() {
+		if (conector.isLogged())
+			conector.addOperacion(Comando.LS);
+	}
+
+	/**
+	 * Envia a conector el comando CD
+	 * 
+	 * @param valor El directorio al que cambiar
+	 */
+	public void comCd(String valor) {
+		if (valor != null && conector.isLogged()) {
+			conector.addOperacion(Comando.CD + " \"" + valor + "\"");
+			comLs();
+		}
+	}
+
+	/**
+	 * Envia a conector el comando GET
+	 * 
+	 * @param rutaRemota Ruta remota que obtener
+	 * @param rutaLocal  Ruta local en la que guardar el archivo descargado
+	 */
+	public void comGet(String rutaRemota, String rutaLocal) {
+		if (rutaRemota != null && rutaLocal != null) {
+			conector.addOperacion(Comando.GET + " \"" + rutaRemota + "\" \"" + rutaLocal + "\"");
+		}
+	}
+
+	/**
+	 * Envia a conector el comando DEL
+	 * 
+	 * @param valor la ruta remota del archivo a elminiar
+	 */
+	public void comDel(String valor) {
+		if (valor != null) {
+			conector.addOperacion(Comando.DEL + " \"" + valor + "\"");
+			comLs();
+		}
+
+	}
+
+	/**
+	 * Envia a conector el comando MKDIR
+	 * 
+	 * @param valor La ruta remota del directorio a crear
+	 */
+	public void comMkdir(String valor) {
+		if (valor != null && conector.isLogged()) {
+			conector.addOperacion(Comando.MKDIR + " \"" + valor + "\"");
+			comLs();
+		}
+	}
+
+	/**
+	 * Envia a conector el comando RMDIR
+	 * 
+	 * @param valor La ruta del directorio remoto a eliminar
+	 */
+	public void comRmdir(String valor) {
+		if (valor != null) {
+			conector.addOperacion(Comando.RMDIR + " \"" + valor + "\"");
+			comLs();
+		}
+
+	}
+
+	/**
+	 * Envia a conector el comando PUT
+	 * 
+	 * @param rutaLocal  Ruta local a enviar
+	 * @param rutaRemota Ruta remota en la que guardar lo enviado
+	 */
+	public void comPut(String rutaLocal, String rutaRemota) {
+		if (rutaRemota != null && rutaLocal != null) {
+			conector.addOperacion(Comando.PUT + " \"" + rutaLocal + "\" \"" + rutaRemota + "\"");
+			comLs();
+		}
+
+	}
+
+	/**
+	 * Envia a conector el comando MKDIR
+	 * 
+	 * @param ruta
+	 * @return La ruta remota a crear
+	 */
+	public boolean comMkdirLocal(String ruta) {
+		try {
+			return new File(ruta).mkdirs();
+		} catch (SecurityException ex) {
+			return false;
+		}
+	}
+
 }

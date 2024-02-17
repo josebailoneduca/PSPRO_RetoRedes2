@@ -1,9 +1,12 @@
 /**
  * 
  */
-package ftpcliente.controlador;
+package ftpcliente.conector;
 
 /**
+ * Codigos de control de los protocolos.
+ * Ver protocolos en la documentacion para informacion 
+ * del uso de los codigos
  * 
  * @author Jose Javier Bailon Ortiz
  */

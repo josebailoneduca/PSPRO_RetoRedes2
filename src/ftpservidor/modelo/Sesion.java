@@ -28,6 +28,7 @@ import ftpservidor.modelo.comandos.ComMkdir;
 import ftpservidor.modelo.comandos.ComPut;
 import ftpservidor.modelo.comandos.ComRmdir;
 import ftpservidor.modelo.comandos.Comando;
+import ftpservidor.modelo.lib.UtilesArchivo;
 
 /**
  * Control de las transferencias de una sesion concreta.
@@ -201,6 +202,17 @@ public class Sesion extends Thread {
 			if (tipoSesion == Codigos.LOGIN_NORMAL) {
 				String nombreUsuario = dis.readUTF();
 				String contrasena = dis.readUTF();
+				
+				//comprobar validez de usuario para filtrar ataques de path transversal
+				String rutaUsuario = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario).getAbsolutePath();
+				if (!UtilesArchivo.rutaDentroDeRuta(rutaUsuario, Config.getRUTA_ALMACENAMIENTO())) {
+					Msg.msgHora("Posible ataque de path transversal a "+rutaUsuario+" desde "+socket.getRemoteSocketAddress());
+					dos.writeInt(Codigos.MAL);
+					exit();
+					return false;
+				}
+				
+				
 				usuario = new Usuario(nombreUsuario);
 				loginOk = usuario.login(contrasena);
 				
@@ -240,6 +252,17 @@ public class Sesion extends Thread {
 			//leer nombre y contraseña
 			String nombreUsuario = dis.readUTF();
 			String contrasena = dis.readUTF();
+			
+			//comprobar validez de usuario para filtrar ataques de path transversal
+			String rutaUsuario = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario).getAbsolutePath();
+
+			if (!UtilesArchivo.rutaDentroDeRuta(rutaUsuario, Config.getRUTA_ALMACENAMIENTO())) {
+				Msg.msgHora("Posible ataque de path transversal a "+rutaUsuario+" desde "+socket.getRemoteSocketAddress());
+				dos.writeInt(Codigos.MAL);
+				exit();
+				return false;
+			}
+			
 			
 			//comprobar si no existe, se puede crear la carpeta y su archivo con la clave
 			boolean registroCorrecto=false;

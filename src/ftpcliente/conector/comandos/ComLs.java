@@ -5,17 +5,12 @@ package ftpcliente.conector.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 
-import ftpcliente.conector.Modelo;
+import ftpcliente.conector.Codigos;
+import ftpcliente.conector.Sesion;
 import ftpcliente.controlador.dto.DtoArchivo;
-import ftpservidor.modelo.Codigos;
-import ftpservidor.modelo.Sesion;
-import ftpservidor.modelo.Usuario;
 
 /**
  *  Se encarga de manejar un comando LS en el cliente
@@ -30,10 +25,10 @@ public class ComLs extends Comando{
 	 * @param comando Partes del comando siendo el primer elemento el codigo del comando y los siguientes los parametros
 	 * @param dis DataInputStream a usar por el comando
 	 * @param dos  DataOutputStream a usar por el comando
-	 * @param modelo Referencia al modelo
+	 * @param sesion Referencia a la sesion
 	 */
-	public ComLs(String[] comando,DataInputStream dis, DataOutputStream dos,Modelo modelo) {
-		super(comando,dis,dos,modelo);
+	public ComLs(String[] comando,DataInputStream dis, DataOutputStream dos,Sesion sesion) {
+		super(comando,dis,dos,sesion);
 
 	}
 	
@@ -66,16 +61,16 @@ public class ComLs extends Comando{
 					
 				}
 				//actualizar interface grafica
-				modelo.actualizaListaArchivosRemotos(rutaActual,archivos);
-				modelo.msgInfo("LS correcto de ruta "+rutaActual);
+				conector.actualizaListaArchivosRemotos(rutaActual,archivos);
+				conector.msgInfo("LS correcto de ruta "+rutaActual);
 				
 			//si es negativa 
 			}else {
-				modelo.msgError("LS erroneo");
+				conector.msgError("LS erroneo. No existe la ruta");
 			}
 		} catch (IOException e) {
-			modelo.setEstadoLogin(false, null);
-			modelo.msgError("LS erroneo");
+			sesion.logout();
+			conector.msgError("LS erroneo");
 		}
 	}
 	

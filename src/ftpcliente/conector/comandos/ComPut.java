@@ -9,16 +9,14 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import ftpcliente.Config;
-import ftpcliente.conector.Modelo;
-import ftpcliente.controlador.Codigos;
+import ftpcliente.conector.Codigos;
+import ftpcliente.conector.Sesion;
 
 /**
  * Se encarga de manejar un comando PUT en el cliente
@@ -34,10 +32,10 @@ public class ComPut extends Comando {
 	 *                comando y los siguientes los parametros
 	 * @param dis     DataInputStream a usar por el comando
 	 * @param dos     DataOutputStream a usar por el comando
-	 * @param modelo  Referencia al modelo
+	 * @param sesion Referencia a la sesion
 	 */
-	public ComPut(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
-		super(comando, dis, dos, modelo);
+	public ComPut(String[] comando, DataInputStream dis, DataOutputStream dos, Sesion sesion) {
+		super(comando, dis, dos, sesion);
 
 	}
 
@@ -86,7 +84,7 @@ public class ComPut extends Comando {
 					//si ya existe confirmar sobreescritura
 				} else if (res == Codigos.YA_EXISTE) {
 					// si ya existe preguntar al usuario
-					if (modelo.confirmar("¿Desea sobreescribir el archivo: " + archivoRemoto + "?")) {
+					if (conector.confirmar("¿Desea sobreescribir el archivo: " + archivoRemoto + "?")) {
 						enviarArchivo = true;
 						//avisar a servidor que se sobreescribira
 						dos.writeInt(Codigos.CONTINUAR);
@@ -97,12 +95,12 @@ public class ComPut extends Comando {
 				
 				//si el servidor no permie el envio 
 				} else {
-					modelo.msgError("PUT erroneo. No puede enviar el archivo " + archivoRemoto);
+					conector.msgError("PUT erroneo. No puede enviar el archivo " + archivoRemoto);
 				}
 			
 			//si las condiciones locales no lo permiten
 			} else {
-				modelo.msgError("PUT erroneo. No puede enviar el archivo " + archivoRemoto
+				conector.msgError("PUT erroneo. No puede enviar el archivo " + archivoRemoto
 						+ " por no existir en local o ser un directorio");
 			}
 			
@@ -118,18 +116,18 @@ public class ComPut extends Comando {
 				else
 					enviarArchivoBytes(arch);
 
-				modelo.msgInfo("PUT exitoso. " + archivoRemoto);
+				conector.msgInfo("PUT exitoso. " + archivoRemoto);
 			}
 
 		} catch (UnsupportedEncodingException ex) {
-			modelo.msgError("PUT erroneo. No se soporta la codificacion del archivo " + rutaLocal);
+			conector.msgError("PUT erroneo. No se soporta la codificacion del archivo " + rutaLocal);
 			try {
 				dos.writeInt(0);
 				dos.writeInt(Codigos.FIN);
 			} catch (IOException e) {
 			}
 		} catch (IOException e) {
-			modelo.msgError("PUT erroneo. Error enviando archivo " + archivoRemoto);
+			conector.msgError("PUT erroneo. Error enviando archivo " + archivoRemoto);
 		}
 	}
 

@@ -9,15 +9,17 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * 
+ *  Configuracion. Contiene varios parametros accesibles de manera estatica.
+ *  Puede cargar los parametros desde un archivo
+ *  
  * @author Jose Javier Bailon Ortiz
  */
 public class Config {
 	private  static  String COD_TEXTO = "UTF-8";
 	private static  String HOST="localhost";
 	private static  int PUERTO=50_000;
-	private static  String USUARIO="jose";
-	private static  String CONTRASENA="1234";
+	private static  String USUARIO="";
+	private static  String CONTRASENA="";
  	
 	public static void cargarConfiguracion(String ruta) {
 		

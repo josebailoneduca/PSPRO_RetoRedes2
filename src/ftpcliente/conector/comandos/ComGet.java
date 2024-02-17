@@ -3,7 +3,6 @@
  */
 package ftpcliente.conector.comandos;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -11,21 +10,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
-import ftpcliente.Config;
-import ftpcliente.conector.Modelo;
-import ftpcliente.controlador.Codigos;
-import ftpcliente.controlador.dto.DtoArchivo;
+import ftpcliente.conector.Codigos;
+import ftpcliente.conector.Sesion;
 
 /**
  * Se encarga de manejar un comando GET en el cliente
@@ -41,10 +30,10 @@ public class ComGet extends Comando {
 	 *                comando y los siguientes los parametros
 	 * @param dis     DataInputStream a usar por el comando
 	 * @param dos     DataOutputStream a usar por el comando
-	 * @param modelo  Referencia al modelo
+	 * @param sesion Referencia a la sesion
 	 */
-	public ComGet(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
-		super(comando, dis, dos, modelo);
+	public ComGet(String[] comando, DataInputStream dis, DataOutputStream dos, Sesion sesion) {
+		super(comando, dis, dos, sesion);
 
 	}
 
@@ -73,7 +62,7 @@ public class ComGet extends Comando {
 
 			// comprobacion de premiso de escritura
 			if (!Files.isWritable(Paths.get(archivoLocal.getParentFile().toURI()))) {
-				modelo.msgError("GET erroneo. No tiene permisos para escribir en: " + archivoLocal.getAbsolutePath());
+				conector.msgError("GET erroneo. No tiene permisos para escribir en: " + archivoLocal.getAbsolutePath());
 				return;
 			}
 
@@ -81,7 +70,7 @@ public class ComGet extends Comando {
 
 			// comprobar si existe y confirmar sobreescritura si existe
 			if (archivoLocal.exists()) {
-				if (modelo.confirmar("¿Desea sobreescribir el archivo " + archivoLocal.getAbsolutePath() + "?"))
+				if (conector.confirmar("¿Desea sobreescribir el archivo " + archivoLocal.getAbsolutePath() + "?"))
 					recibirArchivo = true;
 			} else {
 				recibirArchivo = true;
@@ -110,19 +99,19 @@ public class ComGet extends Comando {
 					else
 						recibirArchivoBytes(archivoLocal);
 
-					// avisar a modelo de fin de transferencia
-					modelo.actualizarArchivosLocales();
-					modelo.msgInfo("GET exitoso. Archivo: " + archivoLocal);
+					// avisar a conector de fin de transferencia
+					conector.actualizarArchivosLocales();
+					conector.msgInfo("GET exitoso. Archivo: " + archivoLocal);
 
 					// si no se puede recibir el archivo
 				} else if (res == Codigos.NO_EXISTE) {
-					modelo.msgError("GET erroneo. El archivo no existe: " + rutaRemota);
+					conector.msgError("GET erroneo. El archivo no existe: " + rutaRemota);
 				} else {
-					modelo.msgError("GET erroneo.No se puede obtener el archivo " + rutaRemota);
+					conector.msgError("GET erroneo.No se puede obtener el archivo " + rutaRemota);
 				}
 			}
 		} catch (IOException e) {
-			modelo.msgError("GET erroneo.No se puede descargar el archivo: " + rutaRemota + " - " + e.getMessage());
+			conector.msgError("GET erroneo.No se puede descargar el archivo: " + rutaRemota + " - " + e.getMessage());
 		}
 	}
 

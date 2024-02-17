@@ -6,19 +6,13 @@ Lista de paquetes:
  */
 package ftpcliente.vista.gui;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -27,25 +21,21 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-import javax.swing.border.LineBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
@@ -55,166 +45,188 @@ import ftpcliente.controlador.dto.DtoArchivo;
 import ftpcliente.vista.modelos.ArbolArchivosModel;
 import ftpcliente.vista.modelos.ArchArbol;
 import ftpcliente.vista.modelos.ArchivoTableModel;
-import ftpservidor.modelo.Codigos;
 
 /**
- *
+ * Clase principal de la vista. Muestra un JFrame con la interfaz grafica
+ * 
  * @author Jose Javier Bailon Ortiz
  */
 public class Ventana extends JFrame implements TreeSelectionListener, ActionListener {
 
-	Controlador controlador;
-	TreePath ultimoPath;
+	/**
+	 * Referencia al controlador
+	 */
+	private Controlador controlador;
+	
+	/**
+	 * Arbol de directorios locales
+	 */
+	private TreePath ultimoPath;
+
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param controlador Referencia al controlador
+	 */
 	public Ventana(Controlador controlador) {
 		this.controlador = controlador;
 		initComponents();
 		initPropio();
-		
 
 	}
 
+	/**
+	 * Inicializacion propia. Recoge datos de configuracion, inicializa eventos,
+	 * ruta local y la botonera superior
+	 * 
+	 */
 	private void initPropio() {
 		inputHost.setText(Config.getHOST());
 		inputPuerto.setText("" + Config.getPUERTO());
 		inputUsuario.setText(Config.getUSUARIO());
 		inputContrasena.setText(Config.getCONTRASENA());
-//		remotoTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//		localTabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
 		iniEventos();
 		inicializarRutaLocal();
 		activarLogin(true);
 	}
 
 	/**
-	 * 
+	 * Inicializa la ruta local
 	 */
 	private void inicializarRutaLocal() {
-		//recoger unidades
+		// recoger unidades
 		String[] roots = controlador.getUnidadesDisco();
 		localSelectorUnidad.setModel(new DefaultComboBoxModel<String>(roots));
 
-		//inicializar arbol
+		// inicializar arbol
 		TreeModel model = new ArbolArchivosModel(new ArchArbol((String) localSelectorUnidad.getSelectedItem()));
 		localArbol.setModel(model);
-		
-		//inicializar ruta actual local
+
+		// inicializar ruta actual local al directorio de ejecucion
 		File cwdLocal = new File(new File(".").getAbsolutePath());
 		String rootCwdLocal = cwdLocal.toPath().getRoot().toString();
-		//activar el selector de unidades a la unidad donde esta el CWDlocal
-		for (int i=0;i<roots.length;i++) {
+		// activar el selector de unidades a la unidad donde esta el CWDlocal
+		for (int i = 0; i < roots.length; i++) {
 			if (roots[i].equals(rootCwdLocal)) {
 				localSelectorUnidad.setSelectedIndex(i);
 			}
 		}
-		//establecer el texto de ruta
+		// establecer el texto de ruta
 		localRuta.setText(Paths.get(cwdLocal.getAbsolutePath()).normalize().toAbsolutePath().toString());
 		actualizarArchivosLocales();
 
 	}
 
+	/**
+	 * Inicialia los eventos
+	 */
 	private void iniEventos() {
+		//listener de arbol de directorios
 		localArbol.addTreeSelectionListener(this);
-		
-//		JButton[] botones = { btnCmdCD, btnCmdDEL, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
-//				btnCmdRMDIR, btnConectar, btnDesconectar, btnEnviar, btnRegistrar };
-		JButton[] botones = { btnCmdCD, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
-				 btnConectar, btnDesconectar, btnEnviar, btnRegistrar };
-		for (JButton boton: botones) {
+
+		//listener de botones
+		JButton[] botones = { btnCmdCD, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT, btnConectar, btnDesconectar,
+				btnEnviar, btnRegistrar };
+		for (JButton boton : botones) {
 			boton.addActionListener(this);
 		}
-		
+
+		//listener de selector de unidades
 		localSelectorUnidad.addActionListener(this);
+		
+		//listener de campo de entrada de comandos
 		inputComando.addActionListener(this);
-		
-		//clicks tabla remota
+
+		// clicks tabla remota
 		remotoTabla.addMouseListener(new MouseAdapter() {
-		    public void mousePressed(MouseEvent me) {
-		    	//seleccion con boton derecho
-//		    	int r = remotoTabla.rowAtPoint(me.getPoint());
-//		        if (r >= 0 && r < remotoTabla.getRowCount()) {
-//		        	remotoTabla.setRowSelectionInterval(r, r);
-//		        } else {
-//		        	remotoTabla.clearSelection();
-//		        }
-		        //evento doble click
-		    	JTable target = (JTable)me.getSource();
-		    	int fila = target.getSelectedRow();
-	            if (me.getClickCount() == 2) {     
-	               clickRemoto(fila);
-	             }
-		    }
+			public void mousePressed(MouseEvent me) {
+				// evento doble click
+				JTable target = (JTable) me.getSource();
+				int fila = target.getSelectedRow();
+				if (me.getClickCount() == 2) {
+					clickRemoto(fila);
+				}
+			}
 
 		});
-		
-		//clicks tabla local
+
+		// clicks tabla local
 		localTabla.addMouseListener(new MouseAdapter() {
-		    public void mousePressed(MouseEvent me) {
-		    	JTable target = (JTable)me.getSource();
-		    	int fila = target.getSelectedRow();
-	            if (me.getClickCount() == 2) {     
-	               clickLocal(fila);
-	             }
-		    }
+			public void mousePressed(MouseEvent me) {
+				JTable target = (JTable) me.getSource();
+				int fila = target.getSelectedRow();
+				if (me.getClickCount() == 2) {
+					clickLocal(fila);
+				}
+			}
 
 		});
-		
-		//menu contextual tabla remota
-		remotoTabla.setComponentPopupMenu(new MenuRemoto(this,remotoTabla));
-		//menu contextual tabla local
-		localTabla.setComponentPopupMenu(new MenuLocal(this,localTabla));
-		
-		
-		//cambio de tamaño de la ventana
+
+		// menu contextual tabla remota
+		remotoTabla.setComponentPopupMenu(new MenuRemoto(this, remotoTabla));
+		// menu contextual tabla local
+		localTabla.setComponentPopupMenu(new MenuLocal(this, localTabla));
+
+		// cambio de tamaño de la ventana
 		this.addComponentListener(new ComponentAdapter() {
-		    public void componentResized(ComponentEvent componentEvent) {
-		        panelDivisor.setDividerLocation(getWidth()*60/100);
-		        panelLocalDivisor.setDividerLocation(getWidth()*30/100);
-		    }
+			public void componentResized(ComponentEvent componentEvent) {
+				panelDivisor.setDividerLocation(getWidth() * 60 / 100);
+				panelLocalDivisor.setDividerLocation(getWidth() * 30 / 100);
+			}
 		});
-		
+
 	}
-	
+
 	/**
-	 * Click en tabla remota. Ejecuta CD o GET en el achivo clickado
-	 * @param fila
+	 * Doble click en tabla remota. Ejecuta CD o GET en el achivo clickado
+	 * 
+	 * @param fila Fila de la tabla a la que aplicar la accion
 	 */
 	private void clickRemoto(int fila) {
-		if (fila==-1)
+		if (fila == -1)
 			return;
-		DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(fila);
+		DtoArchivo arch = ((ArchivoTableModel) remotoTabla.getModel()).getItem(fila);
 		if (arch.esDirectorio())
 			controlador.comCd(arch.getNombre());
 		else
 			getArchivo();
-		
-	}
-
-	
-	private void clickLocal(int fila) {
-		if (fila==-1)
-			return;
-		DtoArchivo arch = ((ArchivoTableModel)localTabla.getModel()).getItem(fila);
-		if (arch.esDirectorio())
-			cambiarDirectorioLocal(localRuta.getText()+"/"+arch.getNombre());
-		else
-			putArchivo();
-		
- 
 	}
 
 	/**
-	 * @param string
+	 * Doble click en tabla local. Ejecuta CD o PUT en el archivo clickado
+	 * 
+	 * @param fila Fila de la tabla a la que aplicar la accion
+	 */
+	private void clickLocal(int fila) {
+		if (fila == -1)
+			return;
+		DtoArchivo arch = ((ArchivoTableModel) localTabla.getModel()).getItem(fila);
+		if (arch.esDirectorio())
+			cambiarDirectorioLocal(localRuta.getText() + "/" + arch.getNombre());
+		else
+			putArchivo();
+
+	}
+
+	/**
+	 * Cambia el directorio local a la ruta definida
+	 * 
+	 * @param string La ruta a establecer
 	 */
 	private void cambiarDirectorioLocal(String string) {
 		String rutaNormalizada = Paths.get(new File(string).getAbsolutePath()).normalize().toAbsolutePath().toString();
 		localRuta.setText(rutaNormalizada);
 		actualizarArchivosLocales();
-		
+
 	}
 
 	/**
-	 * @param rutaActual
-	 * @param archivos
+	 * Actualiza la tabla de archivos remotos 
+	 * 
+	 * @param rutaActual Ruta remota a mostrar
+	 * @param archivos Lista de archivos a mostrar
 	 */
 	public void actualizaListaRemota(String rutaActual, ArrayList<DtoArchivo> archivos) {
 		remotoRuta.setText(rutaActual);
@@ -222,21 +234,25 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		remotoTabla.getColumnModel().getColumn(0).setMaxWidth(50);
 	}
 
-
-
+	/**
+	 * Click sobre arbol de directorios
+	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		ultimoPath=e.getPath();
+		ultimoPath = e.getPath();
 		ArchArbol node = (ArchArbol) ((JTree) e.getSource()).getLastSelectedPathComponent();
 		if (node == null) {
-			// since Nothing is selected.
 			return;
 		}
-		String ruta=node.getAbsolutePath();
+		String ruta = node.getAbsolutePath();
 		localRuta.setText(ruta);
 		actualizarArchivosLocales();
 	}
 
+	/**
+	 * Action listener de la interface grafica. Ejecuta una accion dependiendo
+	 * del ActionCommand del originario del evento
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String ac = e.getActionCommand();
@@ -256,108 +272,106 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		case "PUT" -> putArchivo();
 		case "ACTUALIZAR" -> actualizarArchivosLocales();
 		case "MKDIRLOCAL" -> crearDirectorioLocal();
-
 		}
-
 	}
 
 	
-
+	
 	/**
-	 * @return
+	 * Pide a controlador que cree un directorio local
+	 * 
 	 */
 	private void crearDirectorioLocal() {
-		String ruta=localRuta.getText()+"/"+getValor("Introduzca el nombre del directorio");
-		if(controlador.comMkdirLocal(ruta))
+		//pedir ruta a crear
+		String ruta = localRuta.getText() + "/" + getValor("Introduzca el nombre del directorio");
+		//crear
+		if (controlador.comMkdirLocal(ruta))
 			actualizarArchivosLocales();
 		else
-			msgError("No se pudo crear el directorio: \n"+ruta);
+			msgError("No se pudo crear el directorio: \n" + ruta);
 	}
 
 	/**
-	 * @return
+	 * Recoge los datos de rutas remota y local y nombres de archivos locales seleccionados para 
+	 * pedir a controlador que ejecute un comando PUT por cada archivo
+	 * 
 	 */
 	private void putArchivo() {
 		int[] filasSeleccionadas = localTabla.getSelectedRows();
 
-		for (int i=0;i<filasSeleccionadas.length;i++) {
-			int filaSeleccionada=filasSeleccionadas[i];
-		DtoArchivo arch = ((ArchivoTableModel)localTabla.getModel()).getItem(filaSeleccionada);
-        if (!arch.esDirectorio()) {
-        	String rutaLocal=localRuta.getText()+"/"+arch.getNombre();
-        	String rutaRemota=remotoRuta.getText()+"/"+arch.getNombre();
-        	controlador.comPut(rutaLocal,rutaRemota);
-        }
-        else {
-        	msgInfo("Los directorios no se pueden subir directamente");
-        }
+		for (int i = 0; i < filasSeleccionadas.length; i++) {
+			int filaSeleccionada = filasSeleccionadas[i];
+			DtoArchivo arch = ((ArchivoTableModel) localTabla.getModel()).getItem(filaSeleccionada);
+			if (!arch.esDirectorio()) {
+				String rutaLocal = localRuta.getText() + "/" + arch.getNombre();
+				String rutaRemota = remotoRuta.getText() + "/" + arch.getNombre();
+				controlador.comPut(rutaLocal, rutaRemota);
+			} else {
+				msgInfo("Los directorios no se pueden subir directamente");
+			}
 		}
 	}
 
 	/**
-	 * @return
+	 * Recoge los datos de rutas remota y local y nombres de archivos remotos seleccionados para 
+	 * pedir a controlador que ejecute un comando GET por cada archivo
+	 * 
 	 */
 	private void getArchivo() {
-
-
 		int[] filasSeleccionadas = remotoTabla.getSelectedRows();
-		
-		
- 
-		for (int i = 0;i<filasSeleccionadas.length;i++) {
+		for (int i = 0; i < filasSeleccionadas.length; i++) {
 			int filaSeleccionada = filasSeleccionadas[i];
-        DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
-        if (!arch.esDirectorio()) {
-        	String rutaRemota=remotoRuta.getText()+"/"+arch.getNombre();
-        	String rutaLocal=localRuta.getText()+"/"+arch.getNombre();
-        	controlador.comGet(rutaRemota,rutaLocal);
-        }
-        else {
-        	msgInfo("Lo directorios no se pueden descargar directamente");
-        }
+			DtoArchivo arch = ((ArchivoTableModel) remotoTabla.getModel()).getItem(filaSeleccionada);
+			if (!arch.esDirectorio()) {
+				String rutaRemota = remotoRuta.getText() + "/" + arch.getNombre();
+				String rutaLocal = localRuta.getText() + "/" + arch.getNombre();
+				controlador.comGet(rutaRemota, rutaLocal);
+			} else {
+				msgInfo("Lo directorios no se pueden descargar directamente");
+			}
 		}
 	}
 
- 
 	
-
 	/**
-	 * @return
+	 * Recoge los  nombres de archivos remotos seleccionados para 
+	 * pedir a controlador que ejecute un comando DEL o RMDIR seun toque
+	 *  por cada archivo presuponiendo que  estaran en el CWD remoto.
+	 * 
 	 */
 	private void borrar() {
-        int[] filasSeleccionadas = remotoTabla.getSelectedRows();
-        for (int i=0;i<filasSeleccionadas.length;i++) {
-        	int filaSeleccionada=filasSeleccionadas[i];
-        DtoArchivo arch = ((ArchivoTableModel)remotoTabla.getModel()).getItem(filaSeleccionada);
-        if (arch.esDirectorio()) {
-        	controlador.comRmdir(arch.getNombre());
-        }
-        else { 
-        	controlador.comDel(arch.getNombre());
-        }
-        }
+		int[] filasSeleccionadas = remotoTabla.getSelectedRows();
+		for (int i = 0; i < filasSeleccionadas.length; i++) {
+			int filaSeleccionada = filasSeleccionadas[i];
+			DtoArchivo arch = ((ArchivoTableModel) remotoTabla.getModel()).getItem(filaSeleccionada);
+			if (arch.esDirectorio()) {
+				controlador.comRmdir(arch.getNombre());
+			} else {
+				controlador.comDel(arch.getNombre());
+			}
+		}
 	}
- 
 
 	/**
-	 * @return
+	 * Envia a controlador el comando introducido en el campo inferior de comandos
 	 */
 	private void enviarComando() {
 		String comando = inputComando.getText();
-		if (comando!=null && comando.length()>0)
+		if (comando != null && comando.length() > 0)
 			controlador.enviarComando(comando);
 		inputComando.setText("");
 	}
 
 	/**
-	 * @return
+	 * Pide a controlador el cierre de la sesion
 	 */
 	private void logout() {
 		controlador.logout();
 	}
 
 	/**
-	 * @return
+	 * Recoge los datos de conexion y usuario y envia a controlador
+	 * la orden de iniciar sesion con esos datos
 	 */
 	private void login() {
 		String host = inputHost.getText();
@@ -365,25 +379,25 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		try {
 			puerto = Integer.parseInt(inputPuerto.getText());
 		} catch (NumberFormatException ex) {
-			// TODO AVISAR
+			msgError("Puerto no valido");
 			return;
 		}
 		String usuario = inputUsuario.getText();
 		String contrasena = inputContrasena.getText();
-		if (!controlador.login(host, puerto, usuario, contrasena)) {
-			String msg ="ERROR no se puede conectar a "+host+":"+puerto;
-			msgError(msg);
-			addHistorial(msg);
-		}
+		controlador.login(host, puerto, usuario, contrasena);
 	}
 
+	/**
+	 * Recoge los datos de conexion y usuario y envia a controlador
+	 * la orden de registra nuevo usuario con esos datos
+	 */
 	private void registrar() {
 		String host = inputHost.getText();
 		int puerto = 0;
 		try {
 			puerto = Integer.parseInt(inputPuerto.getText());
 		} catch (NumberFormatException ex) {
-			// TODO AVISAR
+			msgError("Puerto no valido");
 			return;
 		}
 		String usuario = inputUsuario.getText();
@@ -401,26 +415,121 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		actualizarArchivosLocales();
 	}
 
+	/**
+	 * Actualiza el listado de archivos locales y refresca el arbol de directorios
+	 */
 	public void actualizarArchivosLocales() {
 		File ruta = new File(localRuta.getText());
 		localTabla.setModel(new ArchivoTableModel(controlador.getArchivosLocales(ruta)));
 		localTabla.getColumnModel().getColumn(0).setMaxWidth(50);
-		
+
+		//path actual para luego expandir el arbol tras el refresco
 		TreePath p = ultimoPath;
-		
-		
-		ArbolArchivosModel m = (ArbolArchivosModel)localArbol.getModel();
-		String rutaRoot = ((ArchArbol)m.getRoot()).getAbsolutePath();
+
+		ArbolArchivosModel m = (ArbolArchivosModel) localArbol.getModel();
+		String rutaRoot = ((ArchArbol) m.getRoot()).getAbsolutePath();
 		TreeModel model = new ArbolArchivosModel(new ArchArbol((String) localSelectorUnidad.getSelectedItem()));
 		localArbol.setModel(model);
 		localArbol.expandPath(p);
 	}
+	
+	
+	/**
+	 * Muestra un dialogo con un mensaje informativo
+	 * 
+	 * @param msg El mensaje
+	 */
+	public void msgInfo(String msg) {
+		JOptionPane.showMessageDialog(this, msg, "", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	/**
+	 * Muestra un dialogo con un mensaje de error
+	 * 
+	 * @param msg El mensaje
+	 */
+
+	public void msgError(String msg) {
+		JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
+	}
+
+	/**
+	 * Muestra un dialogo pidiendo un valor
+	 * 
+	 * @param msg El mensaje para poner en el dialogo
+	 * 
+	 * @return El valor introducido por el usuario
+	 */
+	public String getValor(String msg) {
+		return JOptionPane.showInputDialog(msg);
+	}
+
+	/**
+	 * Muestra un dialogo de confirmacion
+	 * 
+	 * @param msg El mensaje a mostrar
+	 * 
+	 * @return True si el usuario ha aceptado, false si no ha aceptado
+	 */
+	public boolean confirmar(String msg) {
+		return JOptionPane.showConfirmDialog(this, msg, "Confirmar",
+				JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+	}
+	
+	
+	/**
+	 * Actualiza la barra inferior de estado con los datos de conexion
+	 * 
+	 * @param conectado True si esta conectado, false si no lo esta
+	 * @param host Host de la sesion
+	 * @param usuario Usuario de la sesion
+	 */
+	public void actualizaLoginEstado(boolean conectado, String host, String usuario) {
+		if (conectado) {
+			lbConectado.setText("Conectado");
+			datosConexion.setText(usuario + "@" + host);
+			activarLogin(false);
+		} else {
+			lbConectado.setText("Desconectado");
+			datosConexion.setText("");
+			activarLogin(true);
+			remotoRuta.setText("");
+			remotoTabla.setModel(new ArchivoTableModel(new ArrayList<DtoArchivo>()));
+			remotoTabla.getColumnModel().getColumn(0).setMaxWidth(50);
+		}
+	}
+
+	/**
+	 * Activa y desactiva los paneles de botones y campos de login segun se especifique
+	 * 
+	 * @param b True Establecer la visibilidad para poder hacer login, False establecer la visibilidad para operar una vez iniciada la sesion
+	 */
+	private void activarLogin(boolean b) {
+		panelBotonera.setVisible(!b);
+
+		panelConexion.setVisible(b);
+
+	}
 
 
+
+	/**
+	 * Agrega un mensaje al panel de historial inferior
+	 * 
+	 * @param msg El mensaje
+	 */
+	public void addHistorial(String msg) {
+		historial.setText(historial.getText() + "\n" + msg);
+
+	}
+	
+	
+	/**
+	 * Creacion de componentes de la interfaz
+	 */
 	private void initComponents() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		
 		btnConectar = new JButton();
 		btnConectar.setActionCommand("CONECTAR");//
 		btnDesconectar = new JButton();
@@ -435,12 +544,8 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		btnCmdPUT.setActionCommand("PUT");
 		btnCmdCD = new JButton();
 		btnCmdCD.setActionCommand("CD");
-//		btnCmdDEL = new JButton();
-//		btnCmdDEL.setActionCommand("DEL");
 		btnCmdMKDIR = new JButton();
 		btnCmdMKDIR.setActionCommand("MKDIR");
-//		btnCmdRMDIR = new JButton();
-//		btnCmdRMDIR.setActionCommand("RMDIR");
 		localSelectorUnidad = new JComboBox<>();
 		localSelectorUnidad.setActionCommand("SELEC_UNIDAD");
 		btnEnviar = new JButton();
@@ -460,10 +565,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		inputPuerto = new JTextField();
 		inputUsuario = new JTextField();
 		inputContrasena = new JTextField();
-		
-		
-		
-		
+
 		panelCentral = new JPanel();
 		panelDivisor = new JSplitPane();
 		panelLocalDivisor = new JSplitPane();
@@ -486,7 +588,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		lbUsuario = new JLabel();
 		lbContrasena = new JLabel();
 		panelBotonera = new JPanel();
-		
+
 		panelDivisor.setDividerLocation(451);
 		panelLocalDivisor.setBorder(BorderFactory.createTitledBorder("Archivos locales"));
 		panelLocalDivisor.setDividerLocation(250);
@@ -503,7 +605,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		localRuta.setEditable(false);
 		localRuta.setText("C:\\");
 		panelLocalArchivos.add(localRuta, java.awt.BorderLayout.NORTH);
-	
+
 		panelLocalDivisor.setRightComponent(panelLocalArchivos);
 
 		panelDivisor.setLeftComponent(panelLocalDivisor);
@@ -517,21 +619,17 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		panelDivisor.setDividerLocation(550);
 		GroupLayout panelCentralLayout = new GroupLayout(panelCentral);
 		panelCentral.setLayout(panelCentralLayout);
-		panelCentralLayout
-				.setHorizontalGroup(panelCentralLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addGroup(panelCentralLayout.createSequentialGroup().addContainerGap()
-								.addComponent(panelDivisor, GroupLayout.DEFAULT_SIZE, 929, Short.MAX_VALUE)
-								.addContainerGap()));
-		panelCentralLayout
-				.setVerticalGroup(panelCentralLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addGroup(panelCentralLayout.createSequentialGroup().addContainerGap()
-								.addComponent(panelDivisor, GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
-								.addContainerGap()));
+		panelCentralLayout.setHorizontalGroup(panelCentralLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(panelCentralLayout.createSequentialGroup().addContainerGap()
+						.addComponent(panelDivisor, GroupLayout.DEFAULT_SIZE, 929, Short.MAX_VALUE).addContainerGap()));
+		panelCentralLayout.setVerticalGroup(panelCentralLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(panelCentralLayout.createSequentialGroup().addContainerGap()
+						.addComponent(panelDivisor, GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE).addContainerGap()));
 
 		getContentPane().add(panelCentral, java.awt.BorderLayout.CENTER);
 
 		panelInferior.setLayout(new java.awt.BorderLayout());
-		
+
 		panelComandos.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		panelComandos.setLayout(new java.awt.BorderLayout(5, 5));
 		panelComandos.add(inputComando, java.awt.BorderLayout.CENTER);
@@ -544,9 +642,8 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		lbComando.setText("Comando:");
 		panelComandos.add(lbComando, java.awt.BorderLayout.LINE_START);
 		panelInferior.add(panelComandos, java.awt.BorderLayout.CENTER);
-		panelEstado.setBorder(
-				BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5),
-						BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204))));
+		panelEstado.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5),
+				BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204))));
 		panelEstado.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 		lbConectado.setText("Desconectado");
 		panelEstado.add(lbConectado);
@@ -574,41 +671,42 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		panelConexion.add(inputContrasena);
 		btnConectar.setText("Conectar");
 		panelConexion.add(btnConectar);
-		btnDesconectar.setText("Desconectar");
-		panelConexion.add(btnDesconectar);
-		btnDesconectar.setVisible(false);
 		btnRegistrar.setText("Registrarse");
 		btnRegistrar.setHorizontalTextPosition(SwingConstants.CENTER);
 		btnRegistrar.setVerticalTextPosition(SwingConstants.BOTTOM);
 		panelConexion.add(btnRegistrar);
+
 		panelSuperior.add(panelConexion, java.awt.BorderLayout.NORTH);
+
 		btnCmdLS.setText("LS");
 		panelBotonera.add(btnCmdLS);
+
 		btnCmdGET.setText("<-GET");
 		panelBotonera.add(btnCmdGET);
+
 		btnCmdPUT.setText("PUT->");
 		panelBotonera.add(btnCmdPUT);
+
 		btnCmdCD.setText("CD");
 		panelBotonera.add(btnCmdCD);
-//		btnCmdDEL.setText("DEL");
-//		panelBotonera.add(btnCmdDEL);
+
 		btnCmdMKDIR.setText("MKDIR");
 		panelBotonera.add(btnCmdMKDIR);
-//		btnCmdRMDIR.setText("RMDIR");
-//		panelBotonera.add(btnCmdRMDIR);
+
+		btnDesconectar.setText("Desconectar");
+		panelBotonera.add(btnDesconectar);
+
+		panelBotonera.setVisible(false);
 		panelSuperior.add(panelBotonera, java.awt.BorderLayout.CENTER);
 		getContentPane().add(panelSuperior, java.awt.BorderLayout.NORTH);
 		pack();
 	}
 
-
 	private JButton btnCmdCD;
-//	private JButton btnCmdDEL;
 	private JButton btnCmdGET;
 	private JButton btnCmdLS;
 	private JButton btnCmdMKDIR;
 	private JButton btnCmdPUT;
-//	private JButton btnCmdRMDIR;
 	private JButton btnConectar;
 	private JButton btnDesconectar;
 	private JButton btnEnviar;
@@ -625,7 +723,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	private JComboBox<String> localSelectorUnidad;
 	private JTable localTabla;
 	private JTable remotoTabla;
-	
+
 	private JLabel lbComando;
 	private JLabel lbConectado;
 	private JLabel lbContrasena;
@@ -651,79 +749,5 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	private JScrollPane scrollRemotoArchivos;
 
 	
-	
-	
 
-	public void msgInfo(String msg) {
-		JOptionPane.showMessageDialog(this, msg, "", JOptionPane.INFORMATION_MESSAGE);
-	}
-
-	
-	/**
-	 * @param string
-	 * @return
-	 */
-	public void msgError(String msg) {
-		JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
-	}
-
-	public String getValor(String msg) {
-		return JOptionPane.showInputDialog(msg); 
-	}
-	
-	
-	/**
-	 * @param host
-	 * @param puerto
-	 * @param usuario
-	 */
-	public void actualizaLoginEstado(boolean conectado, String host, String usuario) {
-		if (conectado) {
-			lbConectado.setText("Conectado");
-			datosConexion.setText(usuario + "@" + host);
-			activarLogin(false);
-		} else {
-			lbConectado.setText("Desconectado");
-			datosConexion.setText("");
-			activarLogin(true);
-			remotoRuta.setText("");
-			remotoTabla.setModel(new ArchivoTableModel(new ArrayList<DtoArchivo>()));
-			remotoTabla.getColumnModel().getColumn(0).setMaxWidth(50);
-		}
-	}
-
-	/**
-	 * @param b
-	 */
-	private void activarLogin(boolean b) {
-		btnConectar.setVisible(b);
-		btnRegistrar.setVisible(b);
-		btnDesconectar.setVisible(!b);
-//		JButton[] botones = { btnCmdCD, btnCmdDEL, btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
-//				btnCmdRMDIR, btnEnviar};
-		JButton[] botones = { btnCmdCD,  btnCmdGET, btnCmdLS, btnCmdMKDIR, btnCmdPUT,
-				btnEnviar};
-		for (JButton btn : botones) {
-			btn.setEnabled(!b);
-		}
-	}
-
-	/**
-	 * @param msg
-	 * @return
-	 */
-	public boolean confirmar(String msg) {
-		return JOptionPane.showConfirmDialog(this,msg, "Confirmar", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION;
-	}
-
-	/**
-	 * @param string
-	 */
-	public void addHistorial(String msg) {
-		historial.setText(historial.getText()+"\n"+msg);
-		
-	}
-
- 
-
-}// fin Ftp
+} 

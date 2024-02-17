@@ -5,10 +5,9 @@ package ftpcliente.conector.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 
-import ftpcliente.conector.Modelo;
+import ftpcliente.conector.Conector;
+import ftpcliente.conector.Sesion;
 
 /**
  * 
@@ -82,9 +81,14 @@ abstract public class Comando {
 	protected DataOutputStream dos;
 	
 	/**
-	 * Referencia al modelo
+	 * Referencia a la sesion
 	 */
-	protected Modelo modelo;
+	protected Sesion sesion;
+	
+	/**
+	 * Referencia al conector
+	 */
+	protected Conector conector;
 
 
 	
@@ -94,14 +98,15 @@ abstract public class Comando {
 	 * @param comando Partes del comando siendo el primer elemento el codigo del comando y los siguientes los parametros
 	 * @param dis DataInputStream a usar por el comando
 	 * @param dos  DataOutputStream a usar por el comando
-	 * @param modelo Referencia al modelo
+	 * @param sesion Referencia a la sesion
 	 */
-	public Comando(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
+	public Comando(String[] comando, DataInputStream dis, DataOutputStream dos, Sesion sesion) {
 
 		this.comando = comando;
 		this.dis = dis;
 		this.dos = dos;
-		this.modelo = modelo;
+		this.sesion=sesion;
+		this.conector = sesion.getConector();
 	}
 
 	

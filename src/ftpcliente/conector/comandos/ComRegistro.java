@@ -5,17 +5,11 @@ package ftpcliente.conector.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 
-import ftpcliente.conector.Modelo;
-import ftpcliente.controlador.dto.DtoArchivo;
-import ftpservidor.modelo.Codigos;
-import ftpservidor.modelo.Sesion;
-import ftpservidor.modelo.Usuario;
+import ftpcliente.conector.Codigos;
+import ftpcliente.conector.Sesion;
+
 
 /**
  *  Se encarga de manejar un comando REGISTRO en el cliente
@@ -30,10 +24,10 @@ public class ComRegistro extends Comando{
 	 * @param comando Partes del comando siendo el primer elemento el codigo del comando y los siguientes los parametros
 	 * @param dis DataInputStream a usar por el comando
 	 * @param dos  DataOutputStream a usar por el comando
-	 * @param modelo Referencia al modelo
+	 * @param sesion Referencia a la sesion
 	 */
-	public ComRegistro(String[] comando,DataInputStream dis, DataOutputStream dos,Modelo modelo) {
-		super(comando,dis,dos,modelo);
+	public ComRegistro(String[] comando,DataInputStream dis, DataOutputStream dos,Sesion sesion) {
+		super(comando,dis,dos,sesion);
 
 	}
 	
@@ -42,7 +36,7 @@ public class ComRegistro extends Comando{
 	 */
 	public void iniciar() {
 		//si la sesion esta iniciada cancelar
-		if (modelo.isLogged())
+		if (conector.isLogged())
 			return;
 					
 		//comprobar que hay parametros suficientes
@@ -65,17 +59,19 @@ public class ComRegistro extends Comando{
 			
 			//si afirmativo
 			if (res==Codigos.OK) {
-				modelo.msgInfo("Registro con exito: "+usuario);
-				modelo.setEstadoLogin(true,usuario);
+				conector.msgInfo("Registro con exito: "+usuario);
+				sesion.setEstadoLogin(true,usuario);
+				conector.addOperacion("LS");
+				sesion.setEstadoLogin(true,usuario);
 			}
 			//si negativo
 			else {
-				modelo.msgError("Registro erroneo: "+usuario);
-				modelo.setEstadoLogin(false,null);
+				conector.msgError("Registro erroneo: "+usuario);
+				sesion.logout();
 			}
 		} catch (IOException e) {
-			modelo.msgError("Registro erroneo");
-			modelo.setEstadoLogin(false,null);
+			conector.msgError("Registro erroneo");
+			sesion.logout();
 		}
 	
 	}

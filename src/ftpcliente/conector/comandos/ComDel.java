@@ -5,17 +5,10 @@ package ftpcliente.conector.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 
-import ftpcliente.conector.Modelo;
-import ftpcliente.controlador.dto.DtoArchivo;
-import ftpservidor.modelo.Codigos;
-import ftpservidor.modelo.Sesion;
-import ftpservidor.modelo.Usuario;
+import ftpcliente.conector.Codigos;
+import ftpcliente.conector.Sesion;
 
 /**
  *  Se encarga de manejar un comando DEL en el cliente
@@ -30,10 +23,10 @@ public class ComDel extends Comando {
 	 * @param comando Partes del comando siendo el primer elemento el codigo del comando y los siguientes los parametros
 	 * @param dis DataInputStream a usar por el comando
 	 * @param dos  DataOutputStream a usar por el comando
-	 * @param modelo Referencia al modelo
+	 * @param sesion Referencia a la sesion
 	 */
-	public ComDel(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
-		super(comando, dis, dos, modelo);
+	public ComDel(String[] comando, DataInputStream dis, DataOutputStream dos, Sesion sesion) {
+		super(comando, dis, dos, sesion);
 	}
 
 	
@@ -42,10 +35,17 @@ public class ComDel extends Comando {
 	 * Inicia la operacion siguiendo el protocolo DEL (Ver estructura del protocolo en la documentacion)
 	 */
 	public void iniciar() {
+		
+		
+		
 		//comprobar que hay parametros suficientes
 		if (comando.length < 2)
 			return;
-
+		
+		//confirmacion del borrado
+		if (!conector.confirmar("¿Desea borrar el archivo "+comando[1]+"?"))
+		return;
+		
 		
 		try {
 			//escribir codigo de comando
@@ -59,15 +59,15 @@ public class ComDel extends Comando {
 			
 			//actuar segun la respuesta sea OK  o no
 			if (res == Codigos.OK) {
-				modelo.msgInfo("DEL Exitoso. Archivo " + comando[1] + " eliminado");
+				conector.msgInfo("DEL Exitoso. Archivo " + comando[1] + " eliminado");
 			} else if (res == Codigos.NO_EXISTE) {
-				modelo.msgError("DEL erroneo. No se pudo eliminar. El archivo " + comando[1] + " no existe");
+				conector.msgError("DEL erroneo. No se pudo eliminar. El archivo " + comando[1] + " no existe");
 			} else {
-				modelo.msgError("DEL erroneo. No se pudo eliminar " + comando[1]);
+				conector.msgError("DEL erroneo. No se pudo eliminar " + comando[1]);
 			}
 
 		} catch (IOException e) {
-			modelo.logout();
+			sesion.logout();
 		}
 	}
 

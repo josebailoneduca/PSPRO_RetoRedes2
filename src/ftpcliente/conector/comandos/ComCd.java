@@ -5,17 +5,12 @@ package ftpcliente.conector.comandos;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 
-import ftpcliente.conector.Modelo;
-import ftpcliente.controlador.dto.DtoArchivo;
-import ftpservidor.modelo.Codigos;
-import ftpservidor.modelo.Sesion;
-import ftpservidor.modelo.Usuario;
+import ftpcliente.conector.Codigos;
+import ftpcliente.conector.Conector;
+import ftpcliente.conector.Sesion;
+ 
 
 /**
  *  Se encarga de manejar un comando CD en el cliente
@@ -30,10 +25,10 @@ public class ComCd extends Comando {
 	 * @param comando Partes del comando siendo el primer elemento el codigo del comando y los siguientes los parametros
 	 * @param dis DataInputStream a usar por el comando
 	 * @param dos  DataOutputStream a usar por el comando
-	 * @param modelo Referencia al modelo
+	 * @param sesion Referencia a la sesion
 	 */
-	public ComCd(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
-		super(comando, dis, dos, modelo);
+	public ComCd(String[] comando, DataInputStream dis, DataOutputStream dos, Sesion sesion) {
+		super(comando, dis, dos, sesion);
 
 	}
 
@@ -59,11 +54,13 @@ public class ComCd extends Comando {
 			
 			//actuar segun la respuesta sea OK  o no
 			if (res != Codigos.OK)
-				modelo.msgError("CD erroneo a "+comando[1]);
-			else
-				modelo.msgInfo("CD correcto a "+comando[1]);
+				conector.msgError("CD erroneo. No existe "+comando[1]);
+			else {
+				conector.msgInfo("CD correcto a "+comando[1]);
+				conector.addOperacion("LS");
+			}
 		} catch (IOException e) {
-			modelo.logout();
+			sesion.logout();
 		}
 	}
 

@@ -3,17 +3,18 @@
  */
 package ftpcliente.vista.modelos;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import ftpcliente.controlador.Codigos;
+import ftpcliente.conector.Codigos;
 import ftpcliente.controlador.dto.DtoArchivo;
 /**
+ * Table model para mostrar archivos
  * 
- * @author Bailon
+ * @author Jose Javier Bailon Ortiz
+ * @see DtoArchivo
  */
 public class ArchivoTableModel extends AbstractTableModel{
 
@@ -28,7 +29,7 @@ public class ArchivoTableModel extends AbstractTableModel{
 		
 	}
  
-
+	
 	@Override
 	public int getRowCount() {
 		return items.size();
@@ -57,6 +58,14 @@ public class ArchivoTableModel extends AbstractTableModel{
 		};	
 	}
 	
+	
+	/**
+	 * Devuelve un DtoArchivo correspondiente al indice
+	 * 
+	 * @param indice El indice
+	 * 
+	 * @return El DtoArchivo conrresponediente
+	 */
 	public DtoArchivo getItem(int indice) {
 		if (items.size()>indice && indice>-1) {
 			return items.get(indice);
