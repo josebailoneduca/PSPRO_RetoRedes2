@@ -38,7 +38,7 @@ public class Controlador {
 	 * @param rutaActual
 	 * @param archivos
 	 */
-	public void actualizaLista(String rutaActual, ArrayList<DtoArchivo> archivos) {
+	public void actualizaListaArchivosRemotos(String rutaActual, ArrayList<DtoArchivo> archivos) {
 		SwingUtilities.invokeLater(() -> 
 			vista.actualizaListaRemota(rutaActual,archivos));
 	}
@@ -204,7 +204,7 @@ public class Controlador {
 	/**
 	 * 
 	 */
-	public void actualizarLocal() {
+	public void actualizarArchivosLocalesl() {
 		vista.actualizarArchivosLocales();
 		
 	}

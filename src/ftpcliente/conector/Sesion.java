@@ -17,7 +17,7 @@ import ftpcliente.conector.comandos.Comando;
  * 
  * @author Jose Javier Bailon Ortiz
  */
-public class Conexion {
+public class Sesion {
 	private Socket socket;
 	private ProcesadorOperaciones procOperaciones;
 	private LinkedBlockingQueue<String> operacionesPendientes;
@@ -27,7 +27,7 @@ public class Conexion {
 	private DataOutputStream dos;
 	Modelo modelo;
 
-	public Conexion(Socket socket, Modelo modelo) {
+	public Sesion(Socket socket, Modelo modelo) {
 		operacionesPendientes = new LinkedBlockingQueue<String>();
 		this.modelo = modelo;
 		this.socket = socket;

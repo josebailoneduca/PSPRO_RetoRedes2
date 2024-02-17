@@ -18,26 +18,46 @@ import ftpservidor.modelo.Sesion;
 import ftpservidor.modelo.Usuario;
 
 /**
- * 
+ *  Se encarga de manejar un comando DEL en el cliente
+ *  
  * @author Jose Javier Bailon Ortiz
  */
 public class ComDel extends Comando {
 
+	/**
+	 * Constructor 
+	 * 
+	 * @param comando Partes del comando siendo el primer elemento el codigo del comando y los siguientes los parametros
+	 * @param dis DataInputStream a usar por el comando
+	 * @param dos  DataOutputStream a usar por el comando
+	 * @param modelo Referencia al modelo
+	 */
 	public ComDel(String[] comando, DataInputStream dis, DataOutputStream dos, Modelo modelo) {
 		super(comando, dis, dos, modelo);
-
 	}
 
+	
+	
+	/**
+	 * Inicia la operacion siguiendo el protocolo DEL (Ver estructura del protocolo en la documentacion)
+	 */
 	public void iniciar() {
-
+		//comprobar que hay parametros suficientes
 		if (comando.length < 2)
 			return;
 
+		
 		try {
+			//escribir codigo de comando
 			dos.writeUTF(Comando.DEL);
+			
+			//escribir ruta a eliminar
 			dos.writeUTF(comando[1]);
-
+			
+			//esperar respuesta
 			int res = dis.readInt();
+			
+			//actuar segun la respuesta sea OK  o no
 			if (res == Codigos.OK) {
 				modelo.msgInfo("DEL Exitoso. Archivo " + comando[1] + " eliminado");
 			} else if (res == Codigos.NO_EXISTE) {
@@ -47,7 +67,7 @@ public class ComDel extends Comando {
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			modelo.logout();
 		}
 	}
 

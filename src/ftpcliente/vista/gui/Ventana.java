@@ -713,7 +713,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	 * @return
 	 */
 	public boolean confirmar(String msg) {
-		return JOptionPane.showConfirmDialog(this,msg)==JOptionPane.YES_OPTION;
+		return JOptionPane.showConfirmDialog(this,msg, "Confirmar", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION;
 	}
 
 	/**
