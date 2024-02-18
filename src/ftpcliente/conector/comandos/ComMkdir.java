@@ -66,6 +66,7 @@ public class ComMkdir extends Comando {
 
 		} catch (IOException e) {
 			conector.msgError("MKDIR erroneo. No se pudo crear " + comando[1]);
+			sesion.logout();
 		}
 	}
 

@@ -27,7 +27,7 @@ import java.io.File;
         
         /**
          * Constructor a partir de una ruta
-         * @param path
+         * @param path Ruta de la raiz
          */
         public ArchArbol(String path) {
             super(path);
@@ -35,7 +35,8 @@ import java.io.File;
         
         /**
          *  Constructor a partir de un padre y el nombre de su hijo
-         * 
+         * @param padre  El padre
+         * @param name El nombre del hijo
          */
         public ArchArbol (ArchArbol padre, String name){
             super (padre,name);

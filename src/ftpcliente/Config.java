@@ -15,12 +15,35 @@ import java.util.Properties;
  * @author Jose Javier Bailon Ortiz
  */
 public class Config {
+	/**
+	 * Codificacion de texto usada
+	 */
 	private  static  String COD_TEXTO = "UTF-8";
+	
+	/**
+	 * Host del servidor por defecto
+	 */
 	private static  String HOST="localhost";
+	
+	/**
+	 * Puerto del servidor por defecto
+	 */
 	private static  int PUERTO=50_000;
+	
+	/**
+	 * Usuario por defecto
+	 */
 	private static  String USUARIO="";
+	
+	/**
+	 * Contrasena por defecto
+	 */
 	private static  String CONTRASENA="";
  	
+	/**
+	 * Constructor
+	 * @param ruta Ruta del archivo de configuracion a cargar
+	 */
 	public static void cargarConfiguracion(String ruta) {
 		
 		try {

@@ -82,6 +82,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 	 * 
 	 */
 	private void initPropio() {
+		this.setTitle("FTP - Jose Javier Bailón Ortiz");
 		inputHost.setText(Config.getHOST());
 		inputPuerto.setText("" + Config.getPUERTO());
 		inputUsuario.setText(Config.getUSUARIO());
@@ -90,6 +91,7 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		iniEventos();
 		inicializarRutaLocal();
 		activarLogin(true);
+		
 	}
 
 	/**
@@ -402,6 +404,9 @@ public class Ventana extends JFrame implements TreeSelectionListener, ActionList
 		}
 		String usuario = inputUsuario.getText();
 		String contrasena = inputContrasena.getText();
+		if (usuario.length()<1||contrasena.length()<1)
+			msgError("Debe especificar usuario y contraseña para registrarse");
+		else
 		controlador.registrar(host, puerto, usuario, contrasena);
 	}
 

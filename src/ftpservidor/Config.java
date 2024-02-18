@@ -43,7 +43,12 @@ public class Config {
 	/**
 	 * Modo de transferencia de archivo. True se para modo texto. False para hacerlo como flujo de bytes.
 	 */
-	private static boolean MODO_TEXTO = false;
+	private static boolean MODO_TEXTO = true;
+
+	/**
+	 * El tiempo de vida de una conexion no ocupada en milisegundos
+	 */
+	private static int TIEMPO_VIDA_DESOCUPADO= 180000;//3minutos
 
 	
 	
@@ -66,6 +71,8 @@ public class Config {
 			NOMBRE_USUARIO_ANONIMO = prop.getProperty("NOMBRE_USUARIO_ANONIMO", NOMBRE_USUARIO_ANONIMO);
 			RUTA_ALMACENAMIENTO = prop.getProperty("RUTA_ALMACENAMIENTO", RUTA_ALMACENAMIENTO);
 			MODO_TEXTO = Boolean.parseBoolean(prop.getProperty("MODO_TEXTO", "" + MODO_TEXTO));
+			TIEMPO_VIDA_DESOCUPADO= Integer.parseInt(prop.getProperty("TIEMPO_VIDA_DESOCUPADO", "" + PUERTO));
+
 			comprobarRutas();
 		} catch (IOException | NumberFormatException e) {
 			System.out.println("No se ha podido cargar la configuracion");
@@ -84,7 +91,7 @@ public class Config {
 		}
 		File fa = new File(getRUTA_ALMACENAMIENTO_ANONIMO());
 		if (!fa.exists()) {
-			System.out.println("La ruta de almacenamiento anónimo " + f.getAbsolutePath() + " no existe");
+			System.out.println("La ruta de almacenamiento anónimo " + fa.getAbsolutePath() + " no existe");
 			System.exit(0);
 		}
 	}
@@ -143,6 +150,14 @@ public class Config {
 	 */
 	public static boolean isMODO_TEXTO() {
 		return MODO_TEXTO;
+	}
+	/**
+	 * Devuelve la configuracion MODO_TEXTO
+	 * 
+	 * @return El valor del parametro
+	 */
+	public int isTIEMPO_VIDA_DESOCUPADO() {
+		return TIEMPO_VIDA_DESOCUPADO;
 	}
 
 }

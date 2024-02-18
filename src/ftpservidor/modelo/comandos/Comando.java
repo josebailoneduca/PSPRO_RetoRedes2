@@ -9,8 +9,9 @@ import java.io.DataOutputStream;
 import ftpservidor.modelo.Sesion;
 import ftpservidor.modelo.Usuario;
 
-/**
- * 
+/** 
+ *  Clase padre de los comandos
+ *  
  * @author Jose Javier Bailon Ortiz
  */
 public class Comando {
@@ -111,4 +112,6 @@ public class Comando {
 		this.dos = sesion.getDos();
 		this.cwd = sesion.getCwd();
 	}
+	
+	
 }

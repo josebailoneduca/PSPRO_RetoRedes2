@@ -190,6 +190,8 @@ public class Controlador {
 
 	/**
 	 * Envia a conector un comando como string
+	 * 
+	 * @param comando El comando a enviar
 	 */
 	public void enviarComando(String comando) {
 		if (comando != null)
@@ -283,8 +285,8 @@ public class Controlador {
 	/**
 	 * Envia a conector el comando MKDIR
 	 * 
-	 * @param ruta
-	 * @return La ruta remota a crear
+	 * @param ruta La ruta remota a crear
+	 * @return True si se ha creado, false en cao contrario
 	 */
 	public boolean comMkdirLocal(String ruta) {
 		try {

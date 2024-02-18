@@ -128,6 +128,7 @@ public class ComPut extends Comando {
 			}
 		} catch (IOException e) {
 			conector.msgError("PUT erroneo. Error enviando archivo " + archivoRemoto);
+			sesion.logout();
 		}
 	}
 
@@ -212,7 +213,8 @@ public class ComPut extends Comando {
 				dos.writeInt(Codigos.CONTINUAR);
 			}
 		}
-
+		isr.close();
+		fis.close();
 	}
 
 }

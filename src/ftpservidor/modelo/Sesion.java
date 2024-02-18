@@ -117,9 +117,9 @@ public class Sesion extends Thread {
 	public void run() {
 		try {
 			// coger nuevo socket
-			serverSocketEfimero.setSoTimeout(10000);;
+			serverSocketEfimero.setSoTimeout(10000);
 			socket = serverSocketEfimero.accept();
-			socket.setSoTimeout(60000);
+			socket.setSoTimeout(180000);
 			
 			// cerrar socket inicial de puerto publico fijo
 			this.socketInicial.close();
@@ -253,6 +253,12 @@ public class Sesion extends Thread {
 			String nombreUsuario = dis.readUTF();
 			String contrasena = dis.readUTF();
 			
+			//evitar nombres de usuarios con puntos
+			if (nombreUsuario.indexOf('.')!=-1) {
+				dos.write(Codigos.MAL);
+				exit();
+				return false;
+			}
 			//comprobar validez de usuario para filtrar ataques de path transversal
 			String rutaUsuario = new File(Config.getRUTA_ALMACENAMIENTO()+"/"+nombreUsuario).getAbsolutePath();
 

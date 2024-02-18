@@ -112,6 +112,7 @@ public class ComGet extends Comando {
 			}
 		} catch (IOException e) {
 			conector.msgError("GET erroneo.No se puede descargar el archivo: " + rutaRemota + " - " + e.getMessage());
+			sesion.logout();
 		}
 	}
 
@@ -156,7 +157,8 @@ public class ComGet extends Comando {
 		FileWriter fw = new FileWriter(arch);
 		BufferedWriter bw = new BufferedWriter(fw);
 		boolean continuar = true;
-		
+		boolean primeraLinea=true;
+
 		//lectura de lineas
 		while (continuar) {
 			//leer cantidad de lineas en la siguiente tanda
@@ -164,8 +166,10 @@ public class ComGet extends Comando {
 			//leer y escribir lineas de la sigueiten tanda
 			for (int i = 0; i < cantidadLineas; i++) {
 				String linea = dis.readUTF();
+				if(!primeraLinea)
+					bw.newLine();
+				primeraLinea=false;
 				bw.write(linea);
-				bw.newLine();
 				bw.flush();
 			}
 			// ver si hay que continuar

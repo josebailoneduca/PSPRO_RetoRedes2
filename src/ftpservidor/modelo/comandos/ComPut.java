@@ -135,6 +135,7 @@ public class ComPut extends Comando{
 		FileWriter fw = new FileWriter(arch);
 		BufferedWriter bw = new BufferedWriter(fw);
 		boolean continuar = true;
+		boolean primeraLinea=true;
 		
 		//bucle de lectura
 		while (continuar) {
@@ -144,8 +145,10 @@ public class ComPut extends Comando{
 			//leer lineas de la tanda
 			for (int i = 0; i < cantidadLineas; i++) {
 				String linea = dis.readUTF();
+				if(!primeraLinea)
+					bw.newLine();
+				primeraLinea=false;
 				bw.write(linea);
-				bw.newLine();
 				bw.flush();
 			}
 			// ver si hay que continuar o ha terminado

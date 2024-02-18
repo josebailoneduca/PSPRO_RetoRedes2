@@ -9,7 +9,8 @@ import java.io.DataOutputStream;
 import ftpcliente.conector.Conector;
 import ftpcliente.conector.Sesion;
 
-/**
+/** 
+ * Clase padre de los comandos en el cliente
  * 
  * @author Jose Javier Bailon Ortiz
  */

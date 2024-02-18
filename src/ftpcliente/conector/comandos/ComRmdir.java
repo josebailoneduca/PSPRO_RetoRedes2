@@ -41,6 +41,10 @@ public class ComRmdir extends Comando {
 		if (comando.length < 2)
 			return;
 
+		//confirmacion del borrado
+		if (!conector.confirmar("¿Desea borrar el directorio "+comando[1]+"?"))
+		return;
+		
 		try {
 			// escribir codigo de comando
 			dos.writeUTF(Comando.RMDIR);
@@ -65,7 +69,8 @@ public class ComRmdir extends Comando {
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			sesion.logout();
+			conector.msgError("No se pudo eliminar");
 		}
 	}
 

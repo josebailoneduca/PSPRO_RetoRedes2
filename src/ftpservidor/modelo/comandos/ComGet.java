@@ -88,7 +88,7 @@ public class ComGet extends Comando{
 	 * enviando de 500 en 500 bytes hasta enviar todo el archivo
 	 * 
 	 * @param arch Archivo a enviar
-	 * @throws IOException
+	 * @throws IOException Si hay problemas leyendo el archivo
 	 */
 	private void enviarArchivoBytes(File arch) throws IOException {
 
@@ -122,7 +122,7 @@ public class ComGet extends Comando{
 	 * tandas de lineas y enviandolas hasta consumir el archivo.
 	 * 
 	 * @param arch Archivo a enviar
-	 * @throws IOException
+	 * @throws IOException Si hay  problemas leyendo el archivo
 	 */
 	private void enviarArchivoTexto(File arch) throws IOException {
 
@@ -163,6 +163,8 @@ public class ComGet extends Comando{
 				dos.writeInt(Codigos.CONTINUAR);
 			}
 		}
+		isr.close();
+		fis.close();
 
 	}
 }

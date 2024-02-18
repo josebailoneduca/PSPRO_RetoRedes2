@@ -213,7 +213,7 @@ public class Conector {
 		}
 	}
 
-	/*
+	/**
 	 * Ordena a controlador actualizar la lista de archivos remotos vista por el usuario
 	 * 
 	 * @param rutaActual Ruta actual
@@ -278,7 +278,7 @@ public class Conector {
 	/**
 	 * Muestra un mensaje informativo
 	 * 
-	 * @param string El mensaje
+	 * @param msg El mensaje
 	 */
 	public void msgInfo(String msg) {
 		controlador.mensajeInfo(msg);
