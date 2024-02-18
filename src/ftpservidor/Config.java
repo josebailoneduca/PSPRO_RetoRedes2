@@ -43,12 +43,12 @@ public class Config {
 	/**
 	 * Modo de transferencia de archivo. True se para modo texto. False para hacerlo como flujo de bytes.
 	 */
-	private static boolean MODO_TEXTO = true;
+	private static boolean MODO_TEXTO = false;
 
 	/**
 	 * El tiempo de vida de una conexion no ocupada en milisegundos
 	 */
-	private static int TIEMPO_VIDA_DESOCUPADO= 180000;//3minutos
+	private static int TIEMPO_VIDA_DESOCUPADO= 480000;//8 minutos
 
 	
 	

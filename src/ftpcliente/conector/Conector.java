@@ -4,18 +4,10 @@
 package ftpcliente.conector;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import ftpcliente.Config;
 import ftpcliente.conector.comandos.Comando;
 import ftpcliente.controlador.Controlador;
 import ftpcliente.controlador.dto.DtoArchivo;

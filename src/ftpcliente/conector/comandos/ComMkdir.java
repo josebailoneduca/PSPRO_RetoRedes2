@@ -8,7 +8,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import ftpcliente.conector.Codigos;
-import ftpcliente.conector.Conector;
 import ftpcliente.conector.Sesion;
 
 /**

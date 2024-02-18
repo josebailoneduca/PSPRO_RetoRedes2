@@ -5,14 +5,13 @@ package ftpservidor.modelo;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 import ftpservidor.Config;
-import ftpservidor.Msg;
+import ftpservidor.modelo.lib.Msg;
 
 import java.io.File;
 

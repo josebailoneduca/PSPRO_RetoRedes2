@@ -4,11 +4,9 @@
 package ftpcliente.controlador;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.SwingUtilities;
 
 import ftpcliente.conector.Codigos;

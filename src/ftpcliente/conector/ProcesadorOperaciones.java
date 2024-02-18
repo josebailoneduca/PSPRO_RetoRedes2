@@ -5,10 +5,7 @@ package ftpcliente.conector;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

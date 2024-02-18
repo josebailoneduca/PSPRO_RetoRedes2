@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ftpservidor;
+package ftpservidor.modelo.lib;
 import java.text.SimpleDateFormat;
 
 /**

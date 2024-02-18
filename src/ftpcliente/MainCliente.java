@@ -3,10 +3,7 @@
  */
 package ftpcliente;
 
-import java.awt.EventQueue;
-
 import ftpcliente.controlador.Controlador;
-import ftpcliente.vista.gui.Ventana;
 
 /**
  *  Punto de entrada para iniciar el cliente FTP

@@ -3,18 +3,12 @@
  */
 package ftpservidor.modelo.comandos;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
 
-import ftpservidor.Msg;
 import ftpservidor.modelo.Codigos;
 import ftpservidor.modelo.Sesion;
-import ftpservidor.modelo.Usuario;
+import ftpservidor.modelo.lib.Msg;
 import ftpservidor.modelo.lib.UtilesArchivo;
 
 /**

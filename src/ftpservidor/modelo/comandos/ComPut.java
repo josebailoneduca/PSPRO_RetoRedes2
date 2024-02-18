@@ -9,9 +9,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import ftpservidor.Config;
-import ftpservidor.Msg;
 import ftpservidor.modelo.Codigos;
 import ftpservidor.modelo.Sesion;
+import ftpservidor.modelo.lib.Msg;
 import ftpservidor.modelo.lib.UtilesArchivo;
 
 /**

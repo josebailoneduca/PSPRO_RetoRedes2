@@ -12,9 +12,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import ftpservidor.Config;
-import ftpservidor.Msg;
 import ftpservidor.modelo.Codigos;
 import ftpservidor.modelo.Sesion;
+import ftpservidor.modelo.lib.Msg;
 import ftpservidor.modelo.lib.UtilesArchivo;
 
 /**

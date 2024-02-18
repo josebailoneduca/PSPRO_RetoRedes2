@@ -3,11 +3,9 @@
  */
 package ftpservidor.modelo;
 
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,9 +15,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.file.Paths;
 
-import ftpcliente.conector.ProcesadorOperaciones;
 import ftpservidor.Config;
-import ftpservidor.Msg;
 import ftpservidor.modelo.comandos.ComCd;
 import ftpservidor.modelo.comandos.ComDel;
 import ftpservidor.modelo.comandos.ComGet;
@@ -28,6 +24,7 @@ import ftpservidor.modelo.comandos.ComMkdir;
 import ftpservidor.modelo.comandos.ComPut;
 import ftpservidor.modelo.comandos.ComRmdir;
 import ftpservidor.modelo.comandos.Comando;
+import ftpservidor.modelo.lib.Msg;
 import ftpservidor.modelo.lib.UtilesArchivo;
 
 /**

@@ -11,8 +11,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import ftpcliente.conector.comandos.Comando;
-
 /**
  * Controla el estado de la sesion y activa y para el procesador de operaciones asociado
  * 
